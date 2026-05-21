@@ -31,12 +31,12 @@ const AI = (() => {
    * @param {string} systemPrompt
    * @returns {Promise<string>}
    */
-  async function chat(messages, systemPrompt = '') {
+  async function chat(messages, systemPrompt = '', model = 'claude-sonnet-4-6') {
     const apiKey = getApiKey();
     if (!apiKey) throw new Error('API 키가 설정되지 않았습니다.');
 
     const payload = {
-      model: 'claude-sonnet-4-6',
+      model,
       max_tokens: 1024,
       system: systemPrompt || '당신은 사용자의 전담 AI 비서 Chloe입니다. 업무 일정, 프로젝트, 아이디어 정리를 도와줍니다. 항상 한국어로 답변하세요.',
       messages,

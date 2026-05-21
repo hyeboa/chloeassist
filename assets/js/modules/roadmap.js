@@ -161,59 +161,16 @@ const Roadmap = (() => {
   }
 
   function showAddModal() {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;';
-
-    const today = new Date().toISOString().slice(0, 10);
-    overlay.innerHTML = `
-      <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:28px;width:380px;box-shadow:var(--shadow-lg)">
-        <h3 style="font-size:1rem;font-weight:600;margin-bottom:20px">마일스톤 추가</h3>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div>
-            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">이름 *</label>
-            <input id="ms-title" type="text" placeholder="예: 베타 출시, 앱스토어 등록"
-              style="width:100%;padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.9rem;outline:none">
-          </div>
-          <div>
-            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">목표일 *</label>
-            <input id="ms-date" type="date" value="${today}"
-              style="width:100%;padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.9rem;outline:none">
-          </div>
-          <div>
-            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">메모</label>
-            <input id="ms-desc" type="text" placeholder="간략한 메모 (선택)"
-              style="width:100%;padding:10px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.9rem;outline:none">
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px">
-          <button id="ms-cancel" class="btn btn-ghost">취소</button>
-          <button id="ms-save" class="btn btn-primary">추가</button>
-        </div>
-      </div>
-    `;
-
-    const save = () => {
-      const title = overlay.querySelector('#ms-title').value.trim();
-      const date  = overlay.querySelector('#ms-date').value;
-      if (!title) { Toast.show('이름을 입력해 주세요.', 'warning'); return; }
-      if (!date)  { Toast.show('목표일을 선택해 주세요.', 'warning'); return; }
-      Store.push('milestones', {
-        title,
-        date,
-        desc: overlay.querySelector('#ms-desc').value.trim(),
-        done: false,
-      });
-      render();
-      Toast.show('마일스톤이 추가됐어요.', 'success');
-      overlay.remove();
-    };
-
-    overlay.querySelector('#ms-cancel').addEventListener('click', () => overlay.remove());
-    overlay.querySelector('#ms-save').addEventListener('click', save);
-    overlay.querySelector('#ms-title').addEventListener('keydown', e => { if (e.key === 'Enter') save(); });
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-    document.body.appendChild(overlay);
-    overlay.querySelector('#ms-title').focus();
+    NLInput.show({
+      heading: '마일스톤 추가 — 한 줄로 입력하세요',
+      placeholder: '예) 베타 출시 6월 30일 유저 100명 테스트 시작',
+      type: 'milestone',
+      onSave: ({ title, date, desc }) => {
+        Store.push('milestones', { title, date, desc: desc || '', done: false });
+        render();
+        Toast.show('마일스톤이 추가됐어요.', 'success');
+      },
+    });
   }
 
   return { render, toggleDone, deleteMilestone, showAddModal };
