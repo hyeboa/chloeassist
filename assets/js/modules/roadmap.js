@@ -156,7 +156,6 @@ const Roadmap = (() => {
         </div>
       </div>
     `;
-  }
 
     bindMsInput();
   }
