@@ -138,5 +138,5 @@ const NLInput = (() => {
     textarea.focus();
   }
 
-  return { show };
+  return { show, parse };
 })();

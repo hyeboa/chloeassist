@@ -51,9 +51,15 @@ const Projects = (() => {
     const total    = features.length;
 
     document.getElementById('app').innerHTML = `
-      <div class="features-toolbar">
-        <div style="font-size:0.82rem;color:var(--color-text-3)">헬로아지 기능 ${total}개 트래킹 중</div>
-        <button class="btn btn-primary" onclick="Projects.showAddModal()">+ 기능 추가</button>
+      <div class="inline-nl-wrap">
+        <input id="feat-input" class="inline-nl-input" type="text"
+          placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
+        <div class="inline-nl-footer">
+          <span class="nl-rule-chip">기능명</span>
+          <span class="nl-rule-sep">·</span>
+          <span class="nl-rule-hint">필수 · 분야·설명은 선택 · Enter로 추가</span>
+        </div>
+        <div class="inline-nl-status" id="feat-status"></div>
       </div>
 
       <div class="kanban-board">
@@ -66,33 +72,55 @@ const Projects = (() => {
                 <span class="kanban-count">${cols.length}</span>
               </div>
               ${cols.map(f => renderCard(f)).join('')}
-              <button class="kanban-add-btn" onclick="Projects.showAddModal('${status}')">+ 추가</button>
             </div>
           `;
         }).join('')}
       </div>
     `;
+
+    bindFeatInput();
   }
 
-  function showAddModal(defaultStatus = '아이디어') {
-    NLInput.show({
-      heading: '기능 추가 — 한 줄로 입력하세요',
-      placeholder: '예) 산책 기록 기능 디자인 GPS 경로 저장 및 공유',
-      type: 'feature',
-      onSave: ({ name, desc, category }) => {
+  function bindFeatInput() {
+    const input  = document.getElementById('feat-input');
+    const status = document.getElementById('feat-status');
+    if (!input) return;
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter') return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!AI.getApiKey()) {
+        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+        return;
+      }
+
+      input.disabled = true;
+      status.textContent = '✦ AI가 분석 중...';
+      status.className = 'inline-nl-status';
+
+      try {
+        const result = await NLInput.parse('feature', text);
         Store.push('features', {
-          name,
-          desc: desc || '',
-          category: category || '기획',
-          status: defaultStatus,
+          name: result.name,
+          desc: result.desc || '',
+          category: result.category || '기획',
+          status: '아이디어',
         });
+        input.value = '';
+        status.textContent = '';
         render();
-        Toast.show('기능이 추가됐어요.', 'success');
-      },
+      } catch (err) {
+        status.textContent = '⚠ ' + err.message;
+        status.className = 'inline-nl-status error';
+        input.disabled = false;
+        input.focus();
+      }
     });
   }
 
-  return { render, deleteFeature, moveStatus, showAddModal };
+  return { render, deleteFeature, moveStatus };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Projects.render());

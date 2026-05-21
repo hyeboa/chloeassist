@@ -117,13 +117,23 @@ const Roadmap = (() => {
 
       <!-- 마일스톤 -->
       <div class="milestone-section">
-        <div class="milestone-section-header">
-          <div class="section-title" style="margin:0">마일스톤</div>
-          <button class="btn btn-primary" onclick="Roadmap.showAddModal()">+ 마일스톤 추가</button>
+        <div class="section-title" style="margin-bottom:14px">마일스톤</div>
+
+        <div class="inline-nl-wrap">
+          <input id="ms-input" class="inline-nl-input" type="text"
+            placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
+          <div class="inline-nl-footer">
+            <span class="nl-rule-chip">이름</span>
+            <span class="nl-rule-chip">날짜</span>
+            <span class="nl-rule-sep">·</span>
+            <span class="nl-rule-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
+          </div>
+          <div class="inline-nl-status" id="ms-status"></div>
         </div>
+
         <div class="milestone-list">
           ${milestones.length === 0
-            ? `<div class="empty-state"><div class="empty-state-text">마일스톤을 추가해보세요</div></div>`
+            ? `<div class="empty-state"><div class="empty-state-text">첫 마일스톤을 입력해보세요</div></div>`
             : milestones.map(m => {
                 const dd = dday(m.date, m.done);
                 return `
@@ -148,6 +158,43 @@ const Roadmap = (() => {
     `;
   }
 
+    bindMsInput();
+  }
+
+  function bindMsInput() {
+    const input  = document.getElementById('ms-input');
+    const status = document.getElementById('ms-status');
+    if (!input) return;
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter') return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!AI.getApiKey()) {
+        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+        return;
+      }
+
+      input.disabled = true;
+      status.textContent = '✦ AI가 분석 중...';
+      status.className = 'inline-nl-status';
+
+      try {
+        const result = await NLInput.parse('milestone', text);
+        Store.push('milestones', { title: result.title, date: result.date, desc: result.desc || '', done: false });
+        input.value = '';
+        status.textContent = '';
+        render();
+      } catch (err) {
+        status.textContent = '⚠ ' + err.message;
+        status.className = 'inline-nl-status error';
+        input.disabled = false;
+        input.focus();
+      }
+    });
+  }
+
   function toggleDone(id) {
     const ms = getMilestones().find(m => m.id === id);
     if (!ms) return;
@@ -160,20 +207,7 @@ const Roadmap = (() => {
     render();
   }
 
-  function showAddModal() {
-    NLInput.show({
-      heading: '마일스톤 추가 — 한 줄로 입력하세요',
-      placeholder: '예) 베타 출시 6월 30일 유저 100명 테스트 시작',
-      type: 'milestone',
-      onSave: ({ title, date, desc }) => {
-        Store.push('milestones', { title, date, desc: desc || '', done: false });
-        render();
-        Toast.show('마일스톤이 추가됐어요.', 'success');
-      },
-    });
-  }
-
-  return { render, toggleDone, deleteMilestone, showAddModal };
+  return { render, toggleDone, deleteMilestone };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Roadmap.render());
