@@ -1,5 +1,5 @@
 /**
- * schedule.js — 전체 백로그 (오늘 뷰에서 넘어온 것 + 미래 태스크)
+ * schedule.js — 할 일 목록 (오늘 뷰에서 넘어온 것 + 미래 태스크)
  */
 
 const Schedule = (() => {
