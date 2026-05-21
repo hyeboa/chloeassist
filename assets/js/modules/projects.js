@@ -1,32 +1,23 @@
 /**
- * projects.js — 프로젝트 관리 (카드 + 칸반 뷰)
+ * projects.js — 헬로아지 기능 보드 (칸반)
+ * 상태: 아이디어 → 기획중 → 디자인중 → 개발중 → 완료
  */
 
 const Projects = (() => {
-  let view = 'card';
+  const STATUSES = ['아이디어', '기획중', '디자인중', '개발중'];
+  const CATS = ['기획', '디자인', '개발', '마케팅', '운영'];
 
-  const STATUSES = ['todo', 'inprogress', 'done'];
-  const STATUS_LABELS = { todo: '할 일', inprogress: '진행 중', done: '완료' };
-  const EMOJIS = ['📁', '🚀', '💡', '📊', '🎯', '🛠', '📝', '🌟'];
-
-  function getProjects() {
-    return Store.get('projects') || [];
+  function getFeatures() {
+    return Store.get('features') || [];
   }
 
-  function getProgress(project) {
-    const tasks = (project.tasks || []);
-    if (!tasks.length) return 0;
-    return Math.round(tasks.filter(t => t.done).length / tasks.length * 100);
-  }
-
-  function deleteProject(id) {
-    if (!confirm('프로젝트를 삭제할까요?')) return;
-    Store.remove('projects', id);
+  function deleteFeature(id) {
+    Store.remove('features', id);
     render();
   }
 
-  function setView(v) {
-    view = v;
+  function moveStatus(id, newStatus) {
+    Store.update('features', id, { status: newStatus });
     render();
   }
 
@@ -34,59 +25,48 @@ const Projects = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function renderCardView(projects) {
-    if (!projects.length) {
-      return '<div class="empty-state"><div class="empty-state-icon">◉</div><div class="empty-state-text">프로젝트를 추가해 보세요!</div></div>';
-    }
-    return `<div class="grid-auto">${projects.map(p => {
-      const progress = getProgress(p);
-      const taskCount = (p.tasks || []).length;
-      return `
-        <div class="project-card" onclick="Projects.openProject('${p.id}')">
-          <div class="project-card-header">
-            <div class="project-icon">${p.icon || '📁'}</div>
-            <div class="project-card-actions" onclick="event.stopPropagation()">
-              <button class="icon-btn" onclick="Projects.showEditModal('${p.id}')" title="수정">✎</button>
-              <button class="icon-btn danger" onclick="Projects.deleteProject('${p.id}')" title="삭제">✕</button>
-            </div>
-          </div>
-          <div class="project-name">${escapeHtml(p.name)}</div>
-          <div class="project-desc">${escapeHtml(p.description || '설명 없음')}</div>
-          <div class="project-progress">
-            <div class="progress-label">
-              <span>진행률</span><span>${progress}%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
-          </div>
-          <div class="project-card-footer">
-            <span class="project-task-count">태스크 ${taskCount}개</span>
-            <span class="badge badge-${p.status === 'done' ? 'success' : p.status === 'inprogress' ? 'warning' : 'primary'}">${STATUS_LABELS[p.status] || '할 일'}</span>
+  function renderCard(f) {
+    const catClass = f.category || '';
+    const nextStatus = STATUSES[STATUSES.indexOf(f.status) + 1];
+    const prevStatus = STATUSES[STATUSES.indexOf(f.status) - 1];
+
+    return `
+      <div class="feature-card">
+        <div class="feature-card-name">${escapeHtml(f.name)}</div>
+        ${f.desc ? `<div class="feature-card-desc">${escapeHtml(f.desc)}</div>` : ''}
+        <div class="feature-card-footer">
+          <span class="feature-card-cat cat-badge ${catClass}">${f.category || ''}</span>
+          <div class="feature-card-actions">
+            ${prevStatus ? `<button class="feature-action-btn" onclick="Projects.moveStatus('${f.id}','${prevStatus}')">◀ ${prevStatus}</button>` : ''}
+            ${nextStatus ? `<button class="feature-action-btn" onclick="Projects.moveStatus('${f.id}','${nextStatus}')" style="color:var(--color-primary)">${nextStatus} ▶</button>` : ''}
+            <button class="feature-action-btn del" onclick="Projects.deleteFeature('${f.id}')">✕</button>
           </div>
         </div>
-      `;
-    }).join('')}</div>`;
+      </div>
+    `;
   }
 
-  function renderKanbanView(projects) {
-    return `
+  function render() {
+    const features = getFeatures();
+    const total    = features.length;
+
+    document.getElementById('app').innerHTML = `
+      <div class="features-toolbar">
+        <div style="font-size:0.82rem;color:var(--color-text-3)">헬로아지 기능 ${total}개 트래킹 중</div>
+        <button class="btn btn-primary" onclick="Projects.showAddModal()">+ 기능 추가</button>
+      </div>
+
       <div class="kanban-board">
         ${STATUSES.map(status => {
-          const cols = projects.filter(p => (p.status || 'todo') === status);
+          const cols = features.filter(f => f.status === status);
           return `
-            <div class="kanban-col">
+            <div class="kanban-col" data-status="${status}">
               <div class="kanban-col-header">
-                <span class="kanban-col-title">${STATUS_LABELS[status]}</span>
+                <span class="kanban-col-title">${status}</span>
                 <span class="kanban-count">${cols.length}</span>
               </div>
-              ${cols.map(p => `
-                <div class="kanban-card" onclick="Projects.openProject('${p.id}')">
-                  <div class="kanban-card-title">${p.icon || '📁'} ${escapeHtml(p.name)}</div>
-                  <div class="kanban-card-meta">
-                    <span class="badge badge-primary" style="font-size:0.7rem">태스크 ${(p.tasks||[]).length}개</span>
-                    <span style="font-size:0.72rem;color:var(--color-text-3)">${getProgress(p)}%</span>
-                  </div>
-                </div>
-              `).join('')}
+              ${cols.map(f => renderCard(f)).join('')}
+              <button class="kanban-add-btn" onclick="Projects.showAddModal('${status}')">+ 추가</button>
             </div>
           `;
         }).join('')}
@@ -94,146 +74,41 @@ const Projects = (() => {
     `;
   }
 
-  function render() {
-    const projects = getProjects();
-
-    document.getElementById('app').innerHTML = `
-      <div class="projects-toolbar">
-        <div class="view-toggle">
-          <button class="view-btn ${view === 'card' ? 'active' : ''}" onclick="Projects.setView('card')">카드 뷰</button>
-          <button class="view-btn ${view === 'kanban' ? 'active' : ''}" onclick="Projects.setView('kanban')">칸반 뷰</button>
-        </div>
-        <button class="btn btn-primary" onclick="Projects.showAddModal()">+ 프로젝트 추가</button>
-      </div>
-      ${view === 'card' ? renderCardView(projects) : renderKanbanView(projects)}
-    `;
-  }
-
-  function openProject(id) {
-    const project = getProjects().find(p => p.id === id);
-    if (!project) return;
-
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;';
-    const tasks = project.tasks || [];
-
-    overlay.innerHTML = `
-      <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:28px;width:480px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-          <span style="font-size:1.8rem">${project.icon || '📁'}</span>
-          <div>
-            <h3 style="font-size:1rem;font-weight:700">${escapeHtml(project.name)}</h3>
-            <p style="font-size:0.82rem;color:var(--color-text-2)">${escapeHtml(project.description || '')}</p>
-          </div>
-          <button onclick="this.closest('[style]').remove()" style="margin-left:auto;color:var(--color-text-3);font-size:1rem;padding:4px 8px">✕</button>
-        </div>
-
-        <div style="margin-bottom:16px">
-          <div class="section-title" style="margin-bottom:10px">태스크</div>
-          <div id="proj-tasks">
-            ${tasks.map(t => `
-              <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-border)">
-                <div class="task-checkbox ${t.done ? 'checked' : ''}" onclick="Projects.toggleProjectTask('${id}', '${t.id}', this)">${t.done ? '✓' : ''}</div>
-                <span style="font-size:0.87rem;${t.done ? 'text-decoration:line-through;color:var(--color-text-3)' : ''}">${escapeHtml(t.title)}</span>
-              </div>
-            `).join('')}
-          </div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <input id="new-task-input" type="text" placeholder="새 태스크 추가..."
-              style="flex:1;padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.87rem;outline:none">
-            <button class="btn btn-primary" onclick="Projects.addProjectTask('${id}')">추가</button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    document.body.appendChild(overlay);
-  }
-
-  function toggleProjectTask(projId, taskId, el) {
-    const projects = getProjects();
-    const proj = projects.find(p => p.id === projId);
-    if (!proj) return;
-    proj.tasks = (proj.tasks || []).map(t =>
-      t.id === taskId ? { ...t, done: !t.done } : t
-    );
-    Store.set('projects', projects);
-    el.classList.toggle('checked');
-    el.textContent = el.classList.contains('checked') ? '✓' : '';
-    render();
-  }
-
-  function addProjectTask(projId) {
-    const input = document.getElementById('new-task-input');
-    const title = input?.value.trim();
-    if (!title) return;
-    const projects = getProjects();
-    const proj = projects.find(p => p.id === projId);
-    if (!proj) return;
-    if (!proj.tasks) proj.tasks = [];
-    proj.tasks.push({ id: crypto.randomUUID(), title, done: false });
-    Store.set('projects', projects);
-    input.value = '';
-    const overlay = input.closest('[style]');
-    if (overlay) overlay.remove();
-    openProject(projId);
-    render();
-  }
-
-  function showAddModal() {
-    openModal({ title: '프로젝트 추가', project: { name: '', description: '', icon: '📁', status: 'todo' }, onSave: (data) => {
-      Store.push('projects', { ...data, tasks: [] });
-      render();
-      Toast.show('프로젝트가 추가되었습니다.', 'success');
-    }});
-  }
-
-  function showEditModal(id) {
-    const project = getProjects().find(p => p.id === id);
-    if (!project) return;
-    openModal({ title: '프로젝트 수정', project, onSave: (data) => {
-      Store.update('projects', id, data);
-      render();
-      Toast.show('프로젝트가 수정되었습니다.', 'success');
-    }});
-  }
-
-  function openModal({ title, project, onSave }) {
+  function showAddModal(defaultStatus = '아이디어') {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;';
     overlay.innerHTML = `
       <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:28px;width:400px;box-shadow:var(--shadow-lg)">
-        <h3 style="font-size:1rem;font-weight:600;margin-bottom:20px">${title}</h3>
-        <div style="display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:20px">기능 추가</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
           <div>
-            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">이름 *</label>
-            <input id="m-name" type="text" value="${escapeHtml(project.name)}" placeholder="프로젝트 이름"
+            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">기능명 *</label>
+            <input id="m-name" type="text" placeholder="예: 반려견 프로필 등록"
               style="width:100%;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.9rem;outline:none">
           </div>
           <div>
             <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">설명</label>
-            <input id="m-desc" type="text" value="${escapeHtml(project.description || '')}" placeholder="간략한 설명"
+            <input id="m-desc" type="text" placeholder="간략한 설명"
               style="width:100%;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.9rem;outline:none">
           </div>
-          <div>
-            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:8px">아이콘</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              ${EMOJIS.map(e => `<span data-emoji="${e}" onclick="this.parentNode.querySelectorAll('span').forEach(s=>s.style.background='');this.style.background='var(--color-primary-light)'"
-                style="font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:6px;${project.icon===e?'background:var(--color-primary-light)':''}">${e}</span>`).join('')}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">카테고리</label>
+              <select id="m-cat" style="width:100%;padding:9px 10px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.87rem;outline:none;background:var(--color-surface)">
+                ${CATS.map(c => `<option value="${c}">${c}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">상태</label>
+              <select id="m-status" style="width:100%;padding:9px 10px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.87rem;outline:none;background:var(--color-surface)">
+                ${STATUSES.map(s => `<option value="${s}" ${s===defaultStatus?'selected':''}>${s}</option>`).join('')}
+              </select>
             </div>
           </div>
-          <div>
-            <label style="font-size:0.8rem;color:var(--color-text-2);display:block;margin-bottom:5px">상태</label>
-            <select id="m-status"
-              style="width:100%;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.9rem;outline:none;background:var(--color-surface)">
-              ${STATUSES.map(s => `<option value="${s}" ${project.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
-            </select>
-          </div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:24px">
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px">
           <button id="m-cancel" class="btn btn-ghost">취소</button>
-          <button id="m-save" class="btn btn-primary">저장</button>
+          <button id="m-save" class="btn btn-primary">추가</button>
         </div>
       </div>
     `;
@@ -241,22 +116,24 @@ const Projects = (() => {
     overlay.querySelector('#m-cancel').addEventListener('click', () => overlay.remove());
     overlay.querySelector('#m-save').addEventListener('click', () => {
       const name = overlay.querySelector('#m-name').value.trim();
-      if (!name) { Toast.show('프로젝트 이름을 입력해 주세요.', 'warning'); return; }
-      const selectedEmoji = [...overlay.querySelectorAll('[data-emoji]')].find(el => el.style.background)?.dataset.emoji || project.icon;
-      onSave({
+      if (!name) { Toast.show('기능명을 입력해 주세요.', 'warning'); return; }
+      Store.push('features', {
         name,
-        description: overlay.querySelector('#m-desc').value.trim(),
-        icon: selectedEmoji || '📁',
+        desc: overlay.querySelector('#m-desc').value.trim(),
+        category: overlay.querySelector('#m-cat').value,
         status: overlay.querySelector('#m-status').value,
       });
+      render();
+      Toast.show('기능이 추가됐어요.', 'success');
       overlay.remove();
     });
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
     overlay.querySelector('#m-name').focus();
   }
 
-  return { render, setView, deleteProject, openProject, toggleProjectTask, addProjectTask, showAddModal, showEditModal };
+  return { render, deleteFeature, moveStatus, showAddModal };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Projects.render());

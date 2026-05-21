@@ -22,6 +22,13 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
+  /* 헬로아지 카테고리 컬러 */
+  --cat-기획-bg: #ede9fe; --cat-기획-text: #6d28d9;
+  --cat-디자인-bg: #fce7f3; --cat-디자인-text: #be185d;
+  --cat-개발-bg: #dbeafe; --cat-개발-text: #1d4ed8;
+  --cat-마케팅-bg: #ffedd5; --cat-마케팅-text: #c2410c;
+  --cat-운영-bg: #d1fae5; --cat-운영-text: #065f46;
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;

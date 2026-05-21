@@ -1,151 +1,151 @@
-/* ===== Schedule ===== */
-.schedule-toolbar {
+/* ===== 백로그 ===== */
+.backlog-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
-.schedule-filter-group {
+.cat-filter-group {
   display: flex;
   gap: 6px;
-}
-
-.filter-btn {
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  font-size: 0.8rem;
-  font-weight: 500;
-  border: 1px solid var(--color-border);
-  color: var(--color-text-2);
-  background: var(--color-surface);
-  transition: all var(--transition);
-}
-
-.filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-.filter-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
-
-/* ===== Task List ===== */
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.task-item {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition);
-}
-
-.task-item:hover { box-shadow: var(--shadow-md); }
-
-.task-item.completed { opacity: 0.6; }
-
-.task-checkbox {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  border: 2px solid var(--color-border);
-  flex-shrink: 0;
-  cursor: pointer;
-  margin-top: 1px;
-  transition: all var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.task-checkbox.checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-  font-size: 0.6rem;
-}
-
-.task-body { flex: 1; }
-
-.task-title {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text);
-  margin-bottom: 4px;
-}
-
-.task-item.completed .task-title {
-  text-decoration: line-through;
-  color: var(--color-text-3);
-}
-
-.task-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   flex-wrap: wrap;
 }
 
-.task-date {
-  font-size: 0.75rem;
-  color: var(--color-text-3);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.cat-filter-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  transition: all var(--transition);
+  cursor: pointer;
 }
 
-.task-actions {
+.cat-filter-btn:hover { opacity: 0.8; }
+
+.cat-filter-btn.active-기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text);  border-color: var(--cat-기획-text); }
+.cat-filter-btn.active-디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); border-color: var(--cat-디자인-text); }
+.cat-filter-btn.active-개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text);  border-color: var(--cat-개발-text); }
+.cat-filter-btn.active-마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); border-color: var(--cat-마케팅-text); }
+.cat-filter-btn.active-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text); }
+.cat-filter-btn.active-전체  { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+/* ===== 태스크 아이템 ===== */
+.bl-task {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  border: 1px solid var(--color-border);
+  transition: box-shadow var(--transition);
+}
+
+.bl-task:hover { box-shadow: var(--shadow-sm); }
+.bl-task.done { opacity: 0.5; }
+
+.bl-checkbox {
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  transition: all var(--transition);
+}
+
+.bl-checkbox.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.bl-title {
+  flex: 1;
+  font-size: 0.88rem;
+  color: var(--color-text);
+}
+
+.bl-task.done .bl-title { text-decoration: line-through; color: var(--color-text-3); }
+
+/* ===== 카테고리 뱃지 ===== */
+.cat-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.cat-badge.기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text); }
+.cat-badge.디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); }
+.cat-badge.개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text); }
+.cat-badge.마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); }
+.cat-badge.운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text); }
+
+.bl-actions {
+  display: flex;
+  gap: 4px;
   opacity: 0;
   transition: opacity var(--transition);
 }
 
-.task-item:hover .task-actions { opacity: 1; }
+.bl-task:hover .bl-actions { opacity: 1; }
 
-.icon-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-3);
-  font-size: 0.85rem;
-  transition: background var(--transition), color var(--transition);
+.bl-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  transition: background var(--transition);
 }
 
-.icon-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
-.icon-btn.danger:hover { background: #fee2e2; color: var(--color-danger); }
+.bl-btn-today { color: var(--color-primary); }
+.bl-btn-today:hover { background: var(--color-primary-light); }
+.bl-btn-del   { color: var(--color-text-3); }
+.bl-btn-del:hover { background: #fee2e2; color: var(--color-danger); }
 
-/* ===== Add Task Form ===== */
-.add-task-form {
-  background: var(--color-surface);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
+/* ===== 빠른 추가 ===== */
+.bl-add-wrap {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: text;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bl-add-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
   transition: border-color var(--transition);
 }
 
-.add-task-form:focus-within { border-color: var(--color-primary); border-style: solid; }
+.bl-add-input:focus { border-color: var(--color-primary); }
+.bl-add-input::placeholder { color: var(--color-text-3); }
 
-.add-task-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 0.9rem;
+.bl-cat-select {
+  padding: 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--color-surface);
   color: var(--color-text);
+  outline: none;
+  cursor: pointer;
 }
-
-.add-task-input::placeholder { color: var(--color-text-3); }

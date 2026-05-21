@@ -5,10 +5,10 @@
 
 const Nav = (() => {
   const NAV_ITEMS = [
-    { href: 'index.html',      label: '대시보드',       icon: '▦' },
-    { href: 'schedule.html',   label: '업무 일정',       icon: '◷' },
+    { href: 'index.html',      label: '오늘',           icon: '◎' },
+    { href: 'schedule.html',   label: '백로그',          icon: '☰' },
     { href: 'braindump.html',  label: '브레인 덤프',     icon: '◈' },
-    { href: 'projects.html',   label: '프로젝트',        icon: '◉' },
+    { href: 'projects.html',   label: '기능 보드',       icon: '◉' },
   ];
 
   function currentPage() {
@@ -22,8 +22,8 @@ const Nav = (() => {
     const sidebarHTML = `
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
-          <div class="sidebar-logo-text">ChloeAssist</div>
-          <div class="sidebar-logo-sub">나만의 AI 업무 비서</div>
+          <div class="sidebar-logo-text">헬로아지</div>
+          <div class="sidebar-logo-sub">작업 관리 by Chloe</div>
         </div>
         <nav class="sidebar-nav">
           <div class="sidebar-section-label">메뉴</div>

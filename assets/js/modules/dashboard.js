@@ -1,126 +1,136 @@
 /**
- * dashboard.js — 대시보드 렌더링
+ * dashboard.js — 오늘 집중 뷰 (헬로아지 중심)
  */
 
 const Dashboard = (() => {
-  function getGreeting() {
-    const h = new Date().getHours();
-    if (h < 12) return '좋은 아침이에요';
-    if (h < 18) return '좋은 오후에요';
-    return '좋은 저녁이에요';
-  }
+  const CATS = ['기획', '디자인', '개발', '마케팅', '운영'];
+  let showDone = false;
 
-  function formatDate() {
-    return new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
-  }
-
-  function getStats() {
-    const tasks    = Store.get('tasks') || [];
-    const notes    = Store.get('notes') || [];
-    const projects = Store.get('projects') || [];
-
-    const todayStr = new Date().toDateString();
-    const todayTasks = tasks.filter(t => {
-      if (!t.dueDate) return false;
-      return new Date(t.dueDate).toDateString() === todayStr;
-    });
-
-    return {
-      todayTotal:     todayTasks.length,
-      todayDone:      todayTasks.filter(t => t.done).length,
-      totalNotes:     notes.length,
-      activeProjects: projects.filter(p => p.status !== 'done').length,
-    };
+  function todayStr() {
+    return new Date().toDateString();
   }
 
   function getTodayTasks() {
-    const tasks = Store.get('tasks') || [];
-    const todayStr = new Date().toDateString();
-    return tasks
-      .filter(t => !t.dueDate || new Date(t.dueDate).toDateString() === todayStr)
-      .slice(0, 5);
+    const all = Store.get('tasks') || [];
+    return all.filter(t => t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === todayStr()));
   }
 
-  function getRecentNotes() {
-    const notes = Store.get('notes') || [];
-    return [...notes].sort((a, b) => b.createdAt - a.createdAt).slice(0, 3);
+  function formatDate() {
+    const d = new Date();
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    return `${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
   }
 
-  function toggleTask(id) {
-    const tasks = Store.get('tasks') || [];
-    const task  = tasks.find(t => t.id === id);
-    if (!task) return;
-    Store.update('tasks', id, { done: !task.done });
+  function addTask(title, category) {
+    if (!title.trim()) return;
+    Store.push('tasks', { title: title.trim(), category, done: false, isToday: true });
     render();
   }
 
-  function render() {
-    const stats      = getStats();
-    const todayTasks = getTodayTasks();
-    const recentNotes= getRecentNotes();
+  function toggleDone(id) {
+    const tasks = Store.get('tasks') || [];
+    const t = tasks.find(t => t.id === id);
+    if (!t) return;
+    Store.update('tasks', id, { done: !t.done });
+    render();
+  }
 
-    document.getElementById('app').innerHTML = `
-      <div class="dashboard-greeting">
-        <h1>${getGreeting()}, Chloe!</h1>
-        <p>${formatDate()}</p>
-      </div>
+  function deleteTask(id) {
+    Store.remove('tasks', id);
+    render();
+  }
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">오늘 할 일</div>
-          <div class="stat-value">${stats.todayDone}<span style="color:var(--color-text-3);font-size:1.1rem"> / ${stats.todayTotal}</span></div>
-          <div class="stat-sub">완료율 ${stats.todayTotal ? Math.round(stats.todayDone/stats.todayTotal*100) : 0}%</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">브레인 덤프</div>
-          <div class="stat-value">${stats.totalNotes}</div>
-          <div class="stat-sub">저장된 노트</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">진행 중 프로젝트</div>
-          <div class="stat-value">${stats.activeProjects}</div>
-          <div class="stat-sub">활성 프로젝트</div>
-        </div>
-      </div>
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-      <div class="dashboard-grid">
-        <div class="card">
-          <div class="dash-section-header">
-            <div class="dash-section-title">오늘의 할 일</div>
-            <a href="schedule.html" class="dash-section-link">전체 보기</a>
+  function renderCatGroup(cat, tasks) {
+    const active = tasks.filter(t => !t.done);
+    const done   = tasks.filter(t => t.done);
+    const toShow = showDone ? tasks : active;
+    if (!toShow.length && !active.length) return '';
+
+    return `
+      <div class="cat-group cat-${cat}">
+        <div class="cat-group-header">
+          <div class="cat-dot"></div>
+          <span class="cat-label">${cat}</span>
+          <span class="cat-count">${active.length}개</span>
+        </div>
+        ${toShow.map(t => `
+          <div class="today-task ${t.done ? 'done' : ''}">
+            <div class="today-checkbox ${t.done ? 'checked' : ''}"
+              onclick="Dashboard.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
+            <span class="today-task-text">${escapeHtml(t.title)}</span>
+            <button class="today-task-del" onclick="Dashboard.deleteTask('${t.id}')">✕</button>
           </div>
-          ${todayTasks.length === 0
-            ? '<div class="empty-state"><div class="empty-state-icon">◷</div><div class="empty-state-text">오늘 등록된 일정이 없어요</div></div>'
-            : todayTasks.map(t => `
-              <div class="task-preview-item">
-                <div class="task-check ${t.done ? 'done' : ''}" data-id="${t.id}" onclick="Dashboard.toggleTask('${t.id}')"></div>
-                <span class="task-preview-text ${t.done ? 'done' : ''}">${t.title}</span>
-                ${t.priority ? `<span class="badge badge-${t.priority === '높음' ? 'danger' : t.priority === '보통' ? 'warning' : 'primary'}">${t.priority}</span>` : ''}
-              </div>
-            `).join('')
-          }
-        </div>
-
-        <div class="card">
-          <div class="dash-section-header">
-            <div class="dash-section-title">최근 브레인 덤프</div>
-            <a href="braindump.html" class="dash-section-link">전체 보기</a>
-          </div>
-          ${recentNotes.length === 0
-            ? '<div class="empty-state"><div class="empty-state-icon">◈</div><div class="empty-state-text">아직 작성된 노트가 없어요</div></div>'
-            : recentNotes.map(n => `
-              <div style="padding:9px 0;border-bottom:1px solid var(--color-border)">
-                <div style="font-size:0.85rem;color:var(--color-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.text}</div>
-                <div style="font-size:0.72rem;color:var(--color-text-3);margin-top:3px">${new Date(n.createdAt).toLocaleDateString('ko-KR')}</div>
-              </div>
-            `).join('')
-          }
-        </div>
+        `).join('')}
       </div>
     `;
   }
 
-  return { render, toggleTask };
+  function render() {
+    const tasks  = getTodayTasks();
+    const total  = tasks.length;
+    const done   = tasks.filter(t => t.done).length;
+    const pct    = total ? Math.round(done / total * 100) : 0;
+
+    const byCat  = {};
+    CATS.forEach(c => { byCat[c] = tasks.filter(t => t.category === c); });
+    const hasAny = tasks.filter(t => !t.done).length > 0 || (showDone && done > 0);
+
+    document.getElementById('app').innerHTML = `
+      <div class="today-header">
+        <div class="today-date">${formatDate()}</div>
+        <div class="today-progress-row">
+          <div class="today-progress-bar">
+            <div class="today-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="today-progress-text">${done} / ${total} 완료</span>
+        </div>
+      </div>
+
+      <div class="quick-add-wrap">
+        <input id="quick-input" class="quick-add-input" type="text"
+          placeholder="오늘 할 일 추가... (Enter)" autofocus>
+        <select id="quick-cat" class="quick-cat-select">
+          ${CATS.map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
+      </div>
+
+      <div id="today-list">
+        ${!hasAny && total === 0
+          ? `<div class="empty-state">
+               <div class="empty-state-icon">✦</div>
+               <div class="empty-state-text">오늘 할 일을 추가해보세요</div>
+             </div>`
+          : CATS.map(c => renderCatGroup(c, byCat[c])).join('')
+        }
+        ${done > 0 ? `
+          <div class="done-section-toggle" onclick="Dashboard.toggleShowDone()">
+            ${showDone ? '▴' : '▾'} 완료된 항목 ${done}개 ${showDone ? '숨기기' : '보기'}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    const input = document.getElementById('quick-input');
+    input?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cat = document.getElementById('quick-cat').value;
+        addTask(input.value, cat);
+        input.value = '';
+        input.focus();
+      }
+    });
+  }
+
+  function toggleShowDone() {
+    showDone = !showDone;
+    render();
+  }
+
+  return { render, toggleDone, deleteTask, toggleShowDone };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Dashboard.render());

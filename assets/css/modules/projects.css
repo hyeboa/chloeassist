@@ -1,5 +1,5 @@
-/* ===== Projects ===== */
-.projects-toolbar {
+/* ===== 기능 보드 (헬로아지 기능 칸반) ===== */
+.features-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -7,193 +7,138 @@
   gap: 12px;
 }
 
-.view-toggle {
-  display: flex;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 2px;
-}
-
-.view-btn {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  color: var(--color-text-3);
-  transition: all var(--transition);
-}
-
-.view-btn.active {
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ===== Project Cards ===== */
-.project-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: box-shadow var(--transition);
-}
-
-.project-card:hover { box-shadow: var(--shadow-md); }
-
-.project-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.project-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--color-primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-.project-card-actions {
-  opacity: 0;
-  transition: opacity var(--transition);
-  display: flex;
-  gap: 4px;
-}
-
-.project-card:hover .project-card-actions { opacity: 1; }
-
-.project-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 4px;
-}
-
-.project-desc {
-  font-size: 0.82rem;
-  color: var(--color-text-2);
-  line-height: 1.55;
-  margin-bottom: 14px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ===== Progress Bar ===== */
-.project-progress {
-  margin-bottom: 12px;
-}
-
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--color-text-3);
-  margin-bottom: 6px;
-}
-
-.progress-bar {
-  height: 5px;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: var(--radius-full);
-  transition: width 0.5s ease;
-}
-
-/* ===== Project Footer ===== */
-.project-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.project-task-count {
-  font-size: 0.78rem;
-  color: var(--color-text-3);
-}
-
-/* ===== Kanban View ===== */
+/* ===== 칸반 보드 ===== */
 .kanban-board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
   align-items: start;
 }
 
-@media (max-width: 900px) {
-  .kanban-board { grid-template-columns: 1fr; }
-}
+@media (max-width: 1100px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px)  { .kanban-board { grid-template-columns: 1fr; } }
 
 .kanban-col {
   background: var(--color-surface-2);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 12px;
+  min-height: 200px;
 }
 
 .kanban-col-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
   padding-bottom: 10px;
+  margin-bottom: 10px;
   border-bottom: 2px solid var(--color-border);
 }
 
 .kanban-col-title {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-text-2);
+  font-size: 0.78rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  color: var(--color-text-2);
 }
 
 .kanban-count {
-  background: var(--color-surface);
-  color: var(--color-text-3);
   font-size: 0.72rem;
   font-weight: 600;
+  background: var(--color-surface);
+  color: var(--color-text-3);
   padding: 1px 7px;
   border-radius: var(--radius-full);
 }
 
-.kanban-card {
+/* 칼럼별 강조색 */
+.kanban-col[data-status="아이디어"] .kanban-col-title { color: var(--color-text-3); }
+.kanban-col[data-status="기획중"]   .kanban-col-title { color: var(--cat-기획-text); }
+.kanban-col[data-status="디자인중"] .kanban-col-title { color: var(--cat-디자인-text); }
+.kanban-col[data-status="개발중"]   .kanban-col-title { color: var(--cat-개발-text); }
+
+/* ===== 기능 카드 ===== */
+.feature-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 12px;
   margin-bottom: 8px;
-  font-size: 0.85rem;
   box-shadow: var(--shadow-sm);
-  cursor: grab;
-  transition: box-shadow var(--transition);
+  cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition);
+  position: relative;
 }
 
-.kanban-card:hover { box-shadow: var(--shadow-md); }
-.kanban-card:last-child { margin-bottom: 0; }
+.feature-card:last-child { margin-bottom: 0; }
+.feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
 
-.kanban-card-title {
-  font-weight: 500;
+.feature-card-name {
+  font-size: 0.87rem;
+  font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
-.kanban-card-meta {
+.feature-card-desc {
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feature-card-footer {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.feature-card-cat {
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.feature-card-actions {
+  opacity: 0;
+  display: flex;
+  gap: 4px;
+  transition: opacity var(--transition);
+}
+
+.feature-card:hover .feature-card-actions { opacity: 1; }
+
+.feature-action-btn {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--color-text-3);
+  transition: background var(--transition), color var(--transition);
+}
+
+.feature-action-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
+.feature-action-btn.del:hover { background: #fee2e2; color: var(--color-danger); }
+
+/* ===== 카드 추가 버튼 ===== */
+.kanban-add-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-border);
+  font-size: 0.8rem;
+  color: var(--color-text-3);
+  text-align: center;
+  transition: all var(--transition);
+  margin-top: 6px;
+}
+
+.kanban-add-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
 }
