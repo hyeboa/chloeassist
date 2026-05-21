@@ -1,6 +1,5 @@
 /**
- * assistant.js — 플로팅 AI 비서
- * 모든 페이지에 FAB 버튼 + 채팅 패널 주입
+ * assistant.js — 오른쪽 고정 AI 사이드바
  */
 
 const Assistant = (() => {
@@ -9,56 +8,61 @@ const Assistant = (() => {
   const history = [];
 
   const SYSTEM_PROMPT = `당신은 사용자의 전담 AI 비서 Chloe입니다.
-현재 앱은 업무 일정 관리, 브레인 덤프, 프로젝트 관리 기능을 갖추고 있습니다.
-사용자의 질문에 간결하고 친절하게 한국어로 답변하세요.
-업무 관련 조언, 일정 정리, 아이디어 발전 등을 적극적으로 도와주세요.`;
+사용자는 반려견 플랫폼 모바일 앱 "헬로아지"를 1인으로 기획·디자인·운영하고 있습니다.
+주요 업무 영역: 기획, 디자인, 개발 관리, 마케팅, 운영.
+질문에 간결하고 실용적으로 한국어로 답변하세요.
+업무 우선순위 조언, 기획 아이디어 발전, 디자인 방향 제안 등을 적극적으로 도와주세요.`;
 
   function render() {
-    const el = document.createElement('div');
-    el.innerHTML = `
-      <div class="ai-panel" id="ai-panel">
-        <div class="ai-panel-header">
-          <div class="ai-panel-title">Chloe AI</div>
-          <button class="ai-panel-close" id="ai-close">✕</button>
-        </div>
-        <div class="ai-messages" id="ai-messages">
-          <div class="msg msg-ai">안녕하세요! 저는 Chloe입니다. 일정 관리, 프로젝트, 아이디어 정리 등 무엇이든 도와드릴게요. 😊</div>
-        </div>
-        <div class="ai-input-area">
-          <textarea class="ai-input" id="ai-input" rows="1" placeholder="메시지 입력..."></textarea>
-          <button class="ai-send-btn" id="ai-send">➤</button>
-        </div>
+    // 사이드바 주입
+    const sidebar = document.createElement('div');
+    sidebar.className = 'ai-sidebar';
+    sidebar.id = 'ai-sidebar';
+    sidebar.innerHTML = `
+      <div class="ai-sidebar-header">
+        <div class="ai-sidebar-title">Chloe AI</div>
+        <button class="ai-sidebar-close" id="ai-close" title="닫기">✕</button>
       </div>
-      <button class="ai-fab" id="ai-fab" title="AI 비서 열기">✦</button>
+      <div class="ai-messages" id="ai-messages">
+        <div class="msg msg-ai">안녕하세요! 헬로아지 작업을 도와드릴 Chloe입니다. 기획, 디자인, 업무 우선순위 등 뭐든 물어보세요 😊</div>
+      </div>
+      <div class="ai-input-area">
+        <textarea class="ai-input" id="ai-input" rows="1" placeholder="메시지 입력..."></textarea>
+        <button class="ai-send-btn" id="ai-send" title="전송">➤</button>
+      </div>
     `;
+    document.body.appendChild(sidebar);
 
-    document.body.appendChild(el.firstElementChild);
-    document.body.appendChild(el.lastElementChild);
+    // 헤더에 토글 버튼 주입
+    const headerActions = document.querySelector('.page-header-actions');
+    if (headerActions) {
+      const btn = document.createElement('button');
+      btn.id = 'ai-toggle-btn';
+      btn.className = 'ai-toggle-btn';
+      btn.innerHTML = `<span class="ai-toggle-dot"></span> AI 비서`;
+      btn.addEventListener('click', toggle);
+      headerActions.prepend(btn);
+    }
 
     bindEvents();
   }
 
   function bindEvents() {
-    const fab    = document.getElementById('ai-fab');
-    const panel  = document.getElementById('ai-panel');
-    const close  = document.getElementById('ai-close');
-    const input  = document.getElementById('ai-input');
-    const send   = document.getElementById('ai-send');
+    document.getElementById('ai-close')?.addEventListener('click', () => setOpen(false));
 
-    fab.addEventListener('click', toggle);
-    close.addEventListener('click', () => setOpen(false));
+    const input = document.getElementById('ai-input');
+    const send  = document.getElementById('ai-send');
 
-    send.addEventListener('click', sendMessage);
-    input.addEventListener('keydown', (e) => {
+    send?.addEventListener('click', sendMessage);
+    input?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
     });
-
-    input.addEventListener('input', () => {
+    input?.addEventListener('input', () => {
       input.style.height = 'auto';
-      input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+      input.style.height = Math.min(input.scrollHeight, 96) + 'px';
     });
   }
 
@@ -68,27 +72,32 @@ const Assistant = (() => {
 
   function setOpen(state) {
     isOpen = state;
-    const fab   = document.getElementById('ai-fab');
-    const panel = document.getElementById('ai-panel');
-    fab.classList.toggle('active', isOpen);
-    panel.classList.toggle('open', isOpen);
+
+    const sidebar   = document.getElementById('ai-sidebar');
+    const wrapper   = document.querySelector('.main-wrapper');
+    const toggleBtn = document.getElementById('ai-toggle-btn');
+
+    sidebar?.classList.toggle('open', isOpen);
+    wrapper?.classList.toggle('ai-open', isOpen);
+    toggleBtn?.classList.toggle('active', isOpen);
+
     if (isOpen) {
-      setTimeout(() => document.getElementById('ai-input')?.focus(), 200);
+      setTimeout(() => document.getElementById('ai-input')?.focus(), 260);
     }
   }
 
   async function sendMessage() {
     if (isLoading) return;
     const input = document.getElementById('ai-input');
-    const text  = input.value.trim();
+    const text  = input?.value.trim();
     if (!text) return;
 
     if (!AI.getApiKey()) {
-      Toast.show('설정에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
+      Toast.show('설정(⚙)에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
       return;
     }
 
-    appendMessage('user', text);
+    appendMsg('user', text);
     history.push({ role: 'user', content: text });
     input.value = '';
     input.style.height = 'auto';
@@ -109,13 +118,11 @@ const Assistant = (() => {
           typingEl.textContent = fullText;
           scrollToBottom();
         },
-        () => {
-          history.push({ role: 'assistant', content: fullText });
-        }
+        () => { history.push({ role: 'assistant', content: fullText }); }
       );
     } catch (err) {
       typingEl.className = 'msg msg-ai';
-      typingEl.textContent = `오류가 발생했습니다: ${err.message}`;
+      typingEl.textContent = `오류: ${err.message}`;
       Toast.show(err.message, 'error');
     } finally {
       isLoading = false;
@@ -123,7 +130,7 @@ const Assistant = (() => {
     }
   }
 
-  function appendMessage(role, text) {
+  function appendMsg(role, text) {
     const msgs = document.getElementById('ai-messages');
     const div  = document.createElement('div');
     div.className = `msg msg-${role}`;
@@ -136,7 +143,7 @@ const Assistant = (() => {
   function appendTyping() {
     const msgs = document.getElementById('ai-messages');
     const div  = document.createElement('div');
-    div.className = 'msg msg-ai msg-typing';
+    div.className = 'msg-typing';
     div.innerHTML = '<span></span><span></span><span></span>';
     msgs.appendChild(div);
     scrollToBottom();
@@ -148,5 +155,5 @@ const Assistant = (() => {
     if (msgs) msgs.scrollTop = msgs.scrollHeight;
   }
 
-  return { render };
+  return { render, toggle };
 })();
