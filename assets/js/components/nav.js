@@ -6,7 +6,7 @@
 const Nav = (() => {
   const NAV_ITEMS = [
     { href: 'index.html',      label: '오늘',           icon: '◎' },
-    { href: 'schedule.html',   label: '백로그',          icon: '☰' },
+    { href: 'schedule.html',   label: '할 일 목록',       icon: '☰' },
     { href: 'braindump.html',  label: '브레인 덤프',     icon: '◈' },
     { href: 'projects.html',   label: '기능 보드',       icon: '◉' },
   ];

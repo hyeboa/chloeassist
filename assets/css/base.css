@@ -139,3 +139,31 @@ img { max-width: 100%; display: block; }
 .badge-success { background: #dcfce7; color: #16a34a; }
 .badge-warning { background: #fef3c7; color: #b45309; }
 .badge-danger  { background: #fee2e2; color: #dc2626; }
+
+/* ===== Category Pills ===== */
+.cat-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cat-pill {
+  padding: 5px 13px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.cat-pill:hover { opacity: 0.85; }
+
+.cat-pill.selected-기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text);  border-color: var(--cat-기획-text); }
+.cat-pill.selected-디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); border-color: var(--cat-디자인-text); }
+.cat-pill.selected-개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text);  border-color: var(--cat-개발-text); }
+.cat-pill.selected-마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); border-color: var(--cat-마케팅-text); }
+.cat-pill.selected-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text); }

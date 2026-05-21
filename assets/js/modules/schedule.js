@@ -49,6 +49,15 @@ const Schedule = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  let selectedCat = '기획';
+
+  function selectCat(cat) {
+    selectedCat = cat;
+    document.querySelectorAll('#bl-cat-pills .cat-pill').forEach(el => {
+      el.className = `cat-pill${el.dataset.cat === cat ? ' selected-' + cat : ''}`;
+    });
+  }
+
   function render() {
     const tasks = filtered();
 
@@ -63,15 +72,21 @@ const Schedule = (() => {
       </div>
 
       <div class="bl-add-wrap">
-        <input id="bl-input" class="bl-add-input" type="text" placeholder="백로그에 추가... (Enter)">
-        <select id="bl-cat" class="bl-cat-select">
-          ${CATS.slice(1).map(c => `<option value="${c}">${c}</option>`).join('')}
-        </select>
+        <input id="bl-input" class="bl-add-input" type="text" placeholder="할 일을 입력하세요">
+        <div class="bl-add-footer">
+          <div class="cat-pills" id="bl-cat-pills">
+            ${CATS.slice(1).map(c => `
+              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
+                data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
+            `).join('')}
+          </div>
+          <span class="bl-add-hint">Enter로 추가</span>
+        </div>
       </div>
 
       <div id="bl-list">
         ${tasks.length === 0
-          ? '<div class="empty-state"><div class="empty-state-text">태스크가 없어요</div></div>'
+          ? '<div class="empty-state"><div class="empty-state-text">할 일이 없어요</div></div>'
           : tasks.map(t => `
             <div class="bl-task ${t.done ? 'done' : ''}">
               <div class="bl-checkbox ${t.done ? 'checked' : ''}"
@@ -91,8 +106,7 @@ const Schedule = (() => {
     const input = document.getElementById('bl-input');
     input?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const cat = document.getElementById('bl-cat').value;
-        addTask(input.value, cat);
+        addTask(input.value, selectedCat);
         input.value = '';
         input.focus();
       }
@@ -100,7 +114,7 @@ const Schedule = (() => {
     input?.focus();
   }
 
-  return { render, setFilter, toggleDone, moveToToday, deleteTask };
+  return { render, setFilter, toggleDone, moveToToday, deleteTask, selectCat };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Schedule.render());

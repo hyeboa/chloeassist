@@ -69,6 +69,15 @@ const Dashboard = (() => {
     `;
   }
 
+  let selectedCat = '기획';
+
+  function selectCat(cat) {
+    selectedCat = cat;
+    document.querySelectorAll('#quick-cat-pills .cat-pill').forEach(el => {
+      el.className = `cat-pill${el.dataset.cat === cat ? ' selected-' + cat : ''}`;
+    });
+  }
+
   function render() {
     const tasks  = getTodayTasks();
     const total  = tasks.length;
@@ -92,10 +101,16 @@ const Dashboard = (() => {
 
       <div class="quick-add-wrap">
         <input id="quick-input" class="quick-add-input" type="text"
-          placeholder="오늘 할 일 추가... (Enter)" autofocus>
-        <select id="quick-cat" class="quick-cat-select">
-          ${CATS.map(c => `<option value="${c}">${c}</option>`).join('')}
-        </select>
+          placeholder="오늘 할 일을 입력하세요" autofocus>
+        <div class="quick-add-footer">
+          <div class="cat-pills" id="quick-cat-pills">
+            ${CATS.map(c => `
+              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
+                data-cat="${c}" onclick="Dashboard.selectCat('${c}')">${c}</button>
+            `).join('')}
+          </div>
+          <span class="quick-add-hint">Enter로 추가</span>
+        </div>
       </div>
 
       <div id="today-list">
@@ -117,8 +132,7 @@ const Dashboard = (() => {
     const input = document.getElementById('quick-input');
     input?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const cat = document.getElementById('quick-cat').value;
-        addTask(input.value, cat);
+        addTask(input.value, selectedCat);
         input.value = '';
         input.focus();
       }
@@ -130,7 +144,7 @@ const Dashboard = (() => {
     render();
   }
 
-  return { render, toggleDone, deleteTask, toggleShowDone };
+  return { render, toggleDone, deleteTask, toggleShowDone, selectCat };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Dashboard.render());
