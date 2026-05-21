@@ -35,6 +35,49 @@
 .cat-filter-btn.active-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text); }
 .cat-filter-btn.active-전체  { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
 
+/* ===== 섹션 구분 ===== */
+.bl-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  margin-bottom: 8px;
+}
+
+.bl-section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bl-section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.bl-section-count {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  margin-left: auto;
+}
+
+.bl-section-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 20px 0 16px;
+}
+
+/* 오늘 섹션 */
+.bl-section-today .bl-section-dot  { background: var(--color-primary); }
+.bl-section-today .bl-section-label { color: var(--color-primary); }
+
+/* 나머지 섹션 */
+.bl-section-rest .bl-section-dot  { background: var(--color-text-3); }
+.bl-section-rest .bl-section-label { color: var(--color-text-3); }
+
 /* ===== 태스크 아이템 ===== */
 .bl-task {
   display: flex;
@@ -50,6 +93,17 @@
 
 .bl-task:hover { box-shadow: var(--shadow-sm); }
 .bl-task.done { opacity: 0.5; }
+
+/* 오늘 태스크 강조 */
+.bl-task.is-today {
+  border-left: 3px solid var(--color-primary);
+  background: linear-gradient(to right, rgba(108,99,255,0.03), var(--color-surface));
+}
+
+.bl-task.is-today.done {
+  border-left-color: var(--color-border);
+  background: var(--color-surface);
+}
 
 .bl-checkbox {
   width: 17px;

@@ -58,8 +58,31 @@ const Schedule = (() => {
     });
   }
 
+  function isToday(t) {
+    const todayStr = new Date().toDateString();
+    return t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === todayStr);
+  }
+
+  function taskRow(t) {
+    const today = isToday(t);
+    return `
+      <div class="bl-task ${t.done ? 'done' : ''} ${today ? 'is-today' : ''}">
+        <div class="bl-checkbox ${t.done ? 'checked' : ''}"
+          onclick="Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
+        <span class="bl-title">${escapeHtml(t.title)}</span>
+        <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
+        <div class="bl-actions">
+          ${!today && !t.done ? `<button class="bl-btn bl-btn-today" onclick="Schedule.moveToToday('${t.id}')">오늘로</button>` : ''}
+          <button class="bl-btn bl-btn-del" onclick="Schedule.deleteTask('${t.id}')">삭제</button>
+        </div>
+      </div>
+    `;
+  }
+
   function render() {
-    const tasks = filtered();
+    const tasks    = filtered();
+    const todayList = tasks.filter(t => isToday(t));
+    const restList  = tasks.filter(t => !isToday(t));
 
     document.getElementById('app').innerHTML = `
       <div class="backlog-toolbar">
@@ -87,18 +110,27 @@ const Schedule = (() => {
       <div id="bl-list">
         ${tasks.length === 0
           ? '<div class="empty-state"><div class="empty-state-text">할 일이 없어요</div></div>'
-          : tasks.map(t => `
-            <div class="bl-task ${t.done ? 'done' : ''}">
-              <div class="bl-checkbox ${t.done ? 'checked' : ''}"
-                onclick="Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
-              <span class="bl-title">${escapeHtml(t.title)}</span>
-              <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
-              <div class="bl-actions">
-                ${!t.isToday && !t.done ? `<button class="bl-btn bl-btn-today" onclick="Schedule.moveToToday('${t.id}')">오늘로</button>` : ''}
-                <button class="bl-btn bl-btn-del" onclick="Schedule.deleteTask('${t.id}')">삭제</button>
+          : `
+            ${todayList.length > 0 ? `
+              <div class="bl-section-header bl-section-today">
+                <div class="bl-section-dot"></div>
+                <span class="bl-section-label">오늘 할 일</span>
+                <span class="bl-section-count">${todayList.filter(t => !t.done).length}개 남음</span>
               </div>
-            </div>
-          `).join('')
+              ${todayList.map(t => taskRow(t)).join('')}
+            ` : ''}
+
+            ${todayList.length > 0 && restList.length > 0 ? '<div class="bl-section-divider"></div>' : ''}
+
+            ${restList.length > 0 ? `
+              <div class="bl-section-header bl-section-rest">
+                <div class="bl-section-dot"></div>
+                <span class="bl-section-label">예정 할 일</span>
+                <span class="bl-section-count">${restList.filter(t => !t.done).length}개</span>
+              </div>
+              ${restList.map(t => taskRow(t)).join('')}
+            ` : ''}
+          `
         }
       </div>
     `;
