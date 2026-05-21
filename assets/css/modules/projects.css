@@ -10,13 +10,14 @@
 /* ===== 칸반 보드 ===== */
 .kanban-board {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 14px;
   align-items: start;
 }
 
-@media (max-width: 1100px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px)  { .kanban-board { grid-template-columns: 1fr; } }
+@media (max-width: 1300px) { .kanban-board { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 800px)  { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px)  { .kanban-board { grid-template-columns: 1fr; } }
 
 .kanban-col {
   background: var(--color-surface-2);
@@ -56,6 +57,7 @@
 .kanban-col[data-status="기획중"]   .kanban-col-title { color: var(--cat-기획-text); }
 .kanban-col[data-status="디자인중"] .kanban-col-title { color: var(--cat-디자인-text); }
 .kanban-col[data-status="개발중"]   .kanban-col-title { color: var(--cat-개발-text); }
+.kanban-col[data-status="완료"]     .kanban-col-title { color: var(--color-success); }
 
 /* ===== 기능 카드 ===== */
 .feature-card {

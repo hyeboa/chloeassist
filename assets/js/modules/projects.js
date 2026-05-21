@@ -4,7 +4,7 @@
  */
 
 const Projects = (() => {
-  const STATUSES = ['아이디어', '기획중', '디자인중', '개발중'];
+  const STATUSES = ['아이디어', '기획중', '디자인중', '개발중', '완료'];
   const CATS = ['기획', '디자인', '개발', '마케팅', '운영'];
 
   function getFeatures() {

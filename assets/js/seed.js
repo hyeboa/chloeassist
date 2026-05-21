@@ -5,7 +5,8 @@
  */
 
 (function seedSampleData() {
-  if (localStorage.getItem('chloeassist:seeded')) return;
+  const seeded = localStorage.getItem('chloeassist:seeded');
+  if (seeded === 'v2') return;
 
   const now = Date.now();
   const d = (offsetDays) => new Date(Date.now() + offsetDays * 86400000).toISOString().slice(0, 10);
@@ -51,8 +52,18 @@
     { id: crypto.randomUUID(), name: '온보딩 플로우',          desc: '회원가입 + 반려견/파트너 구분 온보딩',          category: '디자인',  status: '개발중',  createdAt: now - 1000 * 86400 * 3 },
   ];
 
-  localStorage.setItem('chloeassist:tasks',    JSON.stringify(tasks));
-  localStorage.setItem('chloeassist:notes',    JSON.stringify(notes));
-  localStorage.setItem('chloeassist:features', JSON.stringify(features));
-  localStorage.setItem('chloeassist:seeded',   'true');
+  /* ── 마일스톤 ── */
+  const milestones = [
+    { id: crypto.randomUUID(), title: '내부 알파 테스트',   date: d(-10), desc: '팀 내부 기능 점검 및 버그 수집',        done: true,  createdAt: now - 1000 * 86400 * 20 },
+    { id: crypto.randomUUID(), title: '외부 베타 출시',     date: d(12),  desc: '100명 베타 유저 대상 테스트 시작',      done: false, createdAt: now - 1000 * 86400 * 15 },
+    { id: crypto.randomUUID(), title: '앱스토어 심사 제출', date: d(30),  desc: 'iOS / Android 동시 제출',              done: false, createdAt: now - 1000 * 86400 * 10 },
+    { id: crypto.randomUUID(), title: '정식 출시 (v1.0)',   date: d(55),  desc: '헬로아지 공식 서비스 오픈',             done: false, createdAt: now - 1000 * 86400 * 5  },
+    { id: crypto.randomUUID(), title: '유저 1,000명 달성',  date: d(90),  desc: '마케팅 집중 기간, SNS 바이럴 목표',     done: false, createdAt: now - 1000 * 86400 * 3  },
+  ];
+
+  localStorage.setItem('chloeassist:tasks',      JSON.stringify(tasks));
+  localStorage.setItem('chloeassist:notes',      JSON.stringify(notes));
+  localStorage.setItem('chloeassist:features',   JSON.stringify(features));
+  localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
+  localStorage.setItem('chloeassist:seeded',     'v2');
 })();
