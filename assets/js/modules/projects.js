@@ -120,6 +120,7 @@ const Projects = (() => {
 
     document.getElementById('app').innerHTML = `
       <div class="inline-nl-wrap">
+        <div class="inline-nl-label">새 기능 추가</div>
         <input id="feat-input" class="inline-nl-input" type="text"
           placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
         <div class="inline-nl-footer">

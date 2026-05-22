@@ -169,6 +169,7 @@ const Schedule = (() => {
       </div>
 
       <div class="inline-nl-wrap">
+        <div class="inline-nl-label">새 할 일 추가</div>
         <input id="bl-input" class="inline-nl-input" type="text"
           placeholder="유저 인터뷰 섭외 다음주 화요일 기획...">
         <div class="inline-nl-footer">

@@ -142,7 +142,33 @@ img { max-width: 100%; display: block; }
 
 /* ===== 인라인 자연어 입력 ===== */
 .inline-nl-wrap {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 14px 12px;
   margin-bottom: 24px;
+  transition: border-color var(--transition);
+}
+
+.inline-nl-wrap:focus-within {
+  border-color: rgba(108, 99, 255, 0.35);
+}
+
+.inline-nl-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  letter-spacing: 0.02em;
+  margin-bottom: 9px;
+}
+
+.inline-nl-label::before {
+  content: '✦';
+  color: var(--color-primary);
+  font-size: 0.78rem;
 }
 
 .inline-nl-input {
