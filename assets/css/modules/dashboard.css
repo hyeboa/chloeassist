@@ -1,3 +1,81 @@
+/* ===== 헬로아지 현황 스냅샷 ===== */
+.today-pulse {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pulse-chip {
+  display: block;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-decoration: none;
+  transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+  cursor: pointer;
+}
+
+.pulse-chip:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-text-3);
+  transform: translateY(-1px);
+}
+
+.pulse-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.pulse-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.pulse-value span {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-text-3);
+}
+
+.pulse-bar {
+  height: 3px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.pulse-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.pulse-bar-fill.green { background: #10b981; }
+
+.pulse-sub {
+  font-size: 0.68rem;
+  color: var(--color-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 마일스톤 D-day 색상 */
+.pulse-ms .pulse-value { color: var(--color-primary); }
+.pulse-ms-soon .pulse-value { color: #ef4444; }
+.pulse-ms-near .pulse-value { color: #f59e0b; }
+
 /* ===== 오늘 뷰 ===== */
 .today-header {
   margin-bottom: 24px;
