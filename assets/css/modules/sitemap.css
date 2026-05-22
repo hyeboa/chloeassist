@@ -134,11 +134,11 @@
 /* ─ 화면 행 ─ */
 .sitemap-screens {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0;
-  padding: 20px 20px;
+  padding: 20px 20px 24px;
   overflow-x: auto;
-  min-height: 180px;
+  min-height: 120px;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
 }
@@ -153,100 +153,85 @@
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
-  padding: 0 6px;
+  padding: 0 8px;
+  margin-top: 18px;
 }
 
 .arrow-line {
-  width: 20px;
+  width: 24px;
   height: 1.5px;
   background: var(--color-border);
 }
 
 .arrow-head {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--color-border);
   line-height: 1;
 }
 
 /* ─ 화면 카드 ─ */
 .screen-card {
-  width: 88px;
-  height: 152px;
-  border-radius: 12px;
-  border: 2px solid var(--color-border);
+  width: 160px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 10px 6px 8px;
-  position: relative;
-  cursor: pointer;
   flex-shrink: 0;
-  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
-  gap: 4px;
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .screen-card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
-/* 상태별 카드 색상 */
+/* 상태별 테두리 색 */
 .screen-card.st-none   { border-color: var(--color-border); }
-.screen-card.st-plan   { border-color: #a78bfa; background: #faf5ff; }
-.screen-card.st-design { border-color: #f472b6; background: #fdf2f8; }
-.screen-card.st-dev    { border-color: #60a5fa; background: #eff6ff; }
-.screen-card.st-done   { border-color: #34d399; background: #f0fdf4; }
+.screen-card.st-plan   { border-color: #a78bfa; }
+.screen-card.st-design { border-color: #f472b6; }
+.screen-card.st-dev    { border-color: #60a5fa; }
+.screen-card.st-done   { border-color: #34d399; }
 
-/* ─ 폰 노치 ─ */
-.screen-notch {
-  width: 26px;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 2px;
-  flex-shrink: 0;
-  margin-bottom: 6px;
+/* ─ 카드 헤더 ─ */
+.screen-card-hd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.screen-card.st-plan   .screen-notch { background: #c4b5fd; }
-.screen-card.st-design .screen-notch { background: #f9a8d4; }
-.screen-card.st-dev    .screen-notch { background: #93c5fd; }
-.screen-card.st-done   .screen-notch { background: #6ee7b7; }
-
-/* ─ 화면 이름 ─ */
-.screen-name {
-  flex: 1;
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--color-text);
-  text-align: center;
-  line-height: 1.4;
-  word-break: keep-all;
+/* 번호 뱃지 */
+.screen-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-text-3);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 0 2px;
-  outline: none;
-  border-radius: 3px;
-  cursor: text;
-  user-select: none;
-}
-
-.screen-name:focus {
-  box-shadow: 0 0 0 2px rgba(108,99,255,0.25);
-  user-select: text;
-}
-
-/* ─ 상태 버튼 ─ */
-.screen-status-btn {
-  font-size: 0.62rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 10px;
-  letter-spacing: 0.02em;
-  transition: opacity var(--transition);
   flex-shrink: 0;
+}
+
+.screen-card.st-plan   .screen-num { background: #a78bfa; }
+.screen-card.st-design .screen-num { background: #f472b6; }
+.screen-card.st-dev    .screen-num { background: #60a5fa; }
+.screen-card.st-done   .screen-num { background: #34d399; }
+
+/* 상태 버튼 */
+.screen-status-btn {
+  flex: 1;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+  text-align: left;
+  transition: opacity var(--transition);
 }
 
 .screen-card.st-none   .screen-status-btn { background: var(--color-surface-2); color: var(--color-text-3); }
@@ -257,31 +242,151 @@
 
 .screen-status-btn:hover { opacity: 0.75; }
 
-/* ─ 삭제 버튼 ─ */
+/* 삭제 버튼 */
 .screen-del {
-  position: absolute;
-  top: 4px;
-  right: 4px;
   width: 16px;
   height: 16px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--color-text-3);
   border-radius: 50%;
-  opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  flex-shrink: 0;
   transition: opacity var(--transition), background var(--transition), color var(--transition);
 }
 
 .screen-card:hover .screen-del { opacity: 1; }
 .screen-del:hover { background: #fee2e2; color: var(--color-danger); }
 
+/* ─ 화면 이름 영역 ─ */
+.screen-name-area {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.screen-name {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-text);
+  outline: none;
+  border-radius: 3px;
+  cursor: text;
+  word-break: keep-all;
+  line-height: 1.4;
+}
+
+.screen-name:focus { box-shadow: 0 0 0 2px rgba(108,99,255,0.25); }
+
+/* ─ 와이어프레임 플레이스홀더 ─ */
+.screen-wf {
+  padding: 8px 10px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wf-row {
+  height: 5px;
+  background: var(--color-border);
+  border-radius: 2px;
+}
+.wf-row.lg { width: 80%; }
+.wf-row.md { width: 58%; }
+.wf-row.sm { width: 38%; }
+
+.wf-rect {
+  height: 24px;
+  background: var(--color-border);
+  border-radius: 3px;
+  opacity: 0.45;
+  margin-bottom: 2px;
+}
+
+.screen-card.st-plan   .screen-wf { background: #faf5ff; }
+.screen-card.st-design .screen-wf { background: #fdf2f8; }
+.screen-card.st-dev    .screen-wf { background: #eff6ff; }
+.screen-card.st-done   .screen-wf { background: #f0fdf4; }
+
+/* ─ 컴포넌트 목록 ─ */
+.screen-components {
+  flex: 1;
+  padding: 6px 0 8px;
+}
+
+.comp-item {
+  display: flex;
+  align-items: center;
+  padding: 3px 10px;
+  gap: 5px;
+}
+
+.comp-item:hover { background: var(--color-surface-2); }
+
+.comp-dash {
+  color: var(--color-text-3);
+  font-size: 0.65rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.comp-name {
+  flex: 1;
+  font-size: 0.75rem;
+  color: var(--color-text);
+  cursor: text;
+  min-width: 0;
+  outline: none;
+  border-radius: 2px;
+  word-break: keep-all;
+  line-height: 1.5;
+}
+
+.comp-name:focus { box-shadow: 0 0 0 2px rgba(108,99,255,0.2); }
+
+.comp-del {
+  opacity: 0;
+  font-size: 0.55rem;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  padding: 1px 3px;
+  border-radius: 3px;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+
+.comp-item:hover .comp-del { opacity: 1; }
+.comp-del:hover { background: #fee2e2; color: var(--color-danger); }
+
+.comp-add-btn {
+  display: block;
+  margin: 5px 10px 0;
+  padding: 3px 6px;
+  font-size: 0.7rem;
+  color: var(--color-text-3);
+  border: 1px dashed var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  width: calc(100% - 20px);
+  text-align: left;
+  background: transparent;
+  transition: all var(--transition);
+}
+
+.comp-add-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(108,99,255,0.03);
+}
+
 /* ─ 화면 추가 카드 ─ */
 .screen-add-card {
-  width: 88px;
-  height: 152px;
-  border-radius: 12px;
+  width: 80px;
+  min-height: 120px;
+  border-radius: 10px;
   border: 2px dashed var(--color-border);
   background: transparent;
   display: flex;
@@ -292,7 +397,7 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color var(--transition), background var(--transition);
-  margin-left: 32px;
+  margin-left: 16px;
 }
 
 .screen-add-card:hover {
@@ -301,7 +406,7 @@
 }
 
 .screen-add-plus {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: var(--color-text-3);
   line-height: 1;
   transition: color var(--transition);
