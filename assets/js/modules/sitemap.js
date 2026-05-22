@@ -24,7 +24,16 @@ const Sitemap = (() => {
   const MAX_DEPTH = 4;
   let viewMode = 'board';
 
-  function getSections()   { return (Store.get('sitemapSections')   || []).sort((a,b) => a.createdAt - b.createdAt); }
+  function getSections() {
+    let sections = Store.get('sitemapSections') || [];
+    /* 마이그레이션: order 필드가 없는 경우 createdAt 순서대로 1부터 부여 */
+    if (sections.length && sections.every(s => s.order == null)) {
+      sections.sort((a, b) => a.createdAt - b.createdAt);
+      sections.forEach((s, i) => { s.order = i + 1; });
+      Store.set('sitemapSections', sections);
+    }
+    return sections.sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.createdAt - b.createdAt);
+  }
   function getScreens()    { return (Store.get('sitemapScreens')    || []).sort((a,b) => a.createdAt - b.createdAt); }
   function getComponents() { return (Store.get('sitemapComponents') || []).sort((a,b) => a.createdAt - b.createdAt); }
 
@@ -114,7 +123,10 @@ const Sitemap = (() => {
     const sectionScreens = allScreens.filter(s => s.sectionId === section.id);
     const total = sectionScreens.length;
     const done  = sectionScreens.filter(s => s.status === '완료').length;
-    const rows  = collectRows(null, sectionScreens, 2);
+    const collapsed = !!section.collapsed;
+    const order = section.order ?? '';
+
+    const rows = collapsed ? [] : collectRows(null, sectionScreens, 2);
 
     const rowsHTML = rows.map(({ screens, parentId, depth }) => {
       const parentScreen = parentId ? sectionScreens.find(s => s.id === parentId) : null;
@@ -141,17 +153,23 @@ const Sitemap = (() => {
     }).join('');
 
     return `
-      <div class="sitemap-section" data-section-id="${section.id}">
+      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''}" data-section-id="${section.id}">
         <div class="sitemap-section-hd">
           <div class="section-name-wrap">
+            <input type="number" class="section-order" min="1" value="${order}"
+              onchange="Sitemap.setOrder('${section.id}', this.value)"
+              onclick="event.stopPropagation()"
+              title="표시 순서 (작을수록 위/앞)">
+            <button class="section-toggle" onclick="Sitemap.toggleCollapse('${section.id}')"
+              title="${collapsed ? '펼치기' : '접기'}">${collapsed ? '&#9656;' : '&#9662;'}</button>
             <span class="section-icon">&#9703;</span>
             <span class="section-name" data-id="${section.id}"
               contenteditable="true"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+              onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();this.blur()}"
               >${escapeHtml(section.name)}</span>
           </div>
           <div class="section-meta">
-            ${total ? `<span class="section-count">${done}/${total} 완료</span>` : ''}
+            ${total ? `<span class="section-count">${done}/${total} 완료${collapsed ? ' · 접힘' : ''}</span>` : ''}
             <button class="section-del" onclick="Sitemap.deleteSection('${section.id}')">&#10005;</button>
           </div>
         </div>
@@ -208,19 +226,23 @@ const Sitemap = (() => {
       const level2   = screens
         .filter(s => s.sectionId === section.id && !s.parentId)
         .sort((a, b) => a.createdAt - b.createdAt);
-      const col      = BRANCH_COLORS[si % BRANCH_COLORS.length];
-      const secLeaves = level2.reduce((sum, s) => sum + countLeaves(s.id, screens), 0) || 1;
-      const secH     = secLeaves * HT_LEAF_H;
+      const col       = BRANCH_COLORS[si % BRANCH_COLORS.length];
+      const collapsed = !!section.collapsed;
+      const secLeaves = collapsed ? 1 : (level2.reduce((sum, s) => sum + countLeaves(s.id, screens), 0) || 1);
+      const secH      = secLeaves * HT_LEAF_H;
 
       return `
         <div class="ht-sec-cw" style="height:${secH}px">
           <div class="ht-inner">
-            <div class="ht-sec-node"
-              style="border-color:${col.border};background:${col.bg};color:${col.text}">
+            <div class="ht-sec-node ${collapsed ? 'is-collapsed' : ''}"
+              style="border-color:${col.border};background:${col.bg};color:${col.text}"
+              onclick="Sitemap.toggleCollapse('${section.id}')"
+              title="${collapsed ? '펼치기' : '접기'}">
+              ${collapsed ? '<span class="ht-sec-toggle">&#9656;</span>' : ''}
               ${escapeHtml(section.name)}
               <span class="ht-sec-count">${level2.length}</span>
             </div>
-            ${level2.length ? `
+            ${(level2.length && !collapsed) ? `
               <div class="ht-hline" style="background:${col.line}"></div>
               <div class="ht-kids" style="--vline:${col.line}">
                 ${level2.map(s => renderHTNode(s, screens, col)).join('')}
@@ -312,8 +334,8 @@ const Sitemap = (() => {
       el.removeEventListener('blur', save); el.removeEventListener('keydown', onKey);
     };
     const onKey = (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-      if (e.key === 'Escape') { el.textContent = original; el.blur(); }
+      if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); el.blur(); }
+      if (e.key === 'Escape' && !e.isComposing) { el.textContent = original; el.blur(); }
     };
     el.addEventListener('blur', save); el.addEventListener('keydown', onKey);
   }
@@ -333,8 +355,8 @@ const Sitemap = (() => {
       el.removeEventListener('blur', save); el.removeEventListener('keydown', onKey);
     };
     const onKey = (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-      if (e.key === 'Escape') { el.textContent = original; el.blur(); }
+      if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); el.blur(); }
+      if (e.key === 'Escape' && !e.isComposing) { el.textContent = original; el.blur(); }
     };
     el.addEventListener('blur', save); el.addEventListener('keydown', onKey);
   }
@@ -343,7 +365,9 @@ const Sitemap = (() => {
   function setView(mode) { viewMode = mode; render(); }
 
   function addSection() {
-    Store.push('sitemapSections', { name: '새 플로우' });
+    const sections = getSections();
+    const maxOrder = sections.reduce((m, s) => Math.max(m, s.order ?? 0), 0);
+    Store.push('sitemapSections', { name: '새 플로우', order: maxOrder + 1 });
     render();
     const els = document.querySelectorAll('.section-name');
     const last = els[els.length - 1];
@@ -352,6 +376,20 @@ const Sitemap = (() => {
       const r = document.createRange(); r.selectNodeContents(last);
       const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
     }
+  }
+
+  function setOrder(id, value) {
+    const n = parseInt(value, 10);
+    if (isNaN(n) || n < 1) return;
+    Store.update('sitemapSections', id, { order: n });
+    render();
+  }
+
+  function toggleCollapse(id) {
+    const sec = (Store.get('sitemapSections') || []).find(s => s.id === id);
+    if (!sec) return;
+    Store.update('sitemapSections', id, { collapsed: !sec.collapsed });
+    render();
   }
 
   function addScreen(sectionId, parentId = null) {
@@ -413,6 +451,7 @@ const Sitemap = (() => {
   return {
     render, setView, addSection, addScreen, addComponent, deleteComponent,
     cycleStatus, deleteScreen, deleteSection, focusName, focusComponent,
+    setOrder, toggleCollapse,
   };
 })();
 
