@@ -125,30 +125,9 @@
 
 .feature-action-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
 .feature-action-btn.del:hover { background: #fee2e2; color: var(--color-danger); }
+.feature-action-btn.next { color: var(--color-primary); }
 
-/* ─ 카드 구조 개편 ─ */
-.feature-card-main {
-  cursor: pointer;
-}
-
-.feature-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 5px;
-}
-
-.feat-expand-icon {
-  font-size: 0.65rem;
-  color: var(--color-text-3);
-  flex-shrink: 0;
-  margin-top: 3px;
-  transition: color var(--transition);
-}
-
-.feature-card:hover .feat-expand-icon { color: var(--color-primary); }
-
+/* ─ 액션 행 (펼쳐졌거나 hover 시 노출) ─ */
 .feature-card-actions-row {
   display: flex;
   gap: 4px;
@@ -159,96 +138,44 @@
   transition: opacity var(--transition);
 }
 
-.feature-card:hover .feature-card-actions-row { opacity: 1; }
+.feature-card:hover .feature-card-actions-row,
+.feature-card.expanded .feature-card-actions-row { opacity: 1; }
 
-/* ─ 미니 진행률 바 (카드 내) ─ */
-.feat-mini-progress {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* ─ 미니 진행률 (텍스트만) ─ */
+.feat-mini-pct {
+  font-size: 0.7rem;
+  color: var(--color-text-3);
+  font-weight: 500;
   margin-left: auto;
 }
 
-.feat-mini-bar {
-  width: 52px;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.feat-mini-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
-.feat-mini-pct {
-  font-size: 0.68rem;
-  color: var(--color-text-3);
-  font-weight: 500;
-}
-
-/* ─ 태스크 패널 ─ */
+/* ─ 태스크 패널 (심플) ─ */
 .feat-panel {
   border-top: 1px solid var(--color-border);
   margin-top: 10px;
-  padding-top: 12px;
-}
-
-.feat-panel-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.feat-panel-bar-wrap { flex: 1; }
-
-.feat-panel-bar {
-  height: 5px;
-  background: var(--color-border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.feat-panel-bar-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
-.feat-panel-stat {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--color-text-3);
-  white-space: nowrap;
+  padding-top: 10px;
 }
 
 .feat-panel-empty {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--color-text-3);
   text-align: center;
-  padding: 6px 0 10px;
+  padding: 2px 0 10px;
 }
 
 .feat-panel-tasks {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   margin-bottom: 8px;
 }
 
 .feat-panel-row {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 6px;
-  border-radius: 6px;
+  gap: 6px;
+  padding: 4px 4px;
   font-size: 0.8rem;
-  transition: background var(--transition);
+  border-radius: 4px;
 }
 
 .feat-panel-row:hover { background: var(--color-surface-2); }
@@ -256,26 +183,6 @@
 .feat-panel-row.done .feat-task-title {
   text-decoration: line-through;
   color: var(--color-text-3);
-}
-
-.feat-check {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  border: 1.5px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all var(--transition);
-}
-
-.feat-check.checked {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
 }
 
 .feat-task-title {
@@ -286,63 +193,37 @@
   color: var(--color-text);
 }
 
-.feat-task-date {
-  font-size: 0.68rem;
-  color: var(--color-text-3);
-  flex-shrink: 0;
-}
-
 .feat-task-unlink {
   opacity: 0;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--color-text-3);
-  padding: 2px 4px;
-  border-radius: 4px;
+  padding: 0 4px;
   flex-shrink: 0;
-  transition: opacity var(--transition), background var(--transition), color var(--transition);
+  transition: opacity var(--transition), color var(--transition);
 }
 
 .feat-panel-row:hover .feat-task-unlink { opacity: 1; }
-.feat-task-unlink:hover { background: #fee2e2; color: var(--color-danger); }
-
-.feat-panel-add {
-  margin-bottom: 6px;
-}
-
-.feat-panel-input {
-  width: 100%;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  color: var(--color-text);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  outline: none;
-  transition: border-color var(--transition);
-  box-sizing: border-box;
-}
-
-.feat-panel-input:focus { border-color: var(--color-primary); }
-.feat-panel-input::placeholder { color: var(--color-text-3); }
+.feat-task-unlink:hover { color: var(--color-danger); }
 
 .feat-panel-select {
   width: 100%;
   padding: 5px 8px;
-  font-size: 0.78rem;
-  color: var(--color-text-2);
-  background: var(--color-bg);
+  font-size: 0.76rem;
+  color: var(--color-text-3);
+  background: transparent;
   border: 1px dashed var(--color-border);
-  border-radius: 6px;
+  border-radius: 4px;
   outline: none;
   cursor: pointer;
   transition: border-color var(--transition);
 }
 
-.feat-panel-select:focus { border-color: var(--color-primary); }
+.feat-panel-select:hover,
+.feat-panel-select:focus { border-color: var(--color-primary); color: var(--color-primary); }
 
+/* ─ 펼친 카드 ─ */
 .feature-card.expanded {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(108,99,255,0.1), var(--shadow-md);
 }
 
 /* ===== 카드 추가 버튼 ===== */
