@@ -35,6 +35,57 @@
 .cat-filter-btn.active-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text); }
 .cat-filter-btn.active-전체  { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
 
+/* ─ 검색 & 완료 토글 ─ */
+.bl-search-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bl-search-input {
+  width: 200px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), width var(--transition);
+}
+
+.bl-search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.08);
+  width: 240px;
+}
+
+.bl-search-input::placeholder {
+  color: var(--color-text-3);
+}
+
+.bl-done-toggle {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.bl-done-toggle:hover { opacity: 0.8; }
+
+.bl-done-toggle.active {
+  background: var(--color-text-2);
+  color: var(--color-surface);
+  border-color: var(--color-text-2);
+}
+
 /* ===== 섹션 구분 ===== */
 .bl-section-header {
   display: flex;

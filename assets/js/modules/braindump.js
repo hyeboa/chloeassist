@@ -18,6 +18,21 @@ const Braindump = (() => {
     render();
   }
 
+  function convertToTask(id) {
+    const note = getNotes().find(n => n.id === id);
+    if (!note) return;
+    Store.push('tasks', {
+      title: note.text,
+      done: false,
+      category: '',
+      dueDate: null,
+      isToday: false,
+    });
+    Store.remove('notes', id);
+    Toast.show('할 일로 변환되었어요.', 'success');
+    render();
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, '&amp;')
@@ -47,7 +62,8 @@ const Braindump = (() => {
             <div class="dump-item">
               <span class="dump-text">${escapeHtml(n.text)}</span>
               <span class="dump-meta">${formatDate(n.createdAt)}</span>
-              <button class="dump-delete" onclick="Braindump.deleteNote('${n.id}')" title="삭제">✕</button>
+              <button class="dump-action dump-convert" onclick="Braindump.convertToTask('${n.id}')" title="할 일로 변환">→ 할 일</button>
+              <button class="dump-action dump-delete" onclick="Braindump.deleteNote('${n.id}')" title="삭제">✕</button>
             </div>
           `).join('')
         }
@@ -72,7 +88,7 @@ const Braindump = (() => {
     return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
   }
 
-  return { render, deleteNote };
+  return { render, deleteNote, convertToTask };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Braindump.render());

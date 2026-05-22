@@ -8,6 +8,8 @@ const Schedule = (() => {
   let activeFilter  = '전체';
   let selectedCat   = '기획';
   let editingDateId = null;
+  let searchQuery   = '';
+  let hideDone      = false;
 
   function getTasks() { return Store.get('tasks') || []; }
 
@@ -96,10 +98,16 @@ const Schedule = (() => {
       </div>`;
   }
 
-  /* ─ 렌더 ─ */
-  function render() {
-    const all   = getTasks();
-    const list  = (activeFilter === '전체' ? all : all.filter(t => t.category === activeFilter))
+  /* ─ 필터링된 리스트 ─ */
+  function filteredTasks() {
+    const q = searchQuery.trim().toLowerCase();
+    return getTasks()
+      .filter(t => {
+        if (activeFilter !== '전체' && t.category !== activeFilter) return false;
+        if (hideDone && t.done) return false;
+        if (q && !t.title.toLowerCase().includes(q)) return false;
+        return true;
+      })
       .sort((a, b) => {
         if (a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
         const aD = a.dueDate ? new Date(a.dueDate) : null;
@@ -109,23 +117,39 @@ const Schedule = (() => {
         if (bD) return 1;
         return b.createdAt - a.createdAt;
       });
+  }
 
+  function buildListHTML() {
+    const list   = filteredTasks();
     const groups = groupTasks(list);
 
-    let listHTML = '';
     if (list.length === 0) {
-      listHTML = '<div class="empty-state"><div class="empty-state-text">할 일이 없어요</div></div>';
-    } else {
-      let first = true;
-      GROUP_ORDER.forEach(name => {
-        const g = groups[name];
-        if (!g.length) return;
-        if (!first) listHTML += '<div style="height:18px"></div>';
-        first = false;
-        listHTML += groupHeader(name, g) + g.map(taskRow).join('');
-      });
+      const msg = searchQuery
+        ? `"${escapeHtml(searchQuery)}"에 일치하는 할 일이 없어요`
+        : '할 일이 없어요';
+      return `<div class="empty-state"><div class="empty-state-text">${msg}</div></div>`;
     }
 
+    let html  = '';
+    let first = true;
+    GROUP_ORDER.forEach(name => {
+      const g = groups[name];
+      if (!g.length) return;
+      if (!first) html += '<div style="height:18px"></div>';
+      first = false;
+      html += groupHeader(name, g) + g.map(taskRow).join('');
+    });
+    return html;
+  }
+
+  function renderList() {
+    const el = document.getElementById('bl-list');
+    if (el) el.innerHTML = buildListHTML();
+    bindDateEdit();
+  }
+
+  /* ─ 렌더 ─ */
+  function render() {
     document.getElementById('app').innerHTML = `
       <div class="backlog-toolbar">
         <div class="cat-filter-group">
@@ -133,6 +157,14 @@ const Schedule = (() => {
             <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
               onclick="Schedule.setFilter('${c}')">${c}</button>
           `).join('')}
+        </div>
+        <div class="bl-search-group">
+          <input id="bl-search" class="bl-search-input" type="text"
+            placeholder="🔍 할 일 검색..." value="${escapeHtml(searchQuery)}">
+          <button class="bl-done-toggle ${hideDone ? 'active' : ''}"
+            onclick="Schedule.toggleHideDone()">
+            ${hideDone ? '완료 보기' : '완료 숨기기'}
+          </button>
         </div>
       </div>
 
@@ -151,11 +183,22 @@ const Schedule = (() => {
         <div class="inline-nl-status" id="bl-status"></div>
       </div>
 
-      <div id="bl-list">${listHTML}</div>
+      <div id="bl-list">${buildListHTML()}</div>
     `;
 
     bindInput();
+    bindSearch();
     bindDateEdit();
+  }
+
+  /* ─ 검색바 바인딩 ─ */
+  function bindSearch() {
+    const input = document.getElementById('bl-search');
+    if (!input) return;
+    input.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderList();
+    });
   }
 
   /* ─ 새 할 일 입력 (NL 파싱) ─ */
@@ -284,7 +327,12 @@ const Schedule = (() => {
     render();
   }
 
-  return { render, setFilter, toggleDone, moveToToday, deleteTask, selectCat, startDateEdit };
+  function toggleHideDone() {
+    hideDone = !hideDone;
+    render();
+  }
+
+  return { render, setFilter, toggleDone, moveToToday, deleteTask, selectCat, startDateEdit, toggleHideDone };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Schedule.render());
