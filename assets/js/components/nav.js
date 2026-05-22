@@ -12,6 +12,7 @@ const Nav = (() => {
     { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
     { href: 'braindump.html',label: '브레인 덤프', icon: '✦' },
     { href: 'projects.html', label: '기능 보드',   icon: '◉' },
+    { href: 'sitemap.html',  label: '사이트맵',    icon: '◧' },
   ];
 
   function currentPage() {

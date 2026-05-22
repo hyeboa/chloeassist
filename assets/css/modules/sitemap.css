@@ -1,0 +1,344 @@
+/* ===== 사이트맵 ===== */
+
+/* ─ 범례 ─ */
+.sitemap-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-hint {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+}
+
+/* ─ 보드 전체 ─ */
+.sitemap-board {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.sitemap-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.sitemap-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 14px;
+}
+
+.sitemap-empty-text {
+  font-size: 0.88rem;
+  color: var(--color-text-3);
+  line-height: 1.8;
+}
+
+/* ─ 섹션 ─ */
+.sitemap-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sitemap-section-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  gap: 10px;
+}
+
+.section-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.section-icon {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.section-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  outline: none;
+  border-radius: 4px;
+  padding: 1px 4px;
+  min-width: 60px;
+  cursor: text;
+}
+
+.section-name:focus {
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px rgba(108,99,255,0.2);
+}
+
+.section-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.section-count {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  font-weight: 500;
+}
+
+.section-del {
+  opacity: 0;
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+
+.sitemap-section:hover .section-del { opacity: 1; }
+.section-del:hover { background: #fee2e2; color: var(--color-danger); }
+
+/* ─ 화면 행 ─ */
+.sitemap-screens {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 20px 20px;
+  overflow-x: auto;
+  min-height: 180px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.sitemap-screens::-webkit-scrollbar { height: 4px; }
+.sitemap-screens::-webkit-scrollbar-track { background: transparent; }
+.sitemap-screens::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+/* ─ 화살표 ─ */
+.screen-arrow {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 0 6px;
+}
+
+.arrow-line {
+  width: 20px;
+  height: 1.5px;
+  background: var(--color-border);
+}
+
+.arrow-head {
+  font-size: 0.6rem;
+  color: var(--color-border);
+  line-height: 1;
+}
+
+/* ─ 화면 카드 ─ */
+.screen-card {
+  width: 88px;
+  height: 152px;
+  border-radius: 12px;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px 8px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  gap: 4px;
+}
+
+.screen-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* 상태별 카드 색상 */
+.screen-card.st-none   { border-color: var(--color-border); }
+.screen-card.st-plan   { border-color: #a78bfa; background: #faf5ff; }
+.screen-card.st-design { border-color: #f472b6; background: #fdf2f8; }
+.screen-card.st-dev    { border-color: #60a5fa; background: #eff6ff; }
+.screen-card.st-done   { border-color: #34d399; background: #f0fdf4; }
+
+/* ─ 폰 노치 ─ */
+.screen-notch {
+  width: 26px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-bottom: 6px;
+}
+
+.screen-card.st-plan   .screen-notch { background: #c4b5fd; }
+.screen-card.st-design .screen-notch { background: #f9a8d4; }
+.screen-card.st-dev    .screen-notch { background: #93c5fd; }
+.screen-card.st-done   .screen-notch { background: #6ee7b7; }
+
+/* ─ 화면 이름 ─ */
+.screen-name {
+  flex: 1;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+  line-height: 1.4;
+  word-break: keep-all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 2px;
+  outline: none;
+  border-radius: 3px;
+  cursor: text;
+  user-select: none;
+}
+
+.screen-name:focus {
+  box-shadow: 0 0 0 2px rgba(108,99,255,0.25);
+  user-select: text;
+}
+
+/* ─ 상태 버튼 ─ */
+.screen-status-btn {
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.02em;
+  transition: opacity var(--transition);
+  flex-shrink: 0;
+}
+
+.screen-card.st-none   .screen-status-btn { background: var(--color-surface-2); color: var(--color-text-3); }
+.screen-card.st-plan   .screen-status-btn { background: #ede9fe; color: #6d28d9; }
+.screen-card.st-design .screen-status-btn { background: #fce7f3; color: #be185d; }
+.screen-card.st-dev    .screen-status-btn { background: #dbeafe; color: #1d4ed8; }
+.screen-card.st-done   .screen-status-btn { background: #d1fae5; color: #065f46; }
+
+.screen-status-btn:hover { opacity: 0.75; }
+
+/* ─ 삭제 버튼 ─ */
+.screen-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  font-size: 0.6rem;
+  color: var(--color-text-3);
+  border-radius: 50%;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+
+.screen-card:hover .screen-del { opacity: 1; }
+.screen-del:hover { background: #fee2e2; color: var(--color-danger); }
+
+/* ─ 화면 추가 카드 ─ */
+.screen-add-card {
+  width: 88px;
+  height: 152px;
+  border-radius: 12px;
+  border: 2px dashed var(--color-border);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--transition), background var(--transition);
+  margin-left: 32px;
+}
+
+.screen-add-card:hover {
+  border-color: var(--color-primary);
+  background: rgba(108,99,255,0.04);
+}
+
+.screen-add-plus {
+  font-size: 1.2rem;
+  color: var(--color-text-3);
+  line-height: 1;
+  transition: color var(--transition);
+}
+
+.screen-add-label {
+  font-size: 0.68rem;
+  color: var(--color-text-3);
+  transition: color var(--transition);
+}
+
+.screen-add-card:hover .screen-add-plus,
+.screen-add-card:hover .screen-add-label { color: var(--color-primary); }
+
+/* ─ 섹션 추가 버튼 ─ */
+.sitemap-add-section {
+  width: 100%;
+  padding: 12px 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sitemap-add-section:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(108,99,255,0.04);
+}
+
+/* ─ 범례 도트 색상 ─ */
+.legend-dot.st-none   { background: var(--color-border); }
+.legend-dot.st-plan   { background: #a78bfa; }
+.legend-dot.st-design { background: #f472b6; }
+.legend-dot.st-dev    { background: #60a5fa; }
+.legend-dot.st-done   { background: #34d399; }
