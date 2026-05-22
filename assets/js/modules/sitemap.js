@@ -347,7 +347,8 @@ const Sitemap = (() => {
     const el = document.querySelector(`.screen-name[data-id="${id}"]`);
     if (!el) return;
     const original = el.textContent;
-    el.contentEditable = 'true'; el.focus();
+    el.contentEditable = 'true';
+    el.focus({ preventScroll: true });
     const r = document.createRange(); r.selectNodeContents(el);
     const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
     const save = () => {
@@ -356,6 +357,8 @@ const Sitemap = (() => {
       el.textContent = name;
       Store.update('sitemapScreens', id, { name });
       el.removeEventListener('blur', save); el.removeEventListener('keydown', onKey);
+      /* 부모 카드 이름이 바뀌면 하위 행 레이블도 같이 갱신되도록 재렌더 */
+      if (name !== original) render();
     };
     const onKey = (e) => {
       if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); el.blur(); }
@@ -368,7 +371,8 @@ const Sitemap = (() => {
     const el = document.querySelector(`.comp-name[data-comp-id="${id}"]`);
     if (!el) return;
     const original = el.textContent;
-    el.contentEditable = 'true'; el.focus();
+    el.contentEditable = 'true';
+    el.focus({ preventScroll: true });
     const r = document.createRange(); r.selectNodeContents(el);
     const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
     const save = () => {
@@ -417,22 +421,29 @@ const Sitemap = (() => {
   }
 
   function addScreen(sectionId, parentId = null) {
-    Store.push('sitemapScreens', {
+    /* 스크롤 위치 보존 → render 직후 복구 → 새 카드만 최소 스크롤로 가시화 */
+    const scrollY = window.scrollY;
+    const pushed = Store.push('sitemapScreens', {
       sectionId,
       parentId: parentId || null,
       name: '새 화면', status: '미정', note: '',
     });
+    const newId = pushed[pushed.length - 1].id;
     render();
+    window.scrollTo({ top: scrollY, behavior: 'instant' });
     setTimeout(() => {
-      const allCards = document.querySelectorAll('.screen-name');
-      const last = allCards[allCards.length - 1];
-      if (last) focusName(last.dataset.id);
+      const card = document.querySelector(`.screen-card[data-screen-id="${newId}"]`);
+      if (card) card.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      const nameEl = card?.querySelector('.screen-name');
+      if (nameEl) focusName(nameEl.dataset.id);
     }, 50);
   }
 
   function addComponent(screenId) {
+    const scrollY = window.scrollY;
     Store.push('sitemapComponents', { screenId, name: '새 항목' });
     render();
+    window.scrollTo({ top: scrollY, behavior: 'instant' });
     const card = document.querySelector(`[data-screen-id="${screenId}"]`);
     if (!card) return;
     const comps = card.querySelectorAll('.comp-name');
