@@ -519,3 +519,102 @@
   background: var(--color-border);
   pointer-events: none;
 }
+
+
+/* ═════ 세로 트리 구조도 (vtree) ═════ */
+
+.vtree-root {
+  padding: 4px 24px 24px;
+  min-width: max-content;
+}
+
+.vtree-root-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(108,99,255,0.25);
+}
+
+.vtree-root-meta {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.78;
+  margin-left: 4px;
+}
+
+.vtree-top {
+  margin-top: 2px;
+}
+
+.vtree-children {
+  position: relative;
+  padding-left: 22px;
+}
+
+.vtree-node {
+  position: relative;
+  padding: 3px 0;
+}
+
+/* L자 커넥터: 위쪽 세로 + 가로 스텁 */
+.vtree-node::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 0;
+  width: 14px;
+  height: 18px;
+  border-left: 1.5px solid var(--vline, var(--color-border));
+  border-bottom: 1.5px solid var(--vline, var(--color-border));
+  border-bottom-left-radius: 4px;
+  pointer-events: none;
+}
+
+/* 마지막 자식이 아니면 → 아래로 세로선 연장 */
+.vtree-node:not(.is-last)::after {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 18px;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--vline, var(--color-border));
+  pointer-events: none;
+}
+
+.vtree-row {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+}
+
+/* 섹션 노드 (depth 1) */
+.vtree-section-node {
+  padding: 6px 0;
+}
+
+.vtree-section-hd {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid;
+  border-radius: 9px;
+  padding: 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.vtree-section-count {
+  font-size: 0.68rem;
+  font-weight: 500;
+  background: rgba(255,255,255,0.7);
+  border-radius: 20px;
+  padding: 1px 7px;
+}

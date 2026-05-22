@@ -7,24 +7,24 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v7 */
+  /* v4 → v8 */
   if (version === 'v4') {
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v7');
+    localStorage.setItem('chloeassist:seeded', 'v8');
     return;
   }
 
-  /* v5 / v6 → v7: 사이트맵 데이터 교체 */
-  if (version === 'v5' || version === 'v6') {
+  /* v5 / v6 / v7 → v8: 사이트맵 데이터 교체 (섹션 순서 재정렬 포함) */
+  if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
     localStorage.removeItem('chloeassist:sitemapComponents');
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v7');
+    localStorage.setItem('chloeassist:seeded', 'v8');
     return;
   }
 
-  if (version === 'v7') return;
+  if (version === 'v8') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -96,10 +96,10 @@
   localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
 
   injectSitemapData();
-  localStorage.setItem('chloeassist:seeded', 'v7');
+  localStorage.setItem('chloeassist:seeded', 'v8');
 
   /* ══════════════════════════════════════════════
-     사이트맵 샘플 데이터 — 댕찾아 (v7)
+     사이트맵 샘플 데이터 — 댕찾아 (v8)
      잃어버린 강아지 찾기 앱 화면 구조
   ══════════════════════════════════════════════ */
   function injectSitemapData() {
@@ -161,11 +161,12 @@
     /* ─ 종료/공유 — depth 2 ─ */
     const scrShareSheet= crypto.randomUUID(); // 공유
 
+    /* 섹션 순서: 중요도 기준 — 메인 앱이 최상단, 부수 화면(스플래시/온보딩)은 하단 */
     const sections = [
-      { id: secEntry,  name: '진입 화면',        createdAt: a(86400000 * 4) },
-      { id: secAuth,   name: '인증 화면',         createdAt: a(86400000 * 3) },
-      { id: secMain,   name: '메인 앱',           createdAt: a(86400000 * 2) },
-      { id: secShare,  name: '종료 / 공유 흐름',  createdAt: a(86400000 * 1) },
+      { id: secMain,   name: '메인 앱',           createdAt: a(86400000 * 4) },
+      { id: secShare,  name: '종료 / 공유 흐름',  createdAt: a(86400000 * 3) },
+      { id: secAuth,   name: '인증 화면',         createdAt: a(86400000 * 2) },
+      { id: secEntry,  name: '진입 화면',         createdAt: a(86400000 * 1) },
     ];
 
     const screens = [

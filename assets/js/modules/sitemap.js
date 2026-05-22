@@ -160,27 +160,27 @@ const Sitemap = (() => {
   }
 
   /* ════════════════════════════════
-     구조도 뷰 — 재귀 트리
+     구조도 뷰 — 세로 트리
   ════════════════════════════════ */
 
-  /* 화면 노드 하나 + 그 자식들을 재귀 렌더 */
-  function renderDiagNode(screen, allScreens, index) {
+  /* 화면 노드 하나 + 그 자식들을 세로로 재귀 렌더 */
+  function renderVNode(screen, allScreens, isLast) {
     const cls      = STATUS_CLS[screen.status || '미정'];
     const children = allScreens
       .filter(s => s.parentId === screen.id)
       .sort((a, b) => a.createdAt - b.createdAt);
 
     return `
-      <div class="diag-tree-col">
-        <div class="diag-scr-node ${cls}">
-          <span class="diag-scr-num">${index + 1}</span>
-          <span class="diag-scr-name">${escapeHtml(screen.name)}</span>
-          <span class="diag-scr-status">${screen.status || '미정'}</span>
+      <div class="vtree-node ${isLast ? 'is-last' : ''}">
+        <div class="vtree-row">
+          <span class="diag-scr-node ${cls}">
+            <span class="diag-scr-name">${escapeHtml(screen.name)}</span>
+            <span class="diag-scr-status">${screen.status || '미정'}</span>
+          </span>
         </div>
         ${children.length ? `
-          <div class="diag-v-connector"></div>
-          <div class="diag-tree-row">
-            ${children.map((c, i) => renderDiagNode(c, allScreens, i)).join('')}
+          <div class="vtree-children">
+            ${children.map((c, i) => renderVNode(c, allScreens, i === children.length - 1)).join('')}
           </div>` : ''}
       </div>`;
   }
@@ -196,33 +196,34 @@ const Sitemap = (() => {
       const level2 = screens
         .filter(s => s.sectionId === section.id && !s.parentId)
         .sort((a, b) => a.createdAt - b.createdAt);
-      if (!level2.length) return '';
 
       const col = BRANCH_COLORS[si % BRANCH_COLORS.length];
+      const isLast = si === sections.length - 1;
+
       return `
-        <div class="diag-tree-col">
-          <div class="diag-sec-node"
-            style="border-color:${col.border};background:${col.bg};color:${col.text}">
-            ${escapeHtml(section.name)}
-            <span class="diag-sec-count" style="opacity:0.55">${level2.length}</span>
+        <div class="vtree-node vtree-section-node ${isLast ? 'is-last' : ''}" style="--vline:${col.line}">
+          <div class="vtree-row">
+            <div class="vtree-section-hd"
+              style="border-color:${col.border};background:${col.bg};color:${col.text}">
+              ${escapeHtml(section.name)}
+              <span class="vtree-section-count">${level2.length}</span>
+            </div>
           </div>
-          <div class="diag-v-connector" style="background:${col.line}"></div>
-          <div class="diag-tree-row">
-            ${level2.map((s, i) => renderDiagNode(s, screens, i)).join('')}
-          </div>
+          ${level2.length ? `
+            <div class="vtree-children">
+              ${level2.map((s, i) => renderVNode(s, screens, i === level2.length - 1)).join('')}
+            </div>` : ''}
         </div>`;
     }).join('');
 
     return `
-      <div class="diag-tree">
-        <div class="diag-root-row">
-          <div class="diag-root-node">
-            &#9679; 헬로아지
-            <span class="diag-root-meta">${screens.length}개 화면</span>
-          </div>
+      <div class="vtree-root">
+        <div class="vtree-root-node">
+          <span style="font-size:0.7rem;opacity:0.85">&#9679;</span>
+          전체 구조
+          <span class="vtree-root-meta">${screens.length}개 화면</span>
         </div>
-        <div class="diag-v-connector diag-root-trunk"></div>
-        <div class="diag-tree-row">
+        <div class="vtree-children vtree-top">
           ${sectionsHTML}
         </div>
       </div>`;
