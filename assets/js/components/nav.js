@@ -70,6 +70,14 @@ const Nav = (() => {
         </label>
         <input id="api-key-input" type="password" placeholder="sk-ant-..." value="${currentKey}"
           style="width:100%;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.85rem;outline:none;margin-bottom:16px">
+        <div style="border-top:1px solid var(--color-border);margin:4px 0 16px;padding-top:16px">
+          <div style="font-size:0.78rem;font-weight:600;color:var(--color-text-2);margin-bottom:10px">데이터 백업</div>
+          <div style="display:flex;gap:8px">
+            <button id="btn-export" class="btn btn-ghost" style="flex:1;font-size:0.8rem">↓ 내보내기</button>
+            <button id="btn-import" class="btn btn-ghost" style="flex:1;font-size:0.8rem">↑ 불러오기</button>
+            <input id="import-file" type="file" accept=".json" style="display:none">
+          </div>
+        </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
           <button id="settings-cancel" class="btn btn-ghost">취소</button>
           <button id="settings-save" class="btn btn-primary">저장</button>
@@ -83,10 +91,61 @@ const Nav = (() => {
       if (val) { AI.setApiKey(val); Toast.show('API 키가 저장되었습니다.', 'success'); }
       modal.remove();
     });
+
+    modal.querySelector('#btn-export').addEventListener('click', () => exportData());
+    modal.querySelector('#btn-import').addEventListener('click', () => {
+      modal.querySelector('#import-file').click();
+    });
+    modal.querySelector('#import-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      importData(file, modal);
+    });
+
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 
     document.body.appendChild(modal);
     modal.querySelector('#api-key-input').focus();
+  }
+
+  function exportData() {
+    const PREFIX = 'chloeassist:';
+    const backup = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(PREFIX)) {
+        try { backup[key] = JSON.parse(localStorage.getItem(key)); }
+        catch { backup[key] = localStorage.getItem(key); }
+      }
+    }
+    const date = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `chloeassist-backup-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    Toast.show('백업 파일이 다운로드되었습니다.', 'success');
+  }
+
+  function importData(file, modal) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const backup = JSON.parse(e.target.result);
+        if (typeof backup !== 'object' || backup === null) throw new Error();
+        Object.entries(backup).forEach(([key, val]) => {
+          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+        });
+        Toast.show('데이터가 복원되었습니다. 페이지를 새로고침합니다.', 'success');
+        modal.remove();
+        setTimeout(() => location.reload(), 1200);
+      } catch {
+        Toast.show('올바른 백업 파일이 아닙니다.', 'error');
+      }
+    };
+    reader.readAsText(file);
   }
 
   return { render };
