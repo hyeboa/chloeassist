@@ -12,6 +12,8 @@ const Sitemap = (() => {
     '완료':    'st-done',
   };
 
+  let viewMode = 'board'; // 'board' | 'diagram'
+
   function getSections() {
     return (Store.get('sitemapSections') || []).sort((a, b) => a.createdAt - b.createdAt);
   }
@@ -26,7 +28,19 @@ const Sitemap = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  /* ─ 와이어프레임 플레이스홀더 ─ */
+  /* ─ 뷰 탭 ─ */
+  function renderViewTabs() {
+    return `
+      <div class="sitemap-view-tabs">
+        <button class="sitemap-view-tab ${viewMode === 'board' ? 'active' : ''}"
+          onclick="Sitemap.setView('board')">&#9776; 보드</button>
+        <button class="sitemap-view-tab ${viewMode === 'diagram' ? 'active' : ''}"
+          onclick="Sitemap.setView('diagram')">&#9633; 구조도</button>
+      </div>
+    `;
+  }
+
+  /* ─ 와이어프레임 플레이스홀더 (보드 뷰) ─ */
   function renderWireframe() {
     return `
       <div class="screen-wf">
@@ -38,7 +52,7 @@ const Sitemap = (() => {
     `;
   }
 
-  /* ─ 화면 카드 ─ */
+  /* ─ 보드 뷰: 화면 카드 ─ */
   function renderCard(screen, index, allComponents) {
     const cls   = STATUS_CLS[screen.status || '미정'];
     const comps = allComponents.filter(c => c.screenId === screen.id);
@@ -49,7 +63,7 @@ const Sitemap = (() => {
           <span class="screen-num">${index + 1}</span>
           <button class="screen-status-btn"
             onclick="Sitemap.cycleStatus('${screen.id}')">${screen.status || '미정'}</button>
-          <button class="screen-del" onclick="Sitemap.deleteScreen('${screen.id}')">✕</button>
+          <button class="screen-del" onclick="Sitemap.deleteScreen('${screen.id}')">&#10005;</button>
         </div>
         <div class="screen-name-area">
           <span class="screen-name" data-id="${screen.id}"
@@ -59,10 +73,10 @@ const Sitemap = (() => {
         <div class="screen-components">
           ${comps.map(c => `
             <div class="comp-item">
-              <span class="comp-dash">—</span>
+              <span class="comp-dash">&#8212;</span>
               <span class="comp-name" data-comp-id="${c.id}"
                 ondblclick="Sitemap.focusComponent('${c.id}')">${escapeHtml(c.name)}</span>
-              <button class="comp-del" onclick="Sitemap.deleteComponent('${c.id}')">✕</button>
+              <button class="comp-del" onclick="Sitemap.deleteComponent('${c.id}')">&#10005;</button>
             </div>
           `).join('')}
           <button class="comp-add-btn" onclick="Sitemap.addComponent('${screen.id}')">+ 항목 추가</button>
@@ -71,7 +85,7 @@ const Sitemap = (() => {
     `;
   }
 
-  /* ─ 섹션 ─ */
+  /* ─ 보드 뷰: 섹션 ─ */
   function renderSection(section, screens, allComponents) {
     const sectionScreens = screens.filter(s => s.sectionId === section.id);
     const total = sectionScreens.length;
@@ -81,7 +95,7 @@ const Sitemap = (() => {
       <div class="sitemap-section" data-section-id="${section.id}">
         <div class="sitemap-section-hd">
           <div class="section-name-wrap">
-            <span class="section-icon">◧</span>
+            <span class="section-icon">&#9703;</span>
             <span class="section-name" data-id="${section.id}"
               contenteditable="true"
               onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
@@ -89,10 +103,9 @@ const Sitemap = (() => {
           </div>
           <div class="section-meta">
             ${total ? `<span class="section-count">${done}/${total} 완료</span>` : ''}
-            <button class="section-del" onclick="Sitemap.deleteSection('${section.id}')">✕</button>
+            <button class="section-del" onclick="Sitemap.deleteSection('${section.id}')">&#10005;</button>
           </div>
         </div>
-
         <div class="sitemap-screens">
           ${sectionScreens.map((s, i) => `
             ${i > 0 ? '<div class="screen-arrow"><div class="arrow-line"></div><div class="arrow-head">&#9658;</div></div>' : ''}
@@ -107,8 +120,67 @@ const Sitemap = (() => {
     `;
   }
 
+  /* ─ 구조도 뷰: 카드 ─ */
+  function renderDiagCard(screen, index, allComponents) {
+    const cls   = STATUS_CLS[screen.status || '미정'];
+    const comps = allComponents.filter(c => c.screenId === screen.id);
+
+    return `
+      <div class="diag-card ${cls}">
+        <div class="diag-card-hd">
+          <span class="diag-num">${index + 1}</span>
+          <span class="diag-name">${escapeHtml(screen.name)}</span>
+          <span class="diag-status-badge">${screen.status || '미정'}</span>
+        </div>
+        <div class="diag-wf">
+          <div class="diag-wf-rect"></div>
+          <div class="diag-wf-line lg"></div>
+          <div class="diag-wf-line sm"></div>
+        </div>
+        ${comps.length > 0
+          ? `<div class="diag-comp-list">
+               ${comps.map(c => `<div class="diag-comp-item">${escapeHtml(c.name)}</div>`).join('')}
+             </div>`
+          : `<div class="diag-no-comps">항목 없음</div>`
+        }
+      </div>
+    `;
+  }
+
+  /* ─ 구조도 뷰: 전체 ─ */
+  function renderDiagramView(sections, screens, components) {
+    if (sections.length === 0) {
+      return `<div class="sitemap-empty">
+        <div class="sitemap-empty-icon">&#128241;</div>
+        <div class="sitemap-empty-text">보드 뷰에서 화면을 추가하면 여기에 구조도가 표시돼요.</div>
+      </div>`;
+    }
+
+    return sections.map(section => {
+      const sectionScreens = screens.filter(s => s.sectionId === section.id);
+      if (sectionScreens.length === 0) return '';
+
+      return `
+        <div class="diag-section">
+          <div class="diag-section-label">
+            <span class="diag-section-icon">&#9703;</span>
+            ${escapeHtml(section.name)}
+            <span class="diag-section-count">${sectionScreens.length}개 화면</span>
+          </div>
+          <div class="diag-flow">
+            ${sectionScreens.map((s, i) => `
+              ${i > 0 ? '<div class="diag-arrow"><div class="arrow-line"></div><div class="arrow-head">&#9658;</div></div>' : ''}
+              ${renderDiagCard(s, i, components)}
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   /* ─ 범례 ─ */
   function renderLegend() {
+    if (viewMode === 'diagram') return '';
     return `
       <div class="sitemap-legend">
         ${STATUSES.map(s => `
@@ -116,7 +188,7 @@ const Sitemap = (() => {
             <span class="legend-dot ${STATUS_CLS[s]}"></span>${s}
           </span>
         `).join('')}
-        <span class="legend-hint">이름 더블클릭 → 편집 &nbsp;·&nbsp; 뱃지 클릭 → 상태 변경</span>
+        <span class="legend-hint">이름 더블클릭 &#8594; 편집 &nbsp;&#183;&nbsp; 뱃지 클릭 &#8594; 상태 변경</span>
       </div>
     `;
   }
@@ -127,26 +199,31 @@ const Sitemap = (() => {
     const screens    = getScreens();
     const components = getComponents();
 
-    document.getElementById('app').innerHTML = `
-      ${renderLegend()}
-
-      <div class="sitemap-board">
-        ${sections.length === 0
-          ? `<div class="sitemap-empty">
-               <div class="sitemap-empty-icon">📱</div>
-               <div class="sitemap-empty-text">섹션을 추가해서 화면 구조를 만들어보세요<br>
-               <span style="font-size:0.75rem;opacity:0.6">예: 온보딩, 메인 탭, 산책 플로우...</span></div>
-             </div>`
-          : sections.map(s => renderSection(s, screens, components)).join('')
-        }
-      </div>
-
-      <button class="sitemap-add-section" onclick="Sitemap.addSection()">
-        + 섹션 추가
-      </button>
-    `;
-
-    bindSectionNameBlur();
+    if (viewMode === 'board') {
+      document.getElementById('app').innerHTML = `
+        ${renderViewTabs()}
+        ${renderLegend()}
+        <div class="sitemap-board">
+          ${sections.length === 0
+            ? `<div class="sitemap-empty">
+                 <div class="sitemap-empty-icon">&#128241;</div>
+                 <div class="sitemap-empty-text">섹션을 추가해서 화면 구조를 만들어보세요<br>
+                 <span style="font-size:0.75rem;opacity:0.6">예: 온보딩, 메인 탭, 산책 플로우...</span></div>
+               </div>`
+            : sections.map(s => renderSection(s, screens, components)).join('')
+          }
+        </div>
+        <button class="sitemap-add-section" onclick="Sitemap.addSection()">+ 섹션 추가</button>
+      `;
+      bindSectionNameBlur();
+    } else {
+      document.getElementById('app').innerHTML = `
+        ${renderViewTabs()}
+        <div class="sitemap-diagram">
+          ${renderDiagramView(sections, screens, components)}
+        </div>
+      `;
+    }
   }
 
   /* ─ 섹션 이름 blur 저장 ─ */
@@ -223,6 +300,11 @@ const Sitemap = (() => {
   }
 
   /* ─ 공개 메서드 ─ */
+  function setView(mode) {
+    viewMode = mode;
+    render();
+  }
+
   function addSection() {
     Store.push('sitemapSections', { name: '새 플로우' });
     render();
@@ -292,7 +374,7 @@ const Sitemap = (() => {
   }
 
   return {
-    render, addSection, addScreen, addComponent, deleteComponent,
+    render, setView, addSection, addScreen, addComponent, deleteComponent,
     cycleStatus, deleteScreen, deleteSection, focusName, focusComponent,
   };
 })();

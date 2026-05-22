@@ -1,5 +1,32 @@
 /* ===== 사이트맵 ===== */
 
+/* ─ 뷰 전환 탭 ─ */
+.sitemap-view-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.sitemap-view-tab {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sitemap-view-tab:hover { opacity: 0.8; }
+
+.sitemap-view-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
 /* ─ 범례 ─ */
 .sitemap-legend {
   display: flex;
@@ -46,17 +73,8 @@
   text-align: center;
   padding: 60px 20px;
 }
-
-.sitemap-empty-icon {
-  font-size: 2.5rem;
-  margin-bottom: 14px;
-}
-
-.sitemap-empty-text {
-  font-size: 0.88rem;
-  color: var(--color-text-3);
-  line-height: 1.8;
-}
+.sitemap-empty-icon { font-size: 2.5rem; margin-bottom: 14px; }
+.sitemap-empty-text { font-size: 0.88rem; color: var(--color-text-3); line-height: 1.8; }
 
 /* ─ 섹션 ─ */
 .sitemap-section {
@@ -84,11 +102,7 @@
   min-width: 0;
 }
 
-.section-icon {
-  font-size: 0.85rem;
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
+.section-icon { font-size: 0.85rem; color: var(--color-primary); flex-shrink: 0; }
 
 .section-name {
   font-size: 0.88rem;
@@ -106,18 +120,8 @@
   box-shadow: 0 0 0 2px rgba(108,99,255,0.2);
 }
 
-.section-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.section-count {
-  font-size: 0.72rem;
-  color: var(--color-text-3);
-  font-weight: 500;
-}
+.section-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.section-count { font-size: 0.72rem; color: var(--color-text-3); font-weight: 500; }
 
 .section-del {
   opacity: 0;
@@ -127,7 +131,6 @@
   border-radius: 4px;
   transition: opacity var(--transition), background var(--transition), color var(--transition);
 }
-
 .sitemap-section:hover .section-del { opacity: 1; }
 .section-del:hover { background: #fee2e2; color: var(--color-danger); }
 
@@ -147,8 +150,9 @@
 .sitemap-screens::-webkit-scrollbar-track { background: transparent; }
 .sitemap-screens::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
 
-/* ─ 화살표 ─ */
-.screen-arrow {
+/* ─ 화살표 (보드 & 구조도 공용) ─ */
+.screen-arrow,
+.diag-arrow {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -157,19 +161,10 @@
   margin-top: 18px;
 }
 
-.arrow-line {
-  width: 24px;
-  height: 1.5px;
-  background: var(--color-border);
-}
+.arrow-line { width: 24px; height: 1.5px; background: var(--color-border); }
+.arrow-head { font-size: 0.55rem; color: var(--color-border); line-height: 1; }
 
-.arrow-head {
-  font-size: 0.55rem;
-  color: var(--color-border);
-  line-height: 1;
-}
-
-/* ─ 화면 카드 ─ */
+/* ─ 보드 뷰: 화면 카드 ─ */
 .screen-card {
   width: 160px;
   border-radius: 10px;
@@ -182,18 +177,14 @@
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.screen-card:hover {
-  box-shadow: var(--shadow-md);
-}
+.screen-card:hover { box-shadow: var(--shadow-md); }
 
-/* 상태별 테두리 색 */
 .screen-card.st-none   { border-color: var(--color-border); }
 .screen-card.st-plan   { border-color: #a78bfa; }
 .screen-card.st-design { border-color: #f472b6; }
 .screen-card.st-dev    { border-color: #60a5fa; }
 .screen-card.st-done   { border-color: #34d399; }
 
-/* ─ 카드 헤더 ─ */
 .screen-card-hd {
   display: flex;
   align-items: center;
@@ -202,7 +193,6 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-/* 번호 뱃지 */
 .screen-num {
   width: 20px;
   height: 20px;
@@ -222,7 +212,6 @@
 .screen-card.st-dev    .screen-num { background: #60a5fa; }
 .screen-card.st-done   .screen-num { background: #34d399; }
 
-/* 상태 버튼 */
 .screen-status-btn {
   flex: 1;
   font-size: 0.6rem;
@@ -239,10 +228,8 @@
 .screen-card.st-design .screen-status-btn { background: #fce7f3; color: #be185d; }
 .screen-card.st-dev    .screen-status-btn { background: #dbeafe; color: #1d4ed8; }
 .screen-card.st-done   .screen-status-btn { background: #d1fae5; color: #065f46; }
-
 .screen-status-btn:hover { opacity: 0.75; }
 
-/* 삭제 버튼 */
 .screen-del {
   width: 16px;
   height: 16px;
@@ -256,11 +243,9 @@
   flex-shrink: 0;
   transition: opacity var(--transition), background var(--transition), color var(--transition);
 }
-
 .screen-card:hover .screen-del { opacity: 1; }
 .screen-del:hover { background: #fee2e2; color: var(--color-danger); }
 
-/* ─ 화면 이름 영역 ─ */
 .screen-name-area {
   padding: 10px 12px 8px;
   border-bottom: 1px solid var(--color-border);
@@ -277,7 +262,6 @@
   word-break: keep-all;
   line-height: 1.4;
 }
-
 .screen-name:focus { box-shadow: 0 0 0 2px rgba(108,99,255,0.25); }
 
 /* ─ 와이어프레임 플레이스홀더 ─ */
@@ -289,34 +273,19 @@
   flex-direction: column;
   gap: 3px;
 }
-
-.wf-row {
-  height: 5px;
-  background: var(--color-border);
-  border-radius: 2px;
-}
+.wf-row { height: 5px; background: var(--color-border); border-radius: 2px; }
 .wf-row.lg { width: 80%; }
 .wf-row.md { width: 58%; }
 .wf-row.sm { width: 38%; }
-
-.wf-rect {
-  height: 24px;
-  background: var(--color-border);
-  border-radius: 3px;
-  opacity: 0.45;
-  margin-bottom: 2px;
-}
+.wf-rect { height: 24px; background: var(--color-border); border-radius: 3px; opacity: 0.45; margin-bottom: 2px; }
 
 .screen-card.st-plan   .screen-wf { background: #faf5ff; }
 .screen-card.st-design .screen-wf { background: #fdf2f8; }
 .screen-card.st-dev    .screen-wf { background: #eff6ff; }
 .screen-card.st-done   .screen-wf { background: #f0fdf4; }
 
-/* ─ 컴포넌트 목록 ─ */
-.screen-components {
-  flex: 1;
-  padding: 6px 0 8px;
-}
+/* ─ 컴포넌트 목록 (보드 뷰) ─ */
+.screen-components { flex: 1; padding: 6px 0 8px; }
 
 .comp-item {
   display: flex;
@@ -324,15 +293,9 @@
   padding: 3px 10px;
   gap: 5px;
 }
-
 .comp-item:hover { background: var(--color-surface-2); }
 
-.comp-dash {
-  color: var(--color-text-3);
-  font-size: 0.65rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
+.comp-dash { color: var(--color-text-3); font-size: 0.65rem; flex-shrink: 0; line-height: 1; }
 
 .comp-name {
   flex: 1;
@@ -345,7 +308,6 @@
   word-break: keep-all;
   line-height: 1.5;
 }
-
 .comp-name:focus { box-shadow: 0 0 0 2px rgba(108,99,255,0.2); }
 
 .comp-del {
@@ -357,7 +319,6 @@
   border-radius: 3px;
   transition: opacity var(--transition), background var(--transition), color var(--transition);
 }
-
 .comp-item:hover .comp-del { opacity: 1; }
 .comp-del:hover { background: #fee2e2; color: var(--color-danger); }
 
@@ -375,7 +336,6 @@
   background: transparent;
   transition: all var(--transition);
 }
-
 .comp-add-btn:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
@@ -399,25 +359,12 @@
   transition: border-color var(--transition), background var(--transition);
   margin-left: 16px;
 }
-
 .screen-add-card:hover {
   border-color: var(--color-primary);
   background: rgba(108,99,255,0.04);
 }
-
-.screen-add-plus {
-  font-size: 1.4rem;
-  color: var(--color-text-3);
-  line-height: 1;
-  transition: color var(--transition);
-}
-
-.screen-add-label {
-  font-size: 0.68rem;
-  color: var(--color-text-3);
-  transition: color var(--transition);
-}
-
+.screen-add-plus { font-size: 1.4rem; color: var(--color-text-3); line-height: 1; transition: color var(--transition); }
+.screen-add-label { font-size: 0.68rem; color: var(--color-text-3); transition: color var(--transition); }
 .screen-add-card:hover .screen-add-plus,
 .screen-add-card:hover .screen-add-label { color: var(--color-primary); }
 
@@ -434,16 +381,175 @@
   cursor: pointer;
   transition: all var(--transition);
 }
-
 .sitemap-add-section:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: rgba(108,99,255,0.04);
 }
 
-/* ─ 범례 도트 색상 ─ */
+/* ─ 범례 도트 ─ */
 .legend-dot.st-none   { background: var(--color-border); }
 .legend-dot.st-plan   { background: #a78bfa; }
 .legend-dot.st-design { background: #f472b6; }
 .legend-dot.st-dev    { background: #60a5fa; }
 .legend-dot.st-done   { background: #34d399; }
+
+
+/* ===== 구조도 뷰 ===== */
+
+.sitemap-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.diag-section {}
+
+.diag-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-2);
+  margin-bottom: 14px;
+  padding-left: 2px;
+}
+
+.diag-section-icon { color: var(--color-primary); }
+
+.diag-section-count {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--color-text-3);
+  margin-left: 4px;
+}
+
+.diag-flow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+.diag-flow::-webkit-scrollbar { height: 4px; }
+.diag-flow::-webkit-scrollbar-track { background: transparent; }
+.diag-flow::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+/* ─ 구조도 카드 ─ */
+.diag-card {
+  width: 180px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-border);
+  background: var(--color-surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.diag-card.st-plan   { border-top-color: #a78bfa; }
+.diag-card.st-design { border-top-color: #f472b6; }
+.diag-card.st-dev    { border-top-color: #60a5fa; }
+.diag-card.st-done   { border-top-color: #34d399; }
+
+/* 구조도 카드 헤더 */
+.diag-card-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.diag-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-text-3);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.diag-card.st-plan   .diag-num { background: #a78bfa; }
+.diag-card.st-design .diag-num { background: #f472b6; }
+.diag-card.st-dev    .diag-num { background: #60a5fa; }
+.diag-card.st-done   .diag-num { background: #34d399; }
+
+.diag-name {
+  flex: 1;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-text);
+  word-break: keep-all;
+  line-height: 1.3;
+}
+
+.diag-status-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: var(--color-text-3);
+}
+.diag-card.st-plan   .diag-status-badge { color: #6d28d9; }
+.diag-card.st-design .diag-status-badge { color: #be185d; }
+.diag-card.st-dev    .diag-status-badge { color: #1d4ed8; }
+.diag-card.st-done   .diag-status-badge { color: #065f46; }
+
+/* 구조도 미니 와이어프레임 */
+.diag-wf {
+  padding: 8px 12px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.diag-wf-rect { height: 18px; background: var(--color-border); border-radius: 3px; opacity: 0.4; margin-bottom: 2px; }
+.diag-wf-line { height: 4px; background: var(--color-border); border-radius: 2px; }
+.diag-wf-line.lg { width: 80%; }
+.diag-wf-line.sm { width: 50%; }
+
+.diag-card.st-plan   .diag-wf { background: #faf5ff; }
+.diag-card.st-design .diag-wf { background: #fdf2f8; }
+.diag-card.st-dev    .diag-wf { background: #eff6ff; }
+.diag-card.st-done   .diag-wf { background: #f0fdf4; }
+
+/* ─ 구조도 컴포넌트 트리 목록 ─ */
+.diag-comp-list {
+  padding: 8px 0 10px 0;
+  margin-left: 14px;
+  border-left: 1.5px solid var(--color-border);
+}
+
+.diag-comp-item {
+  position: relative;
+  padding: 4px 12px 4px 16px;
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+  line-height: 1.4;
+}
+
+.diag-comp-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 12px;
+  height: 1.5px;
+  background: var(--color-border);
+}
+
+.diag-no-comps {
+  padding: 10px 14px;
+  font-size: 0.74rem;
+  color: var(--color-text-3);
+  font-style: italic;
+}
