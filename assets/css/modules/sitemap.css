@@ -93,6 +93,34 @@
   background: var(--color-surface-2);
 }
 
+/* ─ 드래그 핸들 ─ */
+.section-drag-handle {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--color-text-3);
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: grab;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color var(--transition);
+  user-select: none;
+}
+.section-drag-handle:hover { color: var(--color-primary); }
+.section-drag-handle:active { cursor: grabbing; }
+
+/* ─ 섹션 드래그 상태 ─ */
+.sitemap-section.is-dragging { opacity: 0.4; }
+.sitemap-section.drag-over {
+  outline: 2px dashed var(--color-primary);
+  outline-offset: -2px;
+}
+
 /* ─ 접기/펼치기 토글 ─ */
 .section-toggle {
   width: 22px;
@@ -121,8 +149,12 @@
 .section-name {
   font-size: 0.88rem; font-weight: 600; color: var(--color-text);
   outline: none; border-radius: 4px; padding: 1px 4px; min-width: 60px; cursor: text;
+  max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.section-name:focus { background: var(--color-surface); box-shadow: 0 0 0 2px rgba(108,99,255,0.2); }
+.section-name:focus {
+  background: var(--color-surface); box-shadow: 0 0 0 2px rgba(108,99,255,0.2);
+  white-space: normal; overflow: visible; text-overflow: clip; max-width: none;
+}
 
 .section-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .section-count { font-size: 0.72rem; color: var(--color-text-3); font-weight: 500; }
@@ -160,6 +192,11 @@
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .screen-card:hover { box-shadow: var(--shadow-md); }
+.screen-card.is-dragging { opacity: 0.4; }
+.screen-card.drag-over {
+  outline: 2px dashed var(--color-primary);
+  outline-offset: -2px;
+}
 
 .screen-card.st-none   { border-color: var(--color-border); }
 .screen-card.st-plan   { border-color: #a78bfa; }
@@ -741,6 +778,16 @@
   background: rgba(255,255,255,0.7);
   border-radius: 20px;
   padding: 1px 7px;
+  flex-shrink: 0;
+}
+
+.ht-sec-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
 }
 
 .ht-sec-node {

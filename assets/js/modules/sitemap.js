@@ -24,9 +24,12 @@ const Sitemap = (() => {
   const MAX_DEPTH = 4;
   let viewMode = 'board';
 
+  /* ─ drag state ─ */
+  let dragSectionId = null;
+  let dragScreenId  = null;
+
   function getSections() {
     let sections = Store.get('sitemapSections') || [];
-    /* 마이그레이션: order 필드가 없는 경우 createdAt 순서대로 1부터 부여 */
     if (sections.length && sections.every(s => s.order == null)) {
       sections.sort((a, b) => a.createdAt - b.createdAt);
       sections.forEach((s, i) => { s.order = i + 1; });
@@ -34,8 +37,15 @@ const Sitemap = (() => {
     }
     return sections.sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.createdAt - b.createdAt);
   }
-  function getScreens()    { return (Store.get('sitemapScreens')    || []).sort((a,b) => a.createdAt - b.createdAt); }
-  function getComponents() { return (Store.get('sitemapComponents') || []).sort((a,b) => a.createdAt - b.createdAt); }
+
+  function getScreens() {
+    return (Store.get('sitemapScreens') || [])
+      .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
+  }
+
+  function getComponents() {
+    return (Store.get('sitemapComponents') || []).sort((a, b) => a.createdAt - b.createdAt);
+  }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -75,7 +85,13 @@ const Sitemap = (() => {
     const cls   = STATUS_CLS[screen.status || '미정'];
     const comps = allComponents.filter(c => c.screenId === screen.id);
     return `
-      <div class="screen-card ${cls}" data-screen-id="${screen.id}">
+      <div class="screen-card ${cls}" data-screen-id="${screen.id}"
+        draggable="true"
+        ondragstart="Sitemap.screenDragStart(event,'${screen.id}')"
+        ondragover="Sitemap.screenDragOver(event)"
+        ondragleave="Sitemap.screenDragLeave(event)"
+        ondrop="Sitemap.screenDrop(event,'${screen.id}')"
+        ondragend="Sitemap.screenDragEnd(event)">
         <div class="screen-card-hd">
           <span class="screen-num">${index + 1}</span>
           <button class="screen-status-btn" onclick="Sitemap.cycleStatus('${screen.id}')">${screen.status || '미정'}</button>
@@ -109,7 +125,7 @@ const Sitemap = (() => {
     if (depth > MAX_DEPTH) return [];
     const screens = allSectionScreens
       .filter(s => (s.parentId || null) === parentId)
-      .sort((a, b) => a.createdAt - b.createdAt);
+      .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
 
     const rows = [{ screens, parentId, depth }];
     screens.forEach(s => {
@@ -153,9 +169,16 @@ const Sitemap = (() => {
     }).join('');
 
     return `
-      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''}" data-section-id="${section.id}">
+      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''}" data-section-id="${section.id}"
+        draggable="true"
+        ondragstart="Sitemap.sectionDragStart(event,'${section.id}')"
+        ondragover="Sitemap.sectionDragOver(event)"
+        ondragleave="Sitemap.sectionDragLeave(event)"
+        ondrop="Sitemap.sectionDrop(event,'${section.id}')"
+        ondragend="Sitemap.sectionDragEnd(event)">
         <div class="sitemap-section-hd">
           <div class="section-name-wrap">
+            <button class="section-drag-handle" title="드래그로 순서 변경">&#8942;</button>
             <input type="number" class="section-order" min="1" value="${order}"
               onchange="Sitemap.setOrder('${section.id}', this.value)"
               onclick="event.stopPropagation()"
@@ -165,6 +188,7 @@ const Sitemap = (() => {
             <span class="section-icon">&#9703;</span>
             <span class="section-name" data-id="${section.id}"
               contenteditable="true"
+              title="${escapeHtml(section.name)}"
               onkeydown="if(event.key==='Enter'&&!event.isComposing){event.preventDefault();this.blur()}"
               >${escapeHtml(section.name)}</span>
           </div>
@@ -179,24 +203,21 @@ const Sitemap = (() => {
 
   /* ════════════════════════════════
      구조도 뷰 — 좌→우 수평 트리
-     각 깊이 = 한 컬럼, 자식은 세로로 쌓임
   ════════════════════════════════ */
 
-  const HT_LEAF_H = 44; // px: 리프 노드 1개당 할당 높이
+  const HT_LEAF_H = 44;
 
-  /* 서브트리의 리프 노드 수 (= 세로 공간 단위) */
   function countLeaves(screenId, allScreens) {
     const children = allScreens.filter(s => s.parentId === screenId);
     if (!children.length) return 1;
     return children.reduce((sum, c) => sum + countLeaves(c.id, allScreens), 0);
   }
 
-  /* 화면 노드 하나 + 자식들을 수평으로 재귀 렌더 */
   function renderHTNode(screen, allScreens, col) {
     const cls      = STATUS_CLS[screen.status || '미정'];
     const children = allScreens
       .filter(s => s.parentId === screen.id)
-      .sort((a, b) => a.createdAt - b.createdAt);
+      .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
     const h = countLeaves(screen.id, allScreens) * HT_LEAF_H;
 
     return `
@@ -225,7 +246,7 @@ const Sitemap = (() => {
     const sectionsHTML = sections.map((section, si) => {
       const level2   = screens
         .filter(s => s.sectionId === section.id && !s.parentId)
-        .sort((a, b) => a.createdAt - b.createdAt);
+        .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
       const col       = BRANCH_COLORS[si % BRANCH_COLORS.length];
       const collapsed = !!section.collapsed;
       const secLeaves = collapsed ? 1 : (level2.reduce((sum, s) => sum + countLeaves(s.id, screens), 0) || 1);
@@ -237,9 +258,9 @@ const Sitemap = (() => {
             <div class="ht-sec-node ${collapsed ? 'is-collapsed' : ''}"
               style="border-color:${col.border};background:${col.bg};color:${col.text}"
               onclick="Sitemap.toggleCollapse('${section.id}')"
-              title="${collapsed ? '펼치기' : '접기'}">
+              title="${escapeHtml(section.name)}">
               ${collapsed ? '<span class="ht-sec-toggle">&#9656;</span>' : ''}
-              ${escapeHtml(section.name)}
+              <span class="ht-sec-name">${escapeHtml(section.name)}</span>
               <span class="ht-sec-count">${level2.length}</span>
             </div>
             ${(level2.length && !collapsed) ? `
@@ -314,7 +335,10 @@ const Sitemap = (() => {
     document.querySelectorAll('.section-name[contenteditable]').forEach(el => {
       el.addEventListener('blur', () => {
         const id = el.dataset.id, name = el.textContent.trim();
-        if (name) Store.update('sitemapSections', id, { name });
+        if (name) {
+          Store.update('sitemapSections', id, { name });
+          el.title = name;
+        }
       });
     });
   }
@@ -399,7 +423,6 @@ const Sitemap = (() => {
       name: '새 화면', status: '미정', note: '',
     });
     render();
-    // 새 화면 자동 포커스 (같은 부모 아래 마지막 카드)
     setTimeout(() => {
       const allCards = document.querySelectorAll('.screen-name');
       const last = allCards[allCards.length - 1];
@@ -428,7 +451,6 @@ const Sitemap = (() => {
   }
 
   function deleteScreen(id) {
-    // 하위 화면도 재귀 삭제
     function removeRecursive(screenId) {
       getScreens().filter(s => s.parentId === screenId).forEach(s => removeRecursive(s.id));
       getComponents().filter(c => c.screenId === screenId).forEach(c => Store.remove('sitemapComponents', c.id));
@@ -448,10 +470,131 @@ const Sitemap = (() => {
     render();
   }
 
+  /* ══════════════════════════════
+     섹션 드래그앤드롭 (보드)
+  ══════════════════════════════ */
+
+  function sectionDragStart(e, id) {
+    if (!e.target.closest('.section-drag-handle')) { e.preventDefault(); return; }
+    dragSectionId = id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('is-dragging');
+  }
+
+  function sectionDragOver(e) {
+    if (!dragSectionId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const section = e.currentTarget;
+    if (section.dataset.sectionId !== dragSectionId) {
+      section.classList.add('drag-over');
+    }
+  }
+
+  function sectionDragLeave(e) {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+  }
+
+  function sectionDrop(e, targetId) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (!dragSectionId || dragSectionId === targetId) { dragSectionId = null; return; }
+
+    let sections = getSections();
+    const fromIdx = sections.findIndex(s => s.id === dragSectionId);
+    const toIdx   = sections.findIndex(s => s.id === targetId);
+    if (fromIdx < 0 || toIdx < 0) { dragSectionId = null; return; }
+
+    const [moved] = sections.splice(fromIdx, 1);
+    sections.splice(toIdx, 0, moved);
+    sections.forEach((s, i) => { s.order = i + 1; });
+    Store.set('sitemapSections', sections);
+    dragSectionId = null;
+    render();
+  }
+
+  function sectionDragEnd(e) {
+    document.querySelectorAll('.sitemap-section').forEach(el => el.classList.remove('is-dragging', 'drag-over'));
+    dragSectionId = null;
+  }
+
+  /* ══════════════════════════════
+     화면 카드 드래그앤드롭 (보드)
+  ══════════════════════════════ */
+
+  function screenDragStart(e, id) {
+    e.stopPropagation();
+    dragScreenId = id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('is-dragging');
+  }
+
+  function screenDragOver(e) {
+    if (!dragScreenId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    if (e.currentTarget.dataset.screenId !== dragScreenId) {
+      e.currentTarget.classList.add('drag-over');
+    }
+  }
+
+  function screenDragLeave(e) {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+  }
+
+  function screenDrop(e, targetId) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('drag-over');
+    if (!dragScreenId || dragScreenId === targetId) { dragScreenId = null; return; }
+
+    const allScreens = Store.get('sitemapScreens') || [];
+    const fromScreen = allScreens.find(s => s.id === dragScreenId);
+    const toScreen   = allScreens.find(s => s.id === targetId);
+    if (!fromScreen || !toScreen) { dragScreenId = null; return; }
+
+    /* 같은 부모 그룹 내에서만 재정렬 허용 */
+    if (fromScreen.sectionId !== toScreen.sectionId ||
+        (fromScreen.parentId || null) !== (toScreen.parentId || null)) {
+      dragScreenId = null; return;
+    }
+
+    const siblings = allScreens
+      .filter(s => s.sectionId === fromScreen.sectionId &&
+                   (s.parentId || null) === (fromScreen.parentId || null))
+      .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
+
+    const fromIdx = siblings.findIndex(s => s.id === dragScreenId);
+    const toIdx   = siblings.findIndex(s => s.id === targetId);
+    if (fromIdx < 0 || toIdx < 0) { dragScreenId = null; return; }
+
+    const [moved] = siblings.splice(fromIdx, 1);
+    siblings.splice(toIdx, 0, moved);
+    siblings.forEach((s, i) => {
+      const item = allScreens.find(x => x.id === s.id);
+      if (item) item.screenOrder = i + 1;
+    });
+    Store.set('sitemapScreens', allScreens);
+    dragScreenId = null;
+    render();
+  }
+
+  function screenDragEnd(e) {
+    document.querySelectorAll('.screen-card').forEach(el => el.classList.remove('is-dragging', 'drag-over'));
+    dragScreenId = null;
+  }
+
   return {
     render, setView, addSection, addScreen, addComponent, deleteComponent,
     cycleStatus, deleteScreen, deleteSection, focusName, focusComponent,
     setOrder, toggleCollapse,
+    sectionDragStart, sectionDragOver, sectionDragLeave, sectionDrop, sectionDragEnd,
+    screenDragStart,  screenDragOver,  screenDragLeave,  screenDrop,  screenDragEnd,
   };
 })();
 
