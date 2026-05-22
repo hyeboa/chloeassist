@@ -427,3 +427,95 @@
 .diag-scr-node.st-design .diag-scr-status { color: #f472b6; }
 .diag-scr-node.st-dev    .diag-scr-status { color: #60a5fa; }
 .diag-scr-node.st-done   .diag-scr-status { color: #34d399; }
+
+
+/* ═════ 멀티 레벨 보드 ═════ */
+
+/* ─ 트리 행 ─ */
+.sitemap-tree-row.depth-3 {
+  border-top: 1px dashed var(--color-border);
+  background: rgba(0,0,0,0.012);
+}
+.sitemap-tree-row.depth-4 {
+  border-top: 1px dashed var(--color-border);
+  background: rgba(0,0,0,0.022);
+}
+
+/* ─ 하위 행 레이블 ─ */
+.tree-row-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 20px 0;
+  font-size: 0.74rem;
+  color: var(--color-text-3);
+}
+.tree-row-arrow  { font-size: 0.88rem; color: var(--color-primary); opacity: 0.55; }
+.tree-row-parent { font-weight: 600; color: var(--color-text-2); }
+.tree-row-sub    { color: var(--color-text-3); }
+
+/* ─ 하위 화면 추가 버튼 ─ */
+.screen-add-sub {
+  display: block;
+  width: 100%;
+  padding: 5px;
+  font-size: 0.67rem;
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  border-top: 1px dashed var(--color-border);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  opacity: 0;
+}
+.screen-card:hover .screen-add-sub { opacity: 1; }
+.screen-add-sub:hover {
+  color: var(--color-primary);
+  background: rgba(108,99,255,0.04);
+  border-color: var(--color-primary);
+}
+
+
+/* ═════ 구조도 — 재귀 트리 행/열 ═════ */
+
+.diag-tree-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.diag-tree-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 10px 0;
+  position: relative;
+}
+
+/* 수평 브릿지 세그먼트 */
+.diag-tree-col::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--color-border);
+  pointer-events: none;
+}
+.diag-tree-col:first-child::before { left: 50%; }
+.diag-tree-col:last-child::before  { right: 50%; }
+.diag-tree-col:only-child::before  { display: none; }
+
+/* 수직 드롭 */
+.diag-tree-col::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.5px;
+  height: 18px;
+  background: var(--color-border);
+  pointer-events: none;
+}
