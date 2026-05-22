@@ -1,4 +1,5 @@
 /* ===== 기능 보드 (헬로아지 기능 칸반) ===== */
+
 .features-toolbar {
   display: flex;
   align-items: center;
@@ -7,8 +8,20 @@
   gap: 12px;
 }
 
-/* ===== 칸반 보드 ===== */
+/* ─ 상태 컬러 토큰 (이 파일 내에서만 사용) ─ */
 .kanban-board {
+  --st-idea-bg:    #eef0f5;
+  --st-idea-text:  #64748b;
+  --st-idea-line:  #94a3b8;
+
+  --st-plan-line:  var(--cat-기획-text);
+  --st-design-line:var(--cat-디자인-text);
+  --st-dev-line:   var(--cat-개발-text);
+
+  --st-done-bg:    #dcfce7;
+  --st-done-text:  #15803d;
+  --st-done-line:  var(--color-success);
+
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 14px;
@@ -19,167 +32,343 @@
 @media (max-width: 800px)  { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 500px)  { .kanban-board { grid-template-columns: 1fr; } }
 
+/* ===== 컬럼 ===== */
 .kanban-col {
   background: var(--color-surface-2);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 14px 12px;
   min-height: 200px;
+  border-top: 3px solid var(--color-border);
+  transition: border-top-color var(--transition);
 }
+
+.kanban-col[data-status="아이디어"] { border-top-color: var(--st-idea-line); }
+.kanban-col[data-status="기획중"]   { border-top-color: var(--st-plan-line); }
+.kanban-col[data-status="디자인중"] { border-top-color: var(--st-design-line); }
+.kanban-col[data-status="개발중"]   { border-top-color: var(--st-dev-line); }
+.kanban-col[data-status="완료"]     { border-top-color: var(--st-done-line); }
 
 .kanban-col-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 12px;
 }
 
 .kanban-col-title {
   font-size: 0.78rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.01em;
   color: var(--color-text-2);
 }
 
-.kanban-count {
-  font-size: 0.72rem;
-  font-weight: 600;
-  background: var(--color-surface);
-  color: var(--color-text-3);
-  padding: 1px 7px;
-  border-radius: var(--radius-full);
-}
-
-/* 칼럼별 강조색 */
-.kanban-col[data-status="아이디어"] .kanban-col-title { color: var(--color-text-3); }
+.kanban-col[data-status="아이디어"] .kanban-col-title { color: var(--st-idea-text); }
 .kanban-col[data-status="기획중"]   .kanban-col-title { color: var(--cat-기획-text); }
 .kanban-col[data-status="디자인중"] .kanban-col-title { color: var(--cat-디자인-text); }
 .kanban-col[data-status="개발중"]   .kanban-col-title { color: var(--cat-개발-text); }
-.kanban-col[data-status="완료"]     .kanban-col-title { color: var(--color-success); }
+.kanban-col[data-status="완료"]     .kanban-col-title { color: var(--st-done-text); }
+
+.kanban-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--color-surface);
+  color: var(--color-text-3);
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  min-width: 22px;
+  text-align: center;
+}
+
+.kanban-col[data-status="아이디어"] .kanban-count { background: var(--st-idea-bg); color: var(--st-idea-text); }
+.kanban-col[data-status="기획중"]   .kanban-count { background: var(--cat-기획-bg); color: var(--cat-기획-text); }
+.kanban-col[data-status="디자인중"] .kanban-count { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); }
+.kanban-col[data-status="개발중"]   .kanban-count { background: var(--cat-개발-bg); color: var(--cat-개발-text); }
+.kanban-col[data-status="완료"]     .kanban-count { background: var(--st-done-bg); color: var(--st-done-text); }
 
 /* ===== 기능 카드 ===== */
 .feature-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 11px 13px 12px;
+  margin-bottom: 9px;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
   position: relative;
 }
 
 .feature-card:last-child { margin-bottom: 0; }
 .feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
 
-.feature-card-name {
-  font-size: 0.87rem;
+.feature-card[data-status="아이디어"] { border-left-color: var(--st-idea-line); }
+.feature-card[data-status="기획중"]   { border-left-color: var(--st-plan-line); }
+.feature-card[data-status="디자인중"] { border-left-color: var(--st-design-line); }
+.feature-card[data-status="개발중"]   { border-left-color: var(--st-dev-line); }
+.feature-card[data-status="완료"]     { border-left-color: var(--st-done-line); }
+
+.feature-card.expanded {
+  box-shadow: var(--shadow-md);
+}
+
+/* ─ 헤더 행: 카테고리 뱃지 + 빠른 다음단계 ─ */
+.feature-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  min-height: 22px;
+}
+
+.cat-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
   font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+.cat-badge.기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text); }
+.cat-badge.디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); }
+.cat-badge.개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text); }
+.cat-badge.cat-empty {
+  background: var(--st-idea-bg);
+  color: var(--st-idea-text);
+  font-weight: 500;
+}
+
+/* 빠른 다음 단계 (hover시 노출) */
+.feature-quick-next {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.62rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(108,99,255,0.3);
+  transition: opacity var(--transition), transform var(--transition), background var(--transition);
+}
+
+.feature-card:hover .feature-quick-next,
+.feature-card.expanded .feature-quick-next { opacity: 1; }
+.feature-quick-next:hover { transform: scale(1.08); background: var(--color-primary-dark); }
+
+/* 완료 단계 아이콘 */
+.feature-quick-done {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--st-done-bg);
+  color: var(--st-done-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─ 이름 / 설명 ─ */
+.feature-card-name {
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 5px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+  word-break: keep-all;
 }
 
 .feature-card-desc {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--color-text-2);
   line-height: 1.5;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.feature-card-footer {
+/* ─ 진행률 바 ─ */
+.feature-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.feature-progress-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--color-surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.feature-progress-fill {
+  height: 100%;
+  background: var(--st-idea-line);
+  border-radius: 3px;
+  transition: width var(--transition);
+}
+
+.feature-card[data-status="아이디어"] .feature-progress-fill { background: var(--st-idea-line); }
+.feature-card[data-status="기획중"]   .feature-progress-fill { background: var(--st-plan-line); }
+.feature-card[data-status="디자인중"] .feature-progress-fill { background: var(--st-design-line); }
+.feature-card[data-status="개발중"]   .feature-progress-fill { background: var(--st-dev-line); }
+.feature-card[data-status="완료"]     .feature-progress-fill { background: var(--st-done-line); }
+
+.feature-progress-text {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.feature-progress.empty .feature-progress-text { font-weight: 500; opacity: 0.75; }
+
+/* ─ 액션 행 (확장 시) ─ */
+.feature-card-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.feature-action-btn {
+  padding: 6px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.feature-action-btn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.feature-action-btn.next {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+.feature-action-btn.next:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.feature-action-btn.del {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 0.78rem;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feature-action-btn.del:hover {
+  background: #fee2e2;
+  color: var(--color-danger);
+  border-color: transparent;
+}
+
+/* ═════ 태스크 패널 ═════ */
+.feat-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.feat-panel-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-text-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
-.feature-card-cat {
-  padding: 2px 7px;
+.feat-panel-count {
+  font-weight: 600;
+  color: var(--color-text-2);
+  background: var(--color-surface-2);
+  padding: 1px 7px;
   border-radius: var(--radius-full);
-  font-size: 0.7rem;
-  font-weight: 500;
-}
-
-.feature-card-actions {
-  opacity: 0;
-  display: flex;
-  gap: 4px;
-  transition: opacity var(--transition);
-}
-
-.feature-card:hover .feature-card-actions { opacity: 1; }
-
-.feature-action-btn {
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  color: var(--color-text-3);
-  transition: background var(--transition), color var(--transition);
-}
-
-.feature-action-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
-.feature-action-btn.del:hover { background: #fee2e2; color: var(--color-danger); }
-.feature-action-btn.next { color: var(--color-primary); }
-
-/* ─ 액션 행 (펼쳐졌거나 hover 시 노출) ─ */
-.feature-card-actions-row {
-  display: flex;
-  gap: 4px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border);
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-
-.feature-card:hover .feature-card-actions-row,
-.feature-card.expanded .feature-card-actions-row { opacity: 1; }
-
-/* ─ 미니 진행률 (텍스트만) ─ */
-.feat-mini-pct {
-  font-size: 0.7rem;
-  color: var(--color-text-3);
-  font-weight: 500;
-  margin-left: auto;
-}
-
-/* ─ 태스크 패널 (심플) ─ */
-.feat-panel {
-  border-top: 1px solid var(--color-border);
-  margin-top: 10px;
-  padding-top: 10px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .feat-panel-empty {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: var(--color-text-3);
+  padding: 6px 0 10px;
   text-align: center;
-  padding: 2px 0 10px;
 }
 
 .feat-panel-tasks {
   display: flex;
   flex-direction: column;
   margin-bottom: 8px;
+  gap: 1px;
 }
 
 .feat-panel-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 4px 4px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   border-radius: 4px;
 }
-
 .feat-panel-row:hover { background: var(--color-surface-2); }
 
+.feat-task-check {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.feat-task-check:hover { border-color: var(--color-primary); }
+
+.feat-panel-row.done .feat-task-check {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
 .feat-panel-row.done .feat-task-title {
   text-decoration: line-through;
   color: var(--color-text-3);
@@ -199,15 +388,15 @@
   color: var(--color-text-3);
   padding: 0 4px;
   flex-shrink: 0;
-  transition: opacity var(--transition), color var(--transition);
+  border-radius: 3px;
+  transition: opacity var(--transition), color var(--transition), background var(--transition);
 }
-
 .feat-panel-row:hover .feat-task-del { opacity: 1; }
-.feat-task-del:hover { color: var(--color-danger); }
+.feat-task-del:hover { color: var(--color-danger); background: #fee2e2; }
 
 .feat-task-input {
   width: 100%;
-  padding: 5px 8px;
+  padding: 6px 9px;
   font-size: 0.76rem;
   color: var(--color-text);
   background: transparent;
@@ -215,18 +404,14 @@
   border-radius: 4px;
   outline: none;
   transition: border-color var(--transition), background var(--transition);
+  margin-top: 4px;
 }
 
 .feat-task-input::placeholder { color: var(--color-text-3); }
-.feat-task-input:hover  { border-color: var(--color-primary); }
-.feat-task-input:focus  { border-color: var(--color-primary); background: var(--color-surface); }
+.feat-task-input:hover { border-color: var(--color-primary); }
+.feat-task-input:focus { border-color: var(--color-primary); background: var(--color-surface); border-style: solid; }
 
-/* ─ 펼친 카드 ─ */
-.feature-card.expanded {
-  border-color: var(--color-primary);
-}
-
-/* ===== 카드 추가 버튼 ===== */
+/* ===== 빈 컬럼 (선택) ===== */
 .kanban-add-btn {
   width: 100%;
   padding: 8px;

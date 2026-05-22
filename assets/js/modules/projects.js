@@ -19,19 +19,28 @@ const Projects = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  /* ─ 태스크 패널 (심플) ─ */
+  /* ─ 태스크 패널 ─ */
   function renderTaskPanel(f) {
     const tasks = linkedTasks(f.id);
+    const done  = tasks.filter(t => t.done).length;
 
     return `
       <div class="feat-panel">
+        <div class="feat-panel-label">
+          <span>할 일</span>
+          ${tasks.length ? `<span class="feat-panel-count">${done}/${tasks.length}</span>` : ''}
+        </div>
         ${tasks.length === 0
-          ? '<div class="feat-panel-empty">아직 할 일이 없어요</div>'
+          ? '<div class="feat-panel-empty">아래에서 할 일을 추가해보세요</div>'
           : `<div class="feat-panel-tasks">
               ${tasks.map(t => `
                 <div class="feat-panel-row ${t.done ? 'done' : ''}">
+                  <button class="feat-task-check" title="${t.done ? '완료 해제' : '완료'}"
+                    onclick="event.stopPropagation();Projects.toggleTaskDone('${t.id}')">
+                    ${t.done ? '✓' : ''}
+                  </button>
                   <span class="feat-task-title">${escapeHtml(t.title)}</span>
-                  <button class="feat-task-del" onclick="event.stopPropagation();Projects.deleteTask('${t.id}')" title="삭제">✕</button>
+                  <button class="feat-task-del" title="삭제" onclick="event.stopPropagation();Projects.deleteTask('${t.id}')">✕</button>
                 </div>
               `).join('')}
             </div>`
@@ -53,23 +62,40 @@ const Projects = (() => {
     const pct        = tasks.length ? Math.round(done / tasks.length * 100) : 0;
     const nextStatus = STATUSES[STATUSES.indexOf(f.status) + 1];
     const prevStatus = STATUSES[STATUSES.indexOf(f.status) - 1];
+    const cat        = f.category || '';
 
     return `
-      <div class="feature-card ${isOpen ? 'expanded' : ''}" onclick="Projects.toggleExpand('${f.id}')">
+      <div class="feature-card ${isOpen ? 'expanded' : ''}" data-status="${f.status}" onclick="Projects.toggleExpand('${f.id}')">
+        <div class="feature-card-head">
+          ${cat ? `<span class="cat-badge ${cat}">${cat}</span>` : '<span class="cat-badge cat-empty">미분류</span>'}
+          ${nextStatus ? `
+            <button class="feature-quick-next" title="다음 단계: ${nextStatus}"
+              onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">▶</button>
+          ` : `<span class="feature-quick-done" title="완료">✓</span>`}
+        </div>
+
         <div class="feature-card-name">${escapeHtml(f.name)}</div>
         ${f.desc ? `<div class="feature-card-desc">${escapeHtml(f.desc)}</div>` : ''}
-        <div class="feature-card-footer">
-          <span class="feature-card-cat cat-badge ${f.category || ''}">${f.category || ''}</span>
-          ${tasks.length ? `<span class="feat-mini-pct">${done}/${tasks.length}</span>` : ''}
-        </div>
 
-        <div class="feature-card-actions-row">
-          ${prevStatus ? `<button class="feature-action-btn" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${prevStatus}')">◀ ${prevStatus}</button>` : ''}
-          ${nextStatus ? `<button class="feature-action-btn next" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">${nextStatus} ▶</button>` : ''}
-          <button class="feature-action-btn del" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">✕</button>
-        </div>
+        ${tasks.length ? `
+          <div class="feature-progress">
+            <div class="feature-progress-bar">
+              <div class="feature-progress-fill" style="width:${pct}%"></div>
+            </div>
+            <span class="feature-progress-text">${done}/${tasks.length}</span>
+          </div>` : `
+          <div class="feature-progress empty">
+            <div class="feature-progress-bar"><div class="feature-progress-fill" style="width:0"></div></div>
+            <span class="feature-progress-text">할 일 없음</span>
+          </div>`}
 
-        ${isOpen ? renderTaskPanel(f) : ''}
+        ${isOpen ? `
+          ${renderTaskPanel(f)}
+          <div class="feature-card-actions-row">
+            ${prevStatus ? `<button class="feature-action-btn prev" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${prevStatus}')">◀ ${prevStatus}</button>` : ''}
+            ${nextStatus ? `<button class="feature-action-btn next" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">${nextStatus} ▶</button>` : ''}
+            <button class="feature-action-btn del" title="기능 삭제" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">✕</button>
+          </div>` : ''}
       </div>
     `;
   }
@@ -154,6 +180,13 @@ const Projects = (() => {
     render();
   }
 
+  function toggleTaskDone(taskId) {
+    const t = getTasks().find(x => x.id === taskId);
+    if (!t) return;
+    Store.update('tasks', taskId, { done: !t.done });
+    render();
+  }
+
   function deleteFeature(id) {
     getTasks().filter(t => t.featureId === id)
       .forEach(t => Store.update('tasks', t.id, { featureId: null }));
@@ -170,7 +203,7 @@ const Projects = (() => {
     render();
   }
 
-  return { render, deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask };
+  return { render, deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask, toggleTaskDone };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Projects.render());
