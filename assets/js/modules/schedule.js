@@ -236,7 +236,7 @@ const Schedule = (() => {
     if (!input) return;
 
     input.addEventListener('keydown', async (e) => {
-      if (e.key !== 'Enter') return;
+      if (e.key !== 'Enter' || e.isComposing) return;
       const text = input.value.trim();
       if (!text) return;
 
@@ -283,7 +283,7 @@ const Schedule = (() => {
 
     input.addEventListener('keydown', async (e) => {
       if (e.key === 'Escape') { editingDateId = null; renderList(); return; }
-      if (e.key !== 'Enter') return;
+      if (e.key !== 'Enter' || e.isComposing) return;
 
       const text = input.value.trim();
       if (!text) { editingDateId = null; renderList(); return; }

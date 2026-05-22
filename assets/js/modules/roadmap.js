@@ -261,7 +261,7 @@ const Roadmap = (() => {
     if (!input) return;
 
     input.addEventListener('keydown', async (e) => {
-      if (e.key !== 'Enter') return;
+      if (e.key !== 'Enter' || e.isComposing) return;
       const text = input.value.trim();
       if (!text) return;
 

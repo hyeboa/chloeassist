@@ -219,7 +219,7 @@ const Dashboard = (() => {
 
     const input = document.getElementById('quick-input');
     input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.isComposing) {
         addTask(input.value, selectedCat);
         input.value = '';
         input.focus();
