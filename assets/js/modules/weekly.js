@@ -1,0 +1,350 @@
+/**
+ * weekly.js — 주간 리뷰
+ */
+
+const Weekly = (() => {
+  let currentWeekStart = getWeekStart(new Date());
+
+  /* ─ 날짜 유틸 ─ */
+  function getWeekStart(date) {
+    const d   = new Date(date);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day; // 월요일 기준
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function getWeekEnd(weekStart) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + 6);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+
+  function weekKey(weekStart) {
+    return weekStart.toISOString().slice(0, 10);
+  }
+
+  function inWeek(dateStr, start, end) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    return d >= start && d <= end;
+  }
+
+  function formatWeekLabel(start, end) {
+    const sm = start.getMonth() + 1, sd = start.getDate();
+    const em = end.getMonth() + 1,   ed = end.getDate();
+    const base = `${start.getFullYear()}년 ${sm}월 ${sd}일`;
+    return sm === em ? `${base} ~ ${ed}일` : `${base} ~ ${em}월 ${ed}일`;
+  }
+
+  function shortDate(str) {
+    const d = new Date(str);
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  function ddayLabel(dateStr) {
+    const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
+    if (diff < 0)  return `D+${Math.abs(diff)}`;
+    if (diff === 0) return 'D-Day';
+    return `D-${diff}`;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ─ 주간 메모 저장/불러오기 ─ */
+  function getMemo(weekStart) {
+    const all = Store.get('weeklyReviews') || {};
+    return all[weekKey(weekStart)] || { memo: '', aiSummary: '' };
+  }
+
+  function saveMemo(weekStart, patch) {
+    const all = Store.get('weeklyReviews') || {};
+    const k   = weekKey(weekStart);
+    all[k]    = { ...(all[k] || {}), ...patch };
+    Store.set('weeklyReviews', all);
+  }
+
+  /* ─ 태스크 칩 ─ */
+  function taskChip(t, type) {
+    return `
+      <div class="wk-task-chip wk-chip-${type}">
+        <span class="wk-chip-check">${t.done ? '✓' : '○'}</span>
+        <span class="wk-chip-title">${escapeHtml(t.title)}</span>
+        <span class="cat-wk-dot ${t.category || ''}"></span>
+        ${t.dueDate ? `<span class="wk-chip-date">${shortDate(t.dueDate)}</span>` : ''}
+      </div>`;
+  }
+
+  /* ─ 렌더 ─ */
+  function render() {
+    const weekEnd   = getWeekEnd(currentWeekStart);
+    const today     = new Date();
+    const thisWeek  = weekKey(getWeekStart(today));
+    const isCurrent = weekKey(currentWeekStart) === thisWeek;
+
+    const milestones = Store.get('milestones') || [];
+    const tasks      = Store.get('tasks')      || [];
+    const features   = Store.get('features')   || [];
+
+    /* 이번 주 태스크 */
+    const weekTasks = tasks.filter(t =>
+      (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd)
+    );
+    const doneTasks = weekTasks.filter(t =>  t.done);
+    const missTasks = weekTasks.filter(t => !t.done);
+
+    /* 다음 주 태스크 (현재 주 뷰에서만) */
+    const nextWeekStart = new Date(currentWeekStart);
+    nextWeekStart.setDate(currentWeekStart.getDate() + 7);
+    const nextWeekEnd = getWeekEnd(nextWeekStart);
+    const nextTasks = isCurrent
+      ? tasks.filter(t => !t.done && inWeek(t.dueDate, nextWeekStart, nextWeekEnd))
+      : [];
+
+    /* 이번 주 마일스톤 */
+    const weekMs = milestones.filter(m => inWeek(m.date, currentWeekStart, weekEnd));
+
+    /* 다음 마일스톤 */
+    const nextMs = milestones
+      .filter(m => !m.done && new Date(m.date) >= today)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
+
+    /* 통계 */
+    const totalWeek   = weekTasks.length;
+    const completePct = totalWeek ? Math.round(doneTasks.length / totalWeek * 100) : 0;
+    const featDone    = features.filter(f => f.status === '완료').length;
+    const featPct     = features.length ? Math.round(featDone / features.length * 100) : 0;
+
+    const memo = getMemo(currentWeekStart);
+
+    document.getElementById('app').innerHTML = `
+      <!-- 주 네비게이션 -->
+      <div class="wk-nav">
+        <button class="wk-nav-btn" onclick="Weekly.prevWeek()">← 이전 주</button>
+        <div class="wk-title">
+          <div class="wk-range">${formatWeekLabel(currentWeekStart, weekEnd)}</div>
+          ${isCurrent ? '<span class="wk-current-badge">이번 주</span>' : ''}
+        </div>
+        <button class="wk-nav-btn" onclick="Weekly.nextWeek()" ${isCurrent ? 'disabled' : ''}>다음 주 →</button>
+      </div>
+
+      <!-- 요약 카드 -->
+      <div class="wk-summary">
+        <div class="wk-stat">
+          <div class="wk-stat-label">이번 주 달성률</div>
+          <div class="wk-stat-value">${completePct}<span>%</span></div>
+          <div class="wk-stat-bar"><div class="wk-stat-bar-fill" style="width:${completePct}%"></div></div>
+          <div class="wk-stat-sub">${doneTasks.length} / ${totalWeek}개 완료</div>
+        </div>
+        <div class="wk-stat">
+          <div class="wk-stat-label">기능 개발 진행도</div>
+          <div class="wk-stat-value">${featPct}<span>%</span></div>
+          <div class="wk-stat-bar"><div class="wk-stat-bar-fill green" style="width:${featPct}%"></div></div>
+          <div class="wk-stat-sub">${featDone} / ${features.length}개 완료</div>
+        </div>
+        <div class="wk-stat">
+          <div class="wk-stat-label">다음 마일스톤</div>
+          ${nextMs
+            ? `<div class="wk-ms-title">${escapeHtml(nextMs.title)}</div>
+               <div class="wk-ms-dday">${ddayLabel(nextMs.date)}</div>`
+            : `<div class="wk-ms-title" style="color:var(--color-text-3)">모두 완료!</div>`}
+        </div>
+      </div>
+
+      <!-- 본문 2컬럼 -->
+      <div class="wk-body">
+        <!-- 왼쪽: 이번 주 실적 -->
+        <div class="wk-left">
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot done"></span>
+              이번 주 완료
+              <span class="wk-section-count">${doneTasks.length}개</span>
+            </div>
+            ${doneTasks.length
+              ? doneTasks.map(t => taskChip(t, 'done')).join('')
+              : '<div class="wk-empty">완료된 할 일이 없어요</div>'}
+          </div>
+
+          ${missTasks.length ? `
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot miss"></span>
+              미완료
+              <span class="wk-section-count">${missTasks.length}개</span>
+            </div>
+            ${missTasks.map(t => taskChip(t, 'miss')).join('')}
+          </div>` : ''}
+
+          ${weekMs.length ? `
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot ms"></span>
+              이번 주 마일스톤
+              <span class="wk-section-count">${weekMs.length}개</span>
+            </div>
+            ${weekMs.map(m => `
+              <div class="wk-ms-chip ${m.done ? 'done' : 'pending'}">
+                <span>${m.done ? '✓' : '◆'}</span>
+                <span>${escapeHtml(m.title)}</span>
+              </div>`).join('')}
+          </div>` : ''}
+
+          ${!weekMs.length && !missTasks.length && !doneTasks.length ? `
+          <div class="wk-section">
+            <div class="wk-empty" style="padding:20px 0">
+              이번 주 기한이 설정된 할 일이 없어요.<br>
+              <span style="font-size:0.72rem">할 일 목록에서 날짜를 추가해보세요.</span>
+            </div>
+          </div>` : ''}
+        </div>
+
+        <!-- 오른쪽: 다음 주 + AI + 메모 -->
+        <div class="wk-right">
+          ${isCurrent ? `
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot next"></span>
+              다음 주 예정
+              <span class="wk-section-count">${nextTasks.length}개</span>
+            </div>
+            ${nextTasks.length
+              ? nextTasks.map(t => taskChip(t, 'next')).join('')
+              : '<div class="wk-empty">다음 주 일정이 없어요</div>'}
+          </div>` : ''}
+
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot ai"></span>
+              AI 주간 요약
+            </div>
+            <div id="wk-ai-content">
+              ${memo.aiSummary
+                ? `<div class="wk-ai-result">${escapeHtml(memo.aiSummary).replace(/\n/g, '<br>')}</div>`
+                : '<div class="wk-ai-empty">AI가 이번 주를 분석해드릴게요</div>'}
+            </div>
+            <button class="wk-ai-btn" id="wk-ai-btn" onclick="Weekly.generateSummary()">
+              ✦ ${memo.aiSummary ? '다시 생성' : 'AI 요약 생성'}
+            </button>
+          </div>
+
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot memo"></span>
+              주간 메모
+            </div>
+            <textarea class="wk-memo" id="wk-memo"
+              placeholder="이번 주 느낀 점, 개선할 점, 다음 주 다짐...">${escapeHtml(memo.memo)}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+
+    bindMemo();
+  }
+
+  /* ─ 메모 자동 저장 ─ */
+  function bindMemo() {
+    const ta = document.getElementById('wk-memo');
+    if (!ta) return;
+    let timer;
+    ta.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => saveMemo(currentWeekStart, { memo: ta.value }), 600);
+    });
+  }
+
+  /* ─ AI 주간 요약 생성 ─ */
+  async function generateSummary() {
+    if (!AI.getApiKey()) {
+      Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+      return;
+    }
+
+    const btn     = document.getElementById('wk-ai-btn');
+    const content = document.getElementById('wk-ai-content');
+    if (!btn || !content) return;
+
+    btn.disabled    = true;
+    btn.textContent = '✦ 분석 중...';
+    content.innerHTML = '<div class="wk-ai-streaming" id="wk-ai-stream">분석 중...</div>';
+
+    const weekEnd   = getWeekEnd(currentWeekStart);
+    const today     = new Date();
+    const isCurrent = weekKey(currentWeekStart) === weekKey(getWeekStart(today));
+
+    const tasks      = Store.get('tasks')      || [];
+    const milestones = Store.get('milestones') || [];
+    const features   = Store.get('features')   || [];
+
+    const weekTasks = tasks.filter(t =>
+      (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd)
+    );
+    const done    = weekTasks.filter(t =>  t.done).map(t => t.title);
+    const miss    = weekTasks.filter(t => !t.done).map(t => t.title);
+    const featDone = features.filter(f => f.status === '완료').length;
+    const upcomingMs = milestones.filter(m => !m.done && new Date(m.date) >= today)
+      .sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 2);
+
+    const prompt = `나는 헬로아지(반려견 플랫폼 모바일 앱)를 1인으로 기획·디자인·운영하고 있어.
+
+이번 주 현황:
+- 완료한 일: ${done.length ? done.join(', ') : '없음'}
+- 못 끝낸 일: ${miss.length ? miss.join(', ') : '없음'}
+- 기능 개발 진행도: ${featDone}/${features.length}개 완료
+${upcomingMs.map(m => `- 마일스톤 예정: ${m.title} (${m.date})`).join('\n')}
+
+위 상황을 바탕으로 짧고 따뜻한 주간 리뷰를 써줘. 마크다운 없이 일반 텍스트로.
+
+형식:
+✅ 잘한 점
+⚠️ 주의할 점
+🎯 다음 주 포커스`;
+
+    let full = '';
+    try {
+      await AI.chatStream(
+        [{ role: 'user', content: prompt }],
+        '',
+        (chunk) => {
+          full += chunk;
+          const el = document.getElementById('wk-ai-stream');
+          if (el) el.textContent = full;
+        },
+        () => {
+          saveMemo(currentWeekStart, { aiSummary: full });
+          content.innerHTML = `<div class="wk-ai-result">${escapeHtml(full).replace(/\n/g, '<br>')}</div>`;
+          btn.disabled    = false;
+          btn.textContent = '✦ 다시 생성';
+        }
+      );
+    } catch {
+      content.innerHTML = '<div class="wk-ai-empty">오류가 발생했어요. 다시 시도해주세요.</div>';
+      btn.disabled    = false;
+      btn.textContent = '✦ AI 요약 생성';
+    }
+  }
+
+  /* ─ 주 이동 ─ */
+  function prevWeek() {
+    currentWeekStart = new Date(currentWeekStart);
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    render();
+  }
+
+  function nextWeek() {
+    const limit = getWeekStart(new Date());
+    if (currentWeekStart >= limit) return;
+    currentWeekStart = new Date(currentWeekStart);
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    render();
+  }
+
+  return { render, prevWeek, nextWeek, generateSummary };
+})();
+
+document.addEventListener('DOMContentLoaded', () => Weekly.render());

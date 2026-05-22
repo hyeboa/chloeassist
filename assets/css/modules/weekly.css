@@ -1,0 +1,353 @@
+/* ===== 주간 리뷰 ===== */
+
+/* ─ 주 네비게이션 ─ */
+.wk-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.wk-nav-btn {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.wk-nav-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.wk-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.wk-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.wk-range {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.wk-current-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+/* ─ 요약 카드 ─ */
+.wk-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.wk-stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.wk-stat-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-3);
+  margin-bottom: 8px;
+}
+
+.wk-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.wk-stat-value span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-text-3);
+}
+
+.wk-stat-bar {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.wk-stat-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.wk-stat-bar-fill.green { background: #10b981; }
+
+.wk-stat-sub {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+}
+
+.wk-ms-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.wk-ms-dday {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ─ 바디: 2컬럼 ─ */
+.wk-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ─ 섹션 ─ */
+.wk-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.wk-section:last-child { margin-bottom: 0; }
+
+.wk-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+  margin-bottom: 12px;
+}
+
+.wk-section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wk-section-dot.done { background: #10b981; }
+.wk-section-dot.miss { background: #f59e0b; }
+.wk-section-dot.next { background: var(--color-primary); }
+.wk-section-dot.ms   { background: #6366f1; }
+.wk-section-dot.ai   { background: #8b5cf6; }
+.wk-section-dot.memo { background: var(--color-text-3); }
+
+.wk-section-count {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-text-3);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ─ 태스크 칩 ─ */
+.wk-task-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border-left: 3px solid transparent;
+  font-size: 0.82rem;
+}
+
+.wk-task-chip:last-child { margin-bottom: 0; }
+
+.wk-chip-done {
+  background: rgba(16, 185, 129, 0.06);
+  border-left-color: #10b981;
+  color: var(--color-text-2);
+}
+
+.wk-chip-miss {
+  background: rgba(245, 158, 11, 0.06);
+  border-left-color: #f59e0b;
+}
+
+.wk-chip-next {
+  background: rgba(108, 99, 255, 0.05);
+  border-left-color: var(--color-primary);
+}
+
+.wk-chip-check {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+  color: var(--color-text-3);
+}
+
+.wk-chip-done .wk-chip-check { color: #10b981; }
+.wk-chip-miss .wk-chip-check { color: #f59e0b; }
+
+.wk-chip-title {
+  flex: 1;
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wk-chip-done .wk-chip-title {
+  text-decoration: line-through;
+  color: var(--color-text-3);
+}
+
+.wk-chip-date {
+  font-size: 0.68rem;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}
+
+/* 카테고리 점 */
+.cat-wk-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cat-wk-dot.기획   { background: #6d28d9; }
+.cat-wk-dot.디자인 { background: #be185d; }
+.cat-wk-dot.개발   { background: #1d4ed8; }
+.cat-wk-dot.마케팅 { background: #c2410c; }
+.cat-wk-dot.운영   { background: #065f46; }
+
+/* ─ 마일스톤 칩 ─ */
+.wk-ms-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.wk-ms-chip.done    { background: rgba(16,185,129,0.07); color: #065f46; }
+.wk-ms-chip.pending { background: rgba(99,102,241,0.07); color: #4338ca; }
+
+/* ─ AI 요약 ─ */
+.wk-ai-empty {
+  font-size: 0.8rem;
+  color: var(--color-text-3);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.wk-ai-result {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.wk-ai-streaming {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-height: 60px;
+}
+
+.wk-ai-btn {
+  width: 100%;
+  padding: 9px 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary-light, rgba(108,99,255,0.2));
+  border-radius: 8px;
+  background: rgba(108,99,255,0.04);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.wk-ai-btn:hover:not(:disabled) {
+  background: rgba(108,99,255,0.1);
+}
+
+.wk-ai-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─ 주간 메모 ─ */
+.wk-memo {
+  width: 100%;
+  min-height: 120px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.7;
+  transition: border-color var(--transition);
+  box-sizing: border-box;
+}
+
+.wk-memo:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.08);
+}
+
+.wk-memo::placeholder { color: var(--color-text-3); }
+
+/* ─ 빈 상태 ─ */
+.wk-empty {
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  padding: 6px 0;
+  text-align: center;
+}
