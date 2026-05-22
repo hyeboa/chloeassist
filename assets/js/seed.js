@@ -7,14 +7,24 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v5: 사이트맵 데이터만 추가 */
+  /* v4 → v6: 사이트맵 데이터 추가 */
   if (version === 'v4') {
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v5');
+    localStorage.setItem('chloeassist:seeded', 'v6');
     return;
   }
 
-  if (version === 'v5') return;
+  /* v5 → v6: 계층 구조 샘플 데이터로 교체 */
+  if (version === 'v5') {
+    localStorage.removeItem('chloeassist:sitemapSections');
+    localStorage.removeItem('chloeassist:sitemapScreens');
+    localStorage.removeItem('chloeassist:sitemapComponents');
+    injectSitemapData();
+    localStorage.setItem('chloeassist:seeded', 'v6');
+    return;
+  }
+
+  if (version === 'v6') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -86,71 +96,110 @@
   localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
 
   injectSitemapData();
-  localStorage.setItem('chloeassist:seeded', 'v5');
+  localStorage.setItem('chloeassist:seeded', 'v6');
 
-  /* ── 사이트맵 샘플 데이터 ── */
+  /* ── 사이트맵 샘플 데이터 (v6: 계층 구조 포함) ── */
   function injectSitemapData() {
     const t = Date.now();
     const a = (ms) => t - ms;
 
-    /* 섹션 ID */
+    /* ─ 섹션 ID ─ */
     const secOnboarding = crypto.randomUUID();
     const secMain       = crypto.randomUUID();
     const secMatching   = crypto.randomUUID();
     const secWalk       = crypto.randomUUID();
 
-    /* 화면 ID — 온보딩 */
+    /* ─ 화면 ID — 온보딩 (depth 2) ─ */
     const scrSplash  = crypto.randomUUID();
     const scrRole    = crypto.randomUUID();
     const scrDogReg  = crypto.randomUUID();
     const scrLogin   = crypto.randomUUID();
+    /* 온보딩 depth 3 */
+    const scrRoleOwner   = crypto.randomUUID(); // 역할 선택 > 견주 온보딩
+    const scrRolePartner = crypto.randomUUID(); // 역할 선택 > 파트너 온보딩
 
-    /* 화면 ID — 메인 탭 */
-    const scrHome      = crypto.randomUUID();
-    const scrMatchTab  = crypto.randomUUID();
-    const scrWalkTab   = crypto.randomUUID();
-    const scrMyTab     = crypto.randomUUID();
+    /* ─ 화면 ID — 메인 탭 (depth 2) ─ */
+    const scrHome    = crypto.randomUUID();
+    const scrMatchTab= crypto.randomUUID();
+    const scrWalkTab = crypto.randomUUID();
+    const scrMyTab   = crypto.randomUUID();
+    /* 메인 depth 3 */
+    const scrNoti      = crypto.randomUUID(); // 홈 > 알림 센터
+    const scrMyEdit    = crypto.randomUUID(); // 마이 > 프로필 편집
+    const scrDogEdit   = crypto.randomUUID(); // 마이 > 반려견 편집
+    /* 메인 depth 4 */
+    const scrDogTags   = crypto.randomUUID(); // 반려견 편집 > 성격 태그 설정
 
-    /* 화면 ID — 파트너 매칭 */
+    /* ─ 화면 ID — 파트너 매칭 (depth 2) ─ */
     const scrSearch   = crypto.randomUUID();
     const scrPartner  = crypto.randomUUID();
     const scrBook     = crypto.randomUUID();
     const scrBookDone = crypto.randomUUID();
+    /* 매칭 depth 3 */
+    const scrSearchRegion = crypto.randomUUID(); // 파트너 검색 > 지역 설정
+    const scrSearchFilter = crypto.randomUUID(); // 파트너 검색 > 필터 설정
+    const scrReviews      = crypto.randomUUID(); // 파트너 상세 > 후기 목록
+    /* 매칭 depth 4 */
+    const scrReviewWrite  = crypto.randomUUID(); // 후기 목록 > 후기 작성
 
-    /* 화면 ID — 산책 기록 */
+    /* ─ 화면 ID — 산책 기록 (depth 2) ─ */
     const scrWalkReady  = crypto.randomUUID();
     const scrWalkActive = crypto.randomUUID();
     const scrWalkEnd    = crypto.randomUUID();
     const scrWalkDetail = crypto.randomUUID();
+    /* 산책 depth 3 */
+    const scrWalkPhoto  = crypto.randomUUID(); // 산책 중 > 사진 촬영
+    const scrWalkShare  = crypto.randomUUID(); // 산책 완료 > 공유 옵션
 
     const sections = [
-      { id: secOnboarding, name: '온보딩 플로우',   createdAt: a(86400000 * 4) },
-      { id: secMain,       name: '메인 탭',          createdAt: a(86400000 * 3) },
+      { id: secOnboarding, name: '온보딩 플로우',     createdAt: a(86400000 * 4) },
+      { id: secMain,       name: '메인 탭',            createdAt: a(86400000 * 3) },
       { id: secMatching,   name: '파트너 매칭 플로우', createdAt: a(86400000 * 2) },
-      { id: secWalk,       name: '산책 기록 플로우',  createdAt: a(86400000 * 1) },
+      { id: secWalk,       name: '산책 기록 플로우',   createdAt: a(86400000 * 1) },
     ];
 
     const screens = [
-      /* 온보딩 */
-      { id: scrSplash,  sectionId: secOnboarding, name: '스플래시',   status: '완료',    createdAt: a(86400000 * 4 + 4000) },
-      { id: scrRole,    sectionId: secOnboarding, name: '역할 선택',   status: '완료',    createdAt: a(86400000 * 4 + 3000) },
-      { id: scrDogReg,  sectionId: secOnboarding, name: '반려견 등록', status: '개발중',  createdAt: a(86400000 * 4 + 2000) },
-      { id: scrLogin,   sectionId: secOnboarding, name: '소셜 로그인', status: '개발중',  createdAt: a(86400000 * 4 + 1000) },
-      /* 메인 탭 */
-      { id: scrHome,     sectionId: secMain, name: '홈',        status: '개발중',   createdAt: a(86400000 * 3 + 4000) },
-      { id: scrMatchTab, sectionId: secMain, name: '매칭',       status: '디자인중', createdAt: a(86400000 * 3 + 3000) },
-      { id: scrWalkTab,  sectionId: secMain, name: '산책',       status: '디자인중', createdAt: a(86400000 * 3 + 2000) },
-      { id: scrMyTab,    sectionId: secMain, name: '마이페이지', status: '기획',     createdAt: a(86400000 * 3 + 1000) },
-      /* 파트너 매칭 */
-      { id: scrSearch,   sectionId: secMatching, name: '파트너 검색', status: '디자인중', createdAt: a(86400000 * 2 + 4000) },
-      { id: scrPartner,  sectionId: secMatching, name: '파트너 상세', status: '디자인중', createdAt: a(86400000 * 2 + 3000) },
-      { id: scrBook,     sectionId: secMatching, name: '예약 입력',   status: '기획',     createdAt: a(86400000 * 2 + 2000) },
-      { id: scrBookDone, sectionId: secMatching, name: '예약 완료',   status: '기획',     createdAt: a(86400000 * 2 + 1000) },
-      /* 산책 기록 */
-      { id: scrWalkReady,  sectionId: secWalk, name: '산책 시작',   status: '기획',  createdAt: a(86400000 * 1 + 4000) },
-      { id: scrWalkActive, sectionId: secWalk, name: '산책 중',     status: '기획',  createdAt: a(86400000 * 1 + 3000) },
-      { id: scrWalkEnd,    sectionId: secWalk, name: '산책 완료',   status: '미정',  createdAt: a(86400000 * 1 + 2000) },
-      { id: scrWalkDetail, sectionId: secWalk, name: '기록 상세',   status: '미정',  createdAt: a(86400000 * 1 + 1000) },
+      /* 온보딩 — depth 2 */
+      { id: scrSplash,  sectionId: secOnboarding, parentId: null, name: '스플래시',   status: '완료',   createdAt: a(86400000 * 4 + 5000) },
+      { id: scrRole,    sectionId: secOnboarding, parentId: null, name: '역할 선택',   status: '완료',   createdAt: a(86400000 * 4 + 4000) },
+      { id: scrDogReg,  sectionId: secOnboarding, parentId: null, name: '반려견 등록', status: '개발중', createdAt: a(86400000 * 4 + 3000) },
+      { id: scrLogin,   sectionId: secOnboarding, parentId: null, name: '소셜 로그인', status: '개발중', createdAt: a(86400000 * 4 + 2000) },
+      /* 온보딩 — depth 3 */
+      { id: scrRoleOwner,   sectionId: secOnboarding, parentId: scrRole, name: '견주 온보딩',   status: '개발중', createdAt: a(86400000 * 4 + 1500) },
+      { id: scrRolePartner, sectionId: secOnboarding, parentId: scrRole, name: '파트너 온보딩', status: '기획',   createdAt: a(86400000 * 4 + 1000) },
+
+      /* 메인 탭 — depth 2 */
+      { id: scrHome,     sectionId: secMain, parentId: null, name: '홈',        status: '개발중',  createdAt: a(86400000 * 3 + 5000) },
+      { id: scrMatchTab, sectionId: secMain, parentId: null, name: '매칭',       status: '디자인중', createdAt: a(86400000 * 3 + 4000) },
+      { id: scrWalkTab,  sectionId: secMain, parentId: null, name: '산책',       status: '디자인중', createdAt: a(86400000 * 3 + 3000) },
+      { id: scrMyTab,    sectionId: secMain, parentId: null, name: '마이페이지', status: '기획',    createdAt: a(86400000 * 3 + 2000) },
+      /* 메인 탭 — depth 3 */
+      { id: scrNoti,    sectionId: secMain, parentId: scrHome,  name: '알림 센터',   status: '디자인중', createdAt: a(86400000 * 3 + 1800) },
+      { id: scrMyEdit,  sectionId: secMain, parentId: scrMyTab, name: '프로필 편집', status: '기획',    createdAt: a(86400000 * 3 + 1600) },
+      { id: scrDogEdit, sectionId: secMain, parentId: scrMyTab, name: '반려견 편집', status: '기획',    createdAt: a(86400000 * 3 + 1400) },
+      /* 메인 탭 — depth 4 */
+      { id: scrDogTags, sectionId: secMain, parentId: scrDogEdit, name: '성격 태그 설정', status: '미정', createdAt: a(86400000 * 3 + 1200) },
+
+      /* 파트너 매칭 — depth 2 */
+      { id: scrSearch,   sectionId: secMatching, parentId: null, name: '파트너 검색', status: '디자인중', createdAt: a(86400000 * 2 + 5000) },
+      { id: scrPartner,  sectionId: secMatching, parentId: null, name: '파트너 상세', status: '디자인중', createdAt: a(86400000 * 2 + 4000) },
+      { id: scrBook,     sectionId: secMatching, parentId: null, name: '예약 입력',   status: '기획',    createdAt: a(86400000 * 2 + 3000) },
+      { id: scrBookDone, sectionId: secMatching, parentId: null, name: '예약 완료',   status: '기획',    createdAt: a(86400000 * 2 + 2000) },
+      /* 파트너 매칭 — depth 3 */
+      { id: scrSearchRegion, sectionId: secMatching, parentId: scrSearch,  name: '지역 설정', status: '기획', createdAt: a(86400000 * 2 + 1800) },
+      { id: scrSearchFilter, sectionId: secMatching, parentId: scrSearch,  name: '필터 설정', status: '기획', createdAt: a(86400000 * 2 + 1600) },
+      { id: scrReviews,      sectionId: secMatching, parentId: scrPartner, name: '후기 목록', status: '기획', createdAt: a(86400000 * 2 + 1400) },
+      /* 파트너 매칭 — depth 4 */
+      { id: scrReviewWrite, sectionId: secMatching, parentId: scrReviews, name: '후기 작성', status: '미정', createdAt: a(86400000 * 2 + 1200) },
+
+      /* 산책 기록 — depth 2 */
+      { id: scrWalkReady,  sectionId: secWalk, parentId: null, name: '산책 시작', status: '기획', createdAt: a(86400000 * 1 + 5000) },
+      { id: scrWalkActive, sectionId: secWalk, parentId: null, name: '산책 중',   status: '기획', createdAt: a(86400000 * 1 + 4000) },
+      { id: scrWalkEnd,    sectionId: secWalk, parentId: null, name: '산책 완료', status: '미정', createdAt: a(86400000 * 1 + 3000) },
+      { id: scrWalkDetail, sectionId: secWalk, parentId: null, name: '기록 상세', status: '미정', createdAt: a(86400000 * 1 + 2000) },
+      /* 산책 기록 — depth 3 */
+      { id: scrWalkPhoto, sectionId: secWalk, parentId: scrWalkActive, name: '사진 촬영', status: '미정', createdAt: a(86400000 * 1 + 1600) },
+      { id: scrWalkShare, sectionId: secWalk, parentId: scrWalkEnd,    name: '공유 옵션', status: '미정', createdAt: a(86400000 * 1 + 1400) },
     ];
 
     let cAt = t - 86400000 * 5;
@@ -166,6 +215,16 @@
       nc(scrRole, '견주로 시작'),
       nc(scrRole, '파트너로 시작'),
       nc(scrRole, '이미 계정 있어요'),
+      /* 견주 온보딩 */
+      nc(scrRoleOwner, '반려견 마릿수 선택'),
+      nc(scrRoleOwner, '주요 관심사 태그'),
+      nc(scrRoleOwner, '위치 권한 요청'),
+      nc(scrRoleOwner, '시작하기 버튼'),
+      /* 파트너 온보딩 */
+      nc(scrRolePartner, '돌봄 가능 견종 선택'),
+      nc(scrRolePartner, '활동 가능 지역 설정'),
+      nc(scrRolePartner, '경력 / 자격 입력'),
+      nc(scrRolePartner, '심사 신청 버튼'),
       /* 반려견 등록 */
       nc(scrDogReg, '이름 / 견종 / 나이 입력'),
       nc(scrDogReg, '성격 태그 선택'),
@@ -181,6 +240,11 @@
       nc(scrHome, '오늘 예약 현황'),
       nc(scrHome, '최근 산책 기록'),
       nc(scrHome, '빠른 매칭 바로가기'),
+      nc(scrHome, '알림 아이콘'),
+      /* 알림 센터 */
+      nc(scrNoti, '읽지 않은 알림 뱃지'),
+      nc(scrNoti, '알림 타입별 아이콘'),
+      nc(scrNoti, '전체 읽음 처리'),
       /* 매칭 탭 */
       nc(scrMatchTab, '날짜 / 시간 필터'),
       nc(scrMatchTab, '지역 선택'),
@@ -195,15 +259,48 @@
       nc(scrMyTab, '예약 내역'),
       nc(scrMyTab, '반려견 관리'),
       nc(scrMyTab, '앱 설정'),
+      /* 프로필 편집 */
+      nc(scrMyEdit, '닉네임 수정'),
+      nc(scrMyEdit, '프로필 사진 변경'),
+      nc(scrMyEdit, '저장 버튼'),
+      /* 반려견 편집 */
+      nc(scrDogEdit, '이름 / 나이 수정'),
+      nc(scrDogEdit, '견종 수정'),
+      nc(scrDogEdit, '사진 변경'),
+      nc(scrDogEdit, '성격 태그 수정 →'),
+      /* 성격 태그 설정 */
+      nc(scrDogTags, '활발함 / 조용함'),
+      nc(scrDogTags, '친화적 / 낯가림'),
+      nc(scrDogTags, '겁쟁이 / 용감'),
+      nc(scrDogTags, '적용 버튼'),
       /* 파트너 검색 */
       nc(scrSearch, '날짜 & 지역 조건'),
       nc(scrSearch, '정렬 / 필터'),
       nc(scrSearch, '지도 / 리스트 토글'),
+      nc(scrSearch, '파트너 카드'),
+      /* 지역 설정 */
+      nc(scrSearchRegion, '지도 뷰'),
+      nc(scrSearchRegion, '동 단위 검색'),
+      nc(scrSearchRegion, '반경 설정 슬라이더'),
+      /* 필터 설정 */
+      nc(scrSearchFilter, '가격 범위'),
+      nc(scrSearchFilter, '파트너 경력'),
+      nc(scrSearchFilter, '돌봄 가능 견종'),
+      nc(scrSearchFilter, '적용 / 초기화'),
       /* 파트너 상세 */
       nc(scrPartner, '파트너 사진 & 이름'),
       nc(scrPartner, '자기소개 / 경력'),
-      nc(scrPartner, '후기 & 별점'),
+      nc(scrPartner, '후기 미리보기 →'),
       nc(scrPartner, '예약하기 버튼'),
+      /* 후기 목록 */
+      nc(scrReviews, '후기 키워드 태그 통계'),
+      nc(scrReviews, '후기 카드 리스트'),
+      nc(scrReviews, '후기 작성하기 버튼 →'),
+      /* 후기 작성 */
+      nc(scrReviewWrite, '키워드 태그 선택'),
+      nc(scrReviewWrite, '한줄 코멘트 입력'),
+      nc(scrReviewWrite, '별점 (선택)'),
+      nc(scrReviewWrite, '제출 버튼'),
       /* 예약 입력 */
       nc(scrBook, '날짜 / 시간 선택'),
       nc(scrBook, '반려견 선택'),
@@ -220,12 +317,21 @@
       /* 산책 중 */
       nc(scrWalkActive, '실시간 GPS 경로'),
       nc(scrWalkActive, '시간 / 거리 카운터'),
-      nc(scrWalkActive, '사진 찍기'),
+      nc(scrWalkActive, '사진 찍기 →'),
       nc(scrWalkActive, '일시정지 / 종료'),
+      /* 사진 촬영 */
+      nc(scrWalkPhoto, '카메라 뷰파인더'),
+      nc(scrWalkPhoto, '셔터 버튼'),
+      nc(scrWalkPhoto, '갤러리 첨부'),
       /* 산책 완료 */
       nc(scrWalkEnd, '경로 요약 지도'),
       nc(scrWalkEnd, '총 시간 / 거리'),
-      nc(scrWalkEnd, '저장 & 공유'),
+      nc(scrWalkEnd, '공유하기 →'),
+      nc(scrWalkEnd, '저장 버튼'),
+      /* 공유 옵션 */
+      nc(scrWalkShare, '인스타그램 공유'),
+      nc(scrWalkShare, '카카오 공유'),
+      nc(scrWalkShare, '이미지 저장'),
       /* 기록 상세 */
       nc(scrWalkDetail, '지도 확대 보기'),
       nc(scrWalkDetail, '사진 갤러리'),
