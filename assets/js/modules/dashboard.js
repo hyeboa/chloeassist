@@ -112,6 +112,13 @@ const Dashboard = (() => {
     render();
   }
 
+  function toggleStar(id) {
+    const t = (Store.get('tasks') || []).find(t => t.id === id);
+    if (!t) return;
+    Store.update('tasks', id, { starred: !t.starred });
+    render();
+  }
+
   function deleteTask(id) {
     Store.remove('tasks', id);
     render();
@@ -124,7 +131,8 @@ const Dashboard = (() => {
   function renderCatGroup(cat, tasks) {
     const active = tasks.filter(t => !t.done);
     const done   = tasks.filter(t =>  t.done);
-    const toShow = showDone ? tasks : active;
+    const toShow = (showDone ? tasks : active)
+      .sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0));
     if (!toShow.length && !active.length) return '';
 
     return `
@@ -138,7 +146,11 @@ const Dashboard = (() => {
           <div class="today-task ${t.done ? 'done' : ''}">
             <div class="today-checkbox ${t.done ? 'checked' : ''}"
               onclick="Dashboard.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
-            <span class="today-task-text">${escapeHtml(t.title)}</span>
+            <span class="today-task-text ${t.starred ? 'starred' : ''}">${escapeHtml(t.title)}</span>
+            <button class="today-star ${t.starred ? 'on' : ''}"
+              onclick="Dashboard.toggleStar('${t.id}')" title="${t.starred ? '별표 해제' : '별표 추가'}">
+              ${t.starred ? '★' : '☆'}
+            </button>
             <button class="today-task-del" onclick="Dashboard.deleteTask('${t.id}')">✕</button>
           </div>
         `).join('')}
@@ -220,7 +232,7 @@ const Dashboard = (() => {
     render();
   }
 
-  return { render, toggleDone, deleteTask, toggleShowDone, selectCat };
+  return { render, toggleDone, toggleStar, deleteTask, toggleShowDone, selectCat };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Dashboard.render());

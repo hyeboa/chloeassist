@@ -150,6 +150,15 @@
 .bl-section-rest .bl-section-label { color: var(--color-text-3); }
 
 /* ===== 태스크 아이템 ===== */
+/* ─ 태스크 wrapper ─ */
+.bl-task-wrap {
+  margin-bottom: 6px;
+}
+
+.bl-task-wrap.starred > .bl-task {
+  border-left: 3px solid #f59e0b;
+}
+
 .bl-task {
   display: flex;
   align-items: center;
@@ -157,9 +166,9 @@
   padding: 11px 14px;
   background: var(--color-surface);
   border-radius: var(--radius-sm);
-  margin-bottom: 6px;
   border: 1px solid var(--color-border);
   transition: box-shadow var(--transition);
+  cursor: pointer;
 }
 
 .bl-task:hover { box-shadow: var(--shadow-sm); }
@@ -203,6 +212,58 @@
 }
 
 .bl-task.done .bl-title { text-decoration: line-through; color: var(--color-text-3); }
+
+/* ─ 별표 ─ */
+.bl-star {
+  font-size: 0.85rem;
+  color: var(--color-text-3);
+  opacity: 0;
+  flex-shrink: 0;
+  padding: 0 2px;
+  transition: opacity var(--transition), color var(--transition);
+}
+
+.bl-task:hover .bl-star { opacity: 1; }
+.bl-star.on              { color: #f59e0b; opacity: 1; }
+.bl-star:hover           { color: #f59e0b; }
+
+/* ─ 메모 있음 점 ─ */
+.bl-note-dot {
+  font-size: 1rem;
+  color: var(--color-primary);
+  opacity: 0.5;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ─ 노트 영역 ─ */
+.bl-note-wrap {
+  padding: 0 14px 10px 41px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.bl-note-input {
+  width: 100%;
+  min-height: 72px;
+  font-size: 0.82rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.65;
+  box-sizing: border-box;
+  transition: border-color var(--transition);
+}
+
+.bl-note-input:focus { border-color: var(--color-primary); }
+.bl-note-input::placeholder { color: var(--color-text-3); }
 
 /* ===== 카테고리 뱃지 ===== */
 .cat-badge {

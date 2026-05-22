@@ -10,6 +10,7 @@ const Schedule = (() => {
   let editingDateId = null;
   let searchQuery   = '';
   let hideDone      = false;
+  let expandedNoteId = null;
 
   function getTasks() { return Store.get('tasks') || []; }
 
@@ -63,27 +64,47 @@ const Schedule = (() => {
 
   /* ─ 태스크 행 ─ */
   function taskRow(t) {
+    const isExpanded = expandedNoteId === t.id;
+
     let dateEl;
     if (editingDateId === t.id) {
       dateEl = `<input class="task-date-edit" id="date-edit-${t.id}"
         placeholder="다음주 금요일" autocomplete="off">`;
     } else if (t.dueDate) {
       dateEl = `<span class="task-date-badge ${dateBadgeCls(t)}"
-        onclick="Schedule.startDateEdit('${t.id}')">${shortDate(t.dueDate)}</span>`;
+        onclick="event.stopPropagation();Schedule.startDateEdit('${t.id}')">${shortDate(t.dueDate)}</span>`;
     } else {
-      dateEl = `<span class="task-date-add" onclick="Schedule.startDateEdit('${t.id}')">+ 날짜</span>`;
+      dateEl = `<span class="task-date-add"
+        onclick="event.stopPropagation();Schedule.startDateEdit('${t.id}')">+ 날짜</span>`;
     }
 
     return `
-      <div class="bl-task ${t.done ? 'done' : ''}">
-        <div class="bl-checkbox ${t.done ? 'checked' : ''}"
-          onclick="Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
-        <span class="bl-title">${escapeHtml(t.title)}</span>
-        ${dateEl}
-        <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
-        <div class="bl-actions">
-          <button class="bl-btn bl-btn-del" onclick="Schedule.deleteTask('${t.id}')">삭제</button>
+      <div class="bl-task-wrap ${t.starred ? 'starred' : ''}">
+        <div class="bl-task ${t.done ? 'done' : ''} ${t.starred ? 'starred' : ''}"
+          onclick="Schedule.toggleNote('${t.id}')">
+          <div class="bl-checkbox ${t.done ? 'checked' : ''}"
+            onclick="event.stopPropagation();Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
+          <span class="bl-title">${escapeHtml(t.title)}</span>
+          ${t.note ? '<span class="bl-note-dot" title="메모 있음">•</span>' : ''}
+          ${dateEl}
+          <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
+          <button class="bl-star ${t.starred ? 'on' : ''}"
+            onclick="event.stopPropagation();Schedule.toggleStar('${t.id}')"
+            title="${t.starred ? '별표 해제' : '별표 추가'}">
+            ${t.starred ? '★' : '☆'}
+          </button>
+          <div class="bl-actions">
+            <button class="bl-btn bl-btn-del"
+              onclick="event.stopPropagation();Schedule.deleteTask('${t.id}')">삭제</button>
+          </div>
         </div>
+        ${isExpanded ? `
+          <div class="bl-note-wrap">
+            <textarea class="bl-note-input" id="note-${t.id}"
+              placeholder="이 할 일을 왜 하는지, 관련 컨텍스트, 참고 링크..."
+              onblur="Schedule.saveNote('${t.id}', this.value)"
+              onclick="event.stopPropagation()">${escapeHtml(t.note || '')}</textarea>
+          </div>` : ''}
       </div>`;
   }
 
@@ -109,7 +130,11 @@ const Schedule = (() => {
         return true;
       })
       .sort((a, b) => {
+        // 별표 먼저
+        if (!!b.starred !== !!a.starred) return b.starred ? 1 : -1;
+        // 완료 나중에
         if (a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
+        // 날짜순
         const aD = a.dueDate ? new Date(a.dueDate) : null;
         const bD = b.dueDate ? new Date(b.dueDate) : null;
         if (aD && bD) return aD - bD;
@@ -146,6 +171,7 @@ const Schedule = (() => {
     const el = document.getElementById('bl-list');
     if (el) el.innerHTML = buildListHTML();
     bindDateEdit();
+    bindNoteAutoSave();
   }
 
   /* ─ 렌더 ─ */
@@ -190,9 +216,10 @@ const Schedule = (() => {
     bindInput();
     bindSearch();
     bindDateEdit();
+    bindNoteAutoSave();
   }
 
-  /* ─ 검색바 바인딩 ─ */
+  /* ─ 검색바 ─ */
   function bindSearch() {
     const input = document.getElementById('bl-search');
     if (!input) return;
@@ -255,11 +282,11 @@ const Schedule = (() => {
     input.focus();
 
     input.addEventListener('keydown', async (e) => {
-      if (e.key === 'Escape') { editingDateId = null; render(); return; }
+      if (e.key === 'Escape') { editingDateId = null; renderList(); return; }
       if (e.key !== 'Enter') return;
 
       const text = input.value.trim();
-      if (!text) { editingDateId = null; render(); return; }
+      if (!text) { editingDateId = null; renderList(); return; }
 
       if (!AI.getApiKey()) {
         Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
@@ -284,12 +311,21 @@ const Schedule = (() => {
         Toast.show('오류가 발생했어요. 다시 시도해주세요.', 'error');
       }
       editingDateId = null;
-      render();
+      renderList();
     });
 
     input.addEventListener('blur', () => {
-      setTimeout(() => { if (editingDateId) { editingDateId = null; render(); } }, 200);
+      setTimeout(() => { if (editingDateId) { editingDateId = null; renderList(); } }, 200);
     });
+  }
+
+  /* ─ 노트 자동 저장 ─ */
+  function bindNoteAutoSave() {
+    if (!expandedNoteId) return;
+    const ta = document.getElementById(`note-${expandedNoteId}`);
+    if (!ta) return;
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
   }
 
   /* ─ 공개 메서드 ─ */
@@ -297,22 +333,40 @@ const Schedule = (() => {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
     Store.update('tasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
-    render();
+    renderList();
+  }
+
+  function toggleStar(id) {
+    const t = getTasks().find(t => t.id === id);
+    if (!t) return;
+    Store.update('tasks', id, { starred: !t.starred });
+    renderList();
+  }
+
+  function toggleNote(id) {
+    expandedNoteId = expandedNoteId === id ? null : id;
+    renderList();
+  }
+
+  function saveNote(id, text) {
+    Store.update('tasks', id, { note: text });
   }
 
   function moveToToday(id) {
     Store.update('tasks', id, { isToday: true, dueDate: new Date().toISOString().slice(0, 10) });
     Toast.show('오늘 할 일로 추가됐어요.', 'success');
-    render();
+    renderList();
   }
 
   function deleteTask(id) {
+    if (expandedNoteId === id) expandedNoteId = null;
     Store.remove('tasks', id);
-    render();
+    renderList();
   }
 
   function setFilter(f) {
     activeFilter = f;
+    expandedNoteId = null;
     render();
   }
 
@@ -325,7 +379,7 @@ const Schedule = (() => {
 
   function startDateEdit(id) {
     editingDateId = id;
-    render();
+    renderList();
   }
 
   function toggleHideDone() {
@@ -333,7 +387,10 @@ const Schedule = (() => {
     render();
   }
 
-  return { render, setFilter, toggleDone, moveToToday, deleteTask, selectCat, startDateEdit, toggleHideDone };
+  return {
+    render, setFilter, toggleDone, toggleStar, toggleNote, saveNote,
+    moveToToday, deleteTask, selectCat, startDateEdit, toggleHideDone,
+  };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Schedule.render());
