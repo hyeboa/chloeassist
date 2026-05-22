@@ -90,12 +90,18 @@ const Weekly = (() => {
     const tasks      = Store.get('tasks')      || [];
     const features   = Store.get('features')   || [];
 
-    /* 이번 주 태스크 */
-    const weekTasks = tasks.filter(t =>
-      (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd)
+    /* 이번 주 태스크:
+       - 완료된 것 → doneAt이 이번 주에 찍힌 것 (없으면 dueDate 기준 fallback)
+       - 미완료    → dueDate가 이번 주인 것 */
+    const doneTasks = tasks.filter(t => {
+      if (!t.done) return false;
+      if (t.doneAt) return inWeek(new Date(t.doneAt).toISOString().slice(0,10), currentWeekStart, weekEnd);
+      return (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd);
+    });
+    const missTasks = tasks.filter(t =>
+      !t.done && ((isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd))
     );
-    const doneTasks = weekTasks.filter(t =>  t.done);
-    const missTasks = weekTasks.filter(t => !t.done);
+    const weekTasks = [...doneTasks, ...missTasks];
 
     /* 다음 주 태스크 (현재 주 뷰에서만) */
     const nextWeekStart = new Date(currentWeekStart);
@@ -281,11 +287,17 @@ const Weekly = (() => {
     const milestones = Store.get('milestones') || [];
     const features   = Store.get('features')   || [];
 
-    const weekTasks = tasks.filter(t =>
-      (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd)
+    const wEnd2   = getWeekEnd(currentWeekStart);
+    const doneSummary = tasks.filter(t => {
+      if (!t.done) return false;
+      if (t.doneAt) return inWeek(new Date(t.doneAt).toISOString().slice(0,10), currentWeekStart, wEnd2);
+      return (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, wEnd2);
+    });
+    const missSummary = tasks.filter(t =>
+      !t.done && ((isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, wEnd2))
     );
-    const done    = weekTasks.filter(t =>  t.done).map(t => t.title);
-    const miss    = weekTasks.filter(t => !t.done).map(t => t.title);
+    const done = doneSummary.map(t => t.title);
+    const miss = missSummary.map(t => t.title);
     const featDone = features.filter(f => f.status === '완료').length;
     const upcomingMs = milestones.filter(m => !m.done && new Date(m.date) >= today)
       .sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 2);

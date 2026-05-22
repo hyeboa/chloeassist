@@ -252,7 +252,7 @@ const Schedule = (() => {
   function toggleDone(id) {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
-    Store.update('tasks', id, { done: !t.done });
+    Store.update('tasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     render();
   }
 

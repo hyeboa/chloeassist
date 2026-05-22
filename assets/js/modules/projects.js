@@ -17,7 +17,10 @@ const Projects = (() => {
   }
 
   function moveStatus(id, newStatus) {
-    Store.update('features', id, { status: newStatus });
+    Store.update('features', id, {
+      status: newStatus,
+      doneAt: newStatus === '완료' ? Date.now() : null,
+    });
     render();
   }
 

@@ -197,7 +197,7 @@ const Roadmap = (() => {
   function toggleDone(id) {
     const ms = getMilestones().find(m => m.id === id);
     if (!ms) return;
-    Store.update('milestones', id, { done: !ms.done });
+    Store.update('milestones', id, { done: !ms.done, doneAt: !ms.done ? Date.now() : null });
     render();
   }
 

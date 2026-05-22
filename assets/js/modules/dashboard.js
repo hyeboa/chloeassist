@@ -108,7 +108,7 @@ const Dashboard = (() => {
   function toggleDone(id) {
     const t = (Store.get('tasks') || []).find(t => t.id === id);
     if (!t) return;
-    Store.update('tasks', id, { done: !t.done });
+    Store.update('tasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     render();
   }
 
