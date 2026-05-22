@@ -7,6 +7,7 @@ const Nav = (() => {
   const NAV_ITEMS = [
     { href: 'index.html',    label: '오늘',       icon: '◎' },
     { href: 'weekly.html',   label: '주간 리뷰',   icon: '◫' },
+    { href: 'monthly.html',  label: '월간 리뷰',   icon: '◰' },
     { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
     { href: 'timeline.html', label: '타임라인',    icon: '◷' },
     { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
