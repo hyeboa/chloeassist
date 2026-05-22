@@ -1,0 +1,362 @@
+/* ─── 타임라인 ─── */
+
+.tl-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.tl-stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.tl-stat-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-3);
+  margin-bottom: 8px;
+}
+
+.tl-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.tl-stat-of {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-text-3);
+}
+
+.tl-progress-bar {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.tl-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.tl-progress-fill.green { background: #10b981; }
+
+.tl-stat-sub {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+}
+
+.tl-stat-warn { font-size: 0.72rem; color: #ef4444; }
+.tl-stat-ok   { font-size: 0.72rem; color: #10b981; }
+
+.tl-stat-ms-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.tl-stat-ms-date {
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  margin-bottom: 10px;
+}
+
+/* ─── D-day 배지 ─── */
+.tl-dday-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.tl-dday-soon    { background: #fee2e2; color: #dc2626; }
+.tl-dday-near    { background: #fef3c7; color: #b45309; }
+.tl-dday-far     { background: #dbeafe; color: #2563eb; }
+.tl-dday-overdue { background: #fce7f3; color: #be185d; }
+
+/* ─── 섹션 공통 ─── */
+.tl-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.tl-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  margin-bottom: 16px;
+}
+
+/* ─── 타임라인 레이아웃 ─── */
+.tl-outer {
+  display: flex;
+  align-items: stretch;
+}
+
+/* 왼쪽 라벨 열 */
+.tl-labels {
+  flex: 0 0 70px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.tl-ruler-spacer {
+  height: 32px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tl-row-label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  padding-right: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tl-label-ms  { height: 72px; }
+.tl-label-cat { height: 40px; }
+
+/* 오른쪽 캔버스 열 */
+.tl-canvas {
+  flex: 1;
+  overflow-x: auto;
+  border-left: 1px solid var(--color-border);
+  cursor: grab;
+}
+
+.tl-canvas:active { cursor: grabbing; }
+
+.tl-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── 눈금자 ─── */
+.tl-ruler {
+  height: 32px;
+  position: relative;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.tl-ruler-cell {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  border-right: 1px solid var(--color-border);
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+/* ─── 오늘 선 ─── */
+.tl-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-primary);
+  opacity: 0.7;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.tl-today-tag {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  background: var(--color-bg);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+/* ─── 행(row) ─── */
+.tl-row {
+  position: relative;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tl-row-ms    { height: 72px; }
+.tl-row-tasks { height: 40px; }
+
+.tl-row-tasks:nth-child(even) {
+  background: rgba(0,0,0,0.018);
+}
+
+/* ─── 마일스톤 핀 ─── */
+.tl-ms-pin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-50%);
+  z-index: 5;
+  gap: 3px;
+}
+
+.tl-ms-diamond {
+  width: 11px;
+  height: 11px;
+  transform: rotate(45deg);
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.ms-done .tl-ms-diamond    { background: #10b981; }
+.ms-overdue .tl-ms-diamond { background: #ef4444; }
+
+.tl-ms-text {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  white-space: nowrap;
+  max-width: 76px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.tl-ms-date-text {
+  font-size: 0.58rem;
+  color: var(--color-text-3);
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* ─── 할 일 점 ─── */
+.tl-task-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-text-3);
+  z-index: 5;
+  cursor: pointer;
+}
+
+.tl-task-dot:hover { opacity: 0.8; transform: translate(-50%, -50%) scale(1.4); }
+
+.cat-tl-기획   { background: #6d28d9; }
+.cat-tl-디자인 { background: #be185d; }
+.cat-tl-개발   { background: #1d4ed8; }
+.cat-tl-마케팅 { background: #c2410c; }
+.cat-tl-운영   { background: #065f46; }
+
+.tl-task-dot.task-done    { opacity: 0.25; }
+.tl-task-dot.task-overdue { box-shadow: 0 0 0 2px #ef4444; }
+
+/* 툴팁 (오른쪽) */
+.tl-task-tooltip {
+  display: none;
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-text);
+  color: var(--color-surface);
+  font-size: 0.66rem;
+  line-height: 1.4;
+  padding: 5px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.tl-task-dot:hover .tl-task-tooltip { display: block; }
+
+/* ─── 빈 상태 안내 ─── */
+.tl-hint {
+  margin-top: 14px;
+  font-size: 0.75rem;
+  color: var(--color-text-3);
+  text-align: center;
+  padding: 10px 0 4px;
+}
+
+/* ─── 다가오는 마일스톤 목록 ─── */
+.tl-upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tl-upcoming-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tl-upcoming-item:last-child { border-bottom: none; }
+
+.tl-upcoming-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tl-upcoming-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.tl-upcoming-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-3);
+}
+
+.tl-upcoming-date {
+  font-size: 0.75rem;
+  color: var(--color-text-3);
+  white-space: nowrap;
+  padding-top: 2px;
+}

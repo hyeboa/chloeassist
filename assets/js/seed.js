@@ -5,7 +5,7 @@
  */
 
 (function seedSampleData() {
-  if (localStorage.getItem('chloeassist:seeded') === 'v3') return;
+  if (localStorage.getItem('chloeassist:seeded') === 'v4') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -22,27 +22,27 @@
     { id: crypto.randomUUID(), title: '앱스토어 심사 피드백 확인 및 대응',     category: '운영',   done: true,  isToday: true,  createdAt: ago(1000 * 60 * 20) },
 
     // 예정 할 일 (isToday: false) — 기획
-    { id: crypto.randomUUID(), title: '유저 인터뷰 5명 섭외 (견주 3 + 파트너 2)', category: '기획',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 3) },
-    { id: crypto.randomUUID(), title: '핵심 유저 플로우 재정의 (매칭 → 결제)',    category: '기획',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 6) },
-    { id: crypto.randomUUID(), title: '경쟁 앱 리서치 (펫프렌즈, 강아지야)',      category: '기획',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 24) },
-    { id: crypto.randomUUID(), title: '푸시알림 시나리오 전체 정리',              category: '기획',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 30) },
+    { id: crypto.randomUUID(), title: '유저 인터뷰 5명 섭외 (견주 3 + 파트너 2)', category: '기획',   done: false, isToday: false, dueDate: d(4),  createdAt: ago(1000 * 3600 * 3) },
+    { id: crypto.randomUUID(), title: '핵심 유저 플로우 재정의 (매칭 → 결제)',    category: '기획',   done: false, isToday: false, dueDate: d(9),  createdAt: ago(1000 * 3600 * 6) },
+    { id: crypto.randomUUID(), title: '경쟁 앱 리서치 (펫프렌즈, 강아지야)',      category: '기획',   done: false, isToday: false, dueDate: d(14), createdAt: ago(1000 * 3600 * 24) },
+    { id: crypto.randomUUID(), title: '푸시알림 시나리오 전체 정리',              category: '기획',   done: false, isToday: false, dueDate: d(20), createdAt: ago(1000 * 3600 * 30) },
 
     // 예정 할 일 — 디자인
-    { id: crypto.randomUUID(), title: '산책 기록 화면 UI 디자인',                category: '디자인', done: false, isToday: false, createdAt: ago(1000 * 3600 * 5) },
-    { id: crypto.randomUUID(), title: '디자인 시스템 컴포넌트 정리 (버튼, 폼)',   category: '디자인', done: false, isToday: false, createdAt: ago(1000 * 3600 * 10) },
-    { id: crypto.randomUUID(), title: '다크모드 컬러 변수 정의',                  category: '디자인', done: false, isToday: false, createdAt: ago(1000 * 3600 * 48) },
+    { id: crypto.randomUUID(), title: '산책 기록 화면 UI 디자인',                category: '디자인', done: false, isToday: false, dueDate: d(6),  createdAt: ago(1000 * 3600 * 5) },
+    { id: crypto.randomUUID(), title: '디자인 시스템 컴포넌트 정리 (버튼, 폼)',   category: '디자인', done: false, isToday: false, dueDate: d(11), createdAt: ago(1000 * 3600 * 10) },
+    { id: crypto.randomUUID(), title: '다크모드 컬러 변수 정의',                  category: '디자인', done: false, isToday: false, dueDate: d(17), createdAt: ago(1000 * 3600 * 48) },
 
     // 예정 할 일 — 개발
-    { id: crypto.randomUUID(), title: 'API 명세서 리뷰 및 피드백',               category: '개발',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 8) },
-    { id: crypto.randomUUID(), title: '소셜 로그인 (카카오, 애플) 연동 확인',    category: '개발',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 12) },
+    { id: crypto.randomUUID(), title: 'API 명세서 리뷰 및 피드백',               category: '개발',   done: false, isToday: false, dueDate: d(5),  createdAt: ago(1000 * 3600 * 8) },
+    { id: crypto.randomUUID(), title: '소셜 로그인 (카카오, 애플) 연동 확인',    category: '개발',   done: false, isToday: false, dueDate: d(13), createdAt: ago(1000 * 3600 * 12) },
 
     // 예정 할 일 — 마케팅
-    { id: crypto.randomUUID(), title: '베타 테스터 100명 모집 공고 작성',        category: '마케팅', done: false, isToday: false, createdAt: ago(1000 * 3600 * 10) },
-    { id: crypto.randomUUID(), title: '펫 커뮤니티 카페 홍보 글 초안',           category: '마케팅', done: false, isToday: false, createdAt: ago(1000 * 86400 * 2) },
+    { id: crypto.randomUUID(), title: '베타 테스터 100명 모집 공고 작성',        category: '마케팅', done: false, isToday: false, dueDate: d(7),  createdAt: ago(1000 * 3600 * 10) },
+    { id: crypto.randomUUID(), title: '펫 커뮤니티 카페 홍보 글 초안',           category: '마케팅', done: false, isToday: false, dueDate: d(10), createdAt: ago(1000 * 86400 * 2) },
 
     // 예정 할 일 — 운영
-    { id: crypto.randomUUID(), title: '고객 문의 응대 FAQ 작성',                 category: '운영',   done: false, isToday: false, createdAt: ago(1000 * 3600 * 12) },
-    { id: crypto.randomUUID(), title: '개인정보처리방침 최신화',                  category: '운영',   done: false, isToday: false, createdAt: ago(1000 * 86400 * 3) },
+    { id: crypto.randomUUID(), title: '고객 문의 응대 FAQ 작성',                 category: '운영',   done: false, isToday: false, dueDate: d(8),  createdAt: ago(1000 * 3600 * 12) },
+    { id: crypto.randomUUID(), title: '개인정보처리방침 최신화',                  category: '운영',   done: false, isToday: false, dueDate: d(22), createdAt: ago(1000 * 86400 * 3) },
   ];
 
   /* ── 브레인 덤프 ── */
@@ -85,5 +85,5 @@
   localStorage.setItem('chloeassist:notes',      JSON.stringify(notes));
   localStorage.setItem('chloeassist:features',   JSON.stringify(features));
   localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
-  localStorage.setItem('chloeassist:seeded',     'v3');
+  localStorage.setItem('chloeassist:seeded',     'v4');
 })();

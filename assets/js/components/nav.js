@@ -5,11 +5,12 @@
 
 const Nav = (() => {
   const NAV_ITEMS = [
-    { href: 'index.html',     label: '오늘',        icon: '◎' },
-    { href: 'roadmap.html',   label: '로드맵',       icon: '◈' },
-    { href: 'schedule.html',  label: '할 일 목록',   icon: '☰' },
-    { href: 'braindump.html', label: '브레인 덤프',  icon: '✦' },
-    { href: 'projects.html',  label: '기능 보드',    icon: '◉' },
+    { href: 'index.html',    label: '오늘',       icon: '◎' },
+    { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
+    { href: 'timeline.html', label: '타임라인',    icon: '◷' },
+    { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
+    { href: 'braindump.html',label: '브레인 덤프', icon: '✦' },
+    { href: 'projects.html', label: '기능 보드',   icon: '◉' },
   ];
 
   function currentPage() {
