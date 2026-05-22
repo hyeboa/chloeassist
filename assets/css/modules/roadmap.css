@@ -259,3 +259,185 @@
 }
 
 .ms-del-btn:hover { background: #fee2e2; color: var(--color-danger); }
+
+/* ─ 마일스톤 섹션 헤더 (리스트/캘린더 탭) ─ */
+.ms-section-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.ms-section-hd .section-title { margin: 0; }
+
+.ms-view-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+
+.ms-view-tab {
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.ms-view-tab.active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─ 캘린더 ─ */
+.cal-wrap {
+  overflow: hidden;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cal-nav-btn {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cal-nav-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.cal-month-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cal-current-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cal-dow {
+  padding: 10px 0;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cal-dow.sun { color: #ef4444; }
+.cal-dow.sat { color: #3b82f6; }
+
+.cal-cell {
+  min-height: 80px;
+  padding: 8px 6px 6px;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: background var(--transition);
+}
+
+.cal-cell:nth-child(7n) { border-right: none; }
+
+.cal-cell:hover { background: var(--color-surface-2); }
+
+.cal-cell.other-month { background: var(--color-bg); }
+.cal-cell.other-month .cal-date-num { color: var(--color-text-3); opacity: 0.4; }
+
+.cal-cell.is-today {
+  background: rgba(108, 99, 255, 0.04);
+}
+
+.cal-date-num {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.cal-date-num.today-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.cal-date-num.sun { color: #ef4444; }
+.cal-date-num.sat { color: #3b82f6; }
+
+.cal-ms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.cal-ms-item {
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+  line-height: 1.5;
+}
+
+.cal-ms-item.dday-done    { background: rgba(16,185,129,0.12); color: #065f46; }
+.cal-ms-item.dday-today   { background: rgba(239,68,68,0.12);  color: #dc2626; font-weight: 700; }
+.cal-ms-item.dday-overdue { background: rgba(239,68,68,0.08);  color: #b91c1c; }
+.cal-ms-item.dday-soon    { background: rgba(245,158,11,0.12); color: #92400e; }
+.cal-ms-item.dday-future  { background: rgba(108,99,255,0.1);  color: var(--color-primary); }
+
+.cal-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-3);
+  padding: 20px 0 8px;
+  line-height: 1.8;
+}
