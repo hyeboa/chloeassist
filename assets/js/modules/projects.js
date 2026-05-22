@@ -88,7 +88,6 @@ const Projects = (() => {
           <span class="nl-rule-sep">·</span>
           <span class="nl-rule-hint">필수 · 분야·설명은 선택 · Enter로 추가</span>
         </div>
-        <div class="inline-nl-status" id="feat-status"></div>
       </div>
 
       <div class="kanban-board">
@@ -112,8 +111,7 @@ const Projects = (() => {
 
   /* ─ 기능 입력 바인딩 ─ */
   function bindFeatInput() {
-    const input  = document.getElementById('feat-input');
-    const status = document.getElementById('feat-status');
+    const input = document.getElementById('feat-input');
     if (!input) return;
 
     input.addEventListener('keydown', async (e) => {
@@ -121,32 +119,11 @@ const Projects = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      if (!AI.getApiKey()) {
-        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
-        return;
-      }
-
-      input.disabled = true;
-      status.textContent = '✦ AI가 분석 중...';
-      status.className = 'inline-nl-status';
-
-      try {
-        const result = await NLInput.parse('feature', text);
-        Store.push('features', {
-          name: result.name,
-          desc: result.desc || '',
-          category: result.category || '기획',
-          status: '아이디어',
-        });
-        input.value = '';
-        status.textContent = '';
-        render();
-      } catch (err) {
-        status.textContent = '⚠ ' + err.message;
-        status.className = 'inline-nl-status error';
-        input.disabled = false;
-        input.focus();
-      }
+      Store.push('features', {
+        name: text, desc: '', category: '기획', status: '아이디어',
+      });
+      input.value = '';
+      render();
     });
   }
 
