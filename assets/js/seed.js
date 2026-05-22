@@ -7,24 +7,24 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v6: 사이트맵 데이터 추가 */
+  /* v4 → v7 */
   if (version === 'v4') {
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v6');
+    localStorage.setItem('chloeassist:seeded', 'v7');
     return;
   }
 
-  /* v5 → v6: 계층 구조 샘플 데이터로 교체 */
-  if (version === 'v5') {
+  /* v5 / v6 → v7: 사이트맵 데이터 교체 */
+  if (version === 'v5' || version === 'v6') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
     localStorage.removeItem('chloeassist:sitemapComponents');
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v6');
+    localStorage.setItem('chloeassist:seeded', 'v7');
     return;
   }
 
-  if (version === 'v6') return;
+  if (version === 'v7') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -96,110 +96,127 @@
   localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
 
   injectSitemapData();
-  localStorage.setItem('chloeassist:seeded', 'v6');
+  localStorage.setItem('chloeassist:seeded', 'v7');
 
-  /* ── 사이트맵 샘플 데이터 (v6: 계층 구조 포함) ── */
+  /* ══════════════════════════════════════════════
+     사이트맵 샘플 데이터 — 댕찾아 (v7)
+     잃어버린 강아지 찾기 앱 화면 구조
+  ══════════════════════════════════════════════ */
   function injectSitemapData() {
     const t = Date.now();
     const a = (ms) => t - ms;
 
-    /* ─ 섹션 ID ─ */
-    const secOnboarding = crypto.randomUUID();
-    const secMain       = crypto.randomUUID();
-    const secMatching   = crypto.randomUUID();
-    const secWalk       = crypto.randomUUID();
+    /* ─ 섹션 ─ */
+    const secEntry  = crypto.randomUUID(); // 진입 화면
+    const secAuth   = crypto.randomUUID(); // 인증 화면
+    const secMain   = crypto.randomUUID(); // 메인 앱
+    const secShare  = crypto.randomUUID(); // 종료 / 공유 흐름
 
-    /* ─ 화면 ID — 온보딩 (depth 2) ─ */
-    const scrSplash  = crypto.randomUUID();
-    const scrRole    = crypto.randomUUID();
-    const scrDogReg  = crypto.randomUUID();
-    const scrLogin   = crypto.randomUUID();
-    /* 온보딩 depth 3 */
-    const scrRoleOwner   = crypto.randomUUID(); // 역할 선택 > 견주 온보딩
-    const scrRolePartner = crypto.randomUUID(); // 역할 선택 > 파트너 온보딩
+    /* ─ 진입 화면 — depth 2 ─ */
+    const scrSplash    = crypto.randomUUID();
+    const scrOnboarding= crypto.randomUUID();
 
-    /* ─ 화면 ID — 메인 탭 (depth 2) ─ */
-    const scrHome    = crypto.randomUUID();
-    const scrMatchTab= crypto.randomUUID();
-    const scrWalkTab = crypto.randomUUID();
-    const scrMyTab   = crypto.randomUUID();
-    /* 메인 depth 3 */
-    const scrNoti      = crypto.randomUUID(); // 홈 > 알림 센터
-    const scrMyEdit    = crypto.randomUUID(); // 마이 > 프로필 편집
-    const scrDogEdit   = crypto.randomUUID(); // 마이 > 반려견 편집
-    /* 메인 depth 4 */
-    const scrDogTags   = crypto.randomUUID(); // 반려견 편집 > 성격 태그 설정
+    /* ─ 인증 화면 — depth 2 ─ */
+    const scrLogin     = crypto.randomUUID();
 
-    /* ─ 화면 ID — 파트너 매칭 (depth 2) ─ */
-    const scrSearch   = crypto.randomUUID();
-    const scrPartner  = crypto.randomUUID();
-    const scrBook     = crypto.randomUUID();
-    const scrBookDone = crypto.randomUUID();
-    /* 매칭 depth 3 */
-    const scrSearchRegion = crypto.randomUUID(); // 파트너 검색 > 지역 설정
-    const scrSearchFilter = crypto.randomUUID(); // 파트너 검색 > 필터 설정
-    const scrReviews      = crypto.randomUUID(); // 파트너 상세 > 후기 목록
-    /* 매칭 depth 4 */
-    const scrReviewWrite  = crypto.randomUUID(); // 후기 목록 > 후기 작성
+    /* ─ 메인 앱 — depth 2 (컨테이너) ─ */
+    const scrBottomNav = crypto.randomUUID(); // 하단 네비게이션
+    const scrDetail    = crypto.randomUUID(); // 공통 상세 화면
+    const scrSupport   = crypto.randomUUID(); // 보조 화면
 
-    /* ─ 화면 ID — 산책 기록 (depth 2) ─ */
-    const scrWalkReady  = crypto.randomUUID();
-    const scrWalkActive = crypto.randomUUID();
-    const scrWalkEnd    = crypto.randomUUID();
-    const scrWalkDetail = crypto.randomUUID();
-    /* 산책 depth 3 */
-    const scrWalkPhoto  = crypto.randomUUID(); // 산책 중 > 사진 촬영
-    const scrWalkShare  = crypto.randomUUID(); // 산책 완료 > 공유 옵션
+    /* ─ 메인 앱 — depth 3 (하단 네비 탭) ─ */
+    const scrHome      = crypto.randomUUID(); // 홈
+    const scrRegister  = crypto.randomUUID(); // 등록
+    const scrMyPage    = crypto.randomUUID(); // 마이페이지
+
+    /* ─ 메인 앱 — depth 3 (상세 화면) ─ */
+    const scrDogDetail = crypto.randomUUID(); // 실종 강아지 상세
+    const scrSighting  = crypto.randomUUID(); // 목격 제보 작성
+
+    /* ─ 메인 앱 — depth 3 (보조 화면) ─ */
+    const scrLocation  = crypto.randomUUID(); // 위치 설정
+    const scrFound     = crypto.randomUUID(); // 실종 종료 (찾음 처리)
+    const scrNotif     = crypto.randomUUID(); // 알림 목록
+    const scrEmpty     = crypto.randomUUID(); // 빈 상태 화면
+    const scrError     = crypto.randomUUID(); // 에러 화면
+
+    /* ─ 메인 앱 — depth 4 (홈 하위) ─ */
+    const scrFeed      = crypto.randomUUID(); // 실종 강아지 피드
+    const scrSearch    = crypto.randomUUID(); // 검색
+
+    /* ─ 메인 앱 — depth 4 (등록 하위) ─ */
+    const scrRegForm   = crypto.randomUUID(); // 강아지 등록 폼
+    const scrRegDone   = crypto.randomUUID(); // 등록 완료 & 공유
+
+    /* ─ 메인 앱 — depth 4 (마이페이지 하위) ─ */
+    const scrMyList    = crypto.randomUUID(); // 내가 등록한 강아지 목록
+    const scrMyReports = crypto.randomUUID(); // 받은 목격 제보 목록
+    const scrMyProfile = crypto.randomUUID(); // 프로필 수정
+    const scrSettings  = crypto.randomUUID(); // 설정
+
+    /* ─ 메인 앱 — depth 4 (강아지 상세 하위) ─ */
+    const scrDogInfo   = crypto.randomUUID(); // 강아지 정보 + 미니 지도
+    const scrReportArea= crypto.randomUUID(); // 목격 제보 영역
+
+    /* ─ 종료/공유 — depth 2 ─ */
+    const scrShareSheet= crypto.randomUUID(); // 공유
 
     const sections = [
-      { id: secOnboarding, name: '온보딩 플로우',     createdAt: a(86400000 * 4) },
-      { id: secMain,       name: '메인 탭',            createdAt: a(86400000 * 3) },
-      { id: secMatching,   name: '파트너 매칭 플로우', createdAt: a(86400000 * 2) },
-      { id: secWalk,       name: '산책 기록 플로우',   createdAt: a(86400000 * 1) },
+      { id: secEntry,  name: '진입 화면',        createdAt: a(86400000 * 4) },
+      { id: secAuth,   name: '인증 화면',         createdAt: a(86400000 * 3) },
+      { id: secMain,   name: '메인 앱',           createdAt: a(86400000 * 2) },
+      { id: secShare,  name: '종료 / 공유 흐름',  createdAt: a(86400000 * 1) },
     ];
 
     const screens = [
-      /* 온보딩 — depth 2 */
-      { id: scrSplash,  sectionId: secOnboarding, parentId: null, name: '스플래시',   status: '완료',   createdAt: a(86400000 * 4 + 5000) },
-      { id: scrRole,    sectionId: secOnboarding, parentId: null, name: '역할 선택',   status: '완료',   createdAt: a(86400000 * 4 + 4000) },
-      { id: scrDogReg,  sectionId: secOnboarding, parentId: null, name: '반려견 등록', status: '개발중', createdAt: a(86400000 * 4 + 3000) },
-      { id: scrLogin,   sectionId: secOnboarding, parentId: null, name: '소셜 로그인', status: '개발중', createdAt: a(86400000 * 4 + 2000) },
-      /* 온보딩 — depth 3 */
-      { id: scrRoleOwner,   sectionId: secOnboarding, parentId: scrRole, name: '견주 온보딩',   status: '개발중', createdAt: a(86400000 * 4 + 1500) },
-      { id: scrRolePartner, sectionId: secOnboarding, parentId: scrRole, name: '파트너 온보딩', status: '기획',   createdAt: a(86400000 * 4 + 1000) },
+      /* ── 진입 화면 ── */
+      { id: scrSplash,     sectionId: secEntry, parentId: null, name: '스플래시',              status: '기획', createdAt: a(86400000 * 4 + 3000) },
+      { id: scrOnboarding, sectionId: secEntry, parentId: null, name: '온보딩 (3페이지 스와이프)', status: '기획', createdAt: a(86400000 * 4 + 2000) },
 
-      /* 메인 탭 — depth 2 */
-      { id: scrHome,     sectionId: secMain, parentId: null, name: '홈',        status: '개발중',  createdAt: a(86400000 * 3 + 5000) },
-      { id: scrMatchTab, sectionId: secMain, parentId: null, name: '매칭',       status: '디자인중', createdAt: a(86400000 * 3 + 4000) },
-      { id: scrWalkTab,  sectionId: secMain, parentId: null, name: '산책',       status: '디자인중', createdAt: a(86400000 * 3 + 3000) },
-      { id: scrMyTab,    sectionId: secMain, parentId: null, name: '마이페이지', status: '기획',    createdAt: a(86400000 * 3 + 2000) },
-      /* 메인 탭 — depth 3 */
-      { id: scrNoti,    sectionId: secMain, parentId: scrHome,  name: '알림 센터',   status: '디자인중', createdAt: a(86400000 * 3 + 1800) },
-      { id: scrMyEdit,  sectionId: secMain, parentId: scrMyTab, name: '프로필 편집', status: '기획',    createdAt: a(86400000 * 3 + 1600) },
-      { id: scrDogEdit, sectionId: secMain, parentId: scrMyTab, name: '반려견 편집', status: '기획',    createdAt: a(86400000 * 3 + 1400) },
-      /* 메인 탭 — depth 4 */
-      { id: scrDogTags, sectionId: secMain, parentId: scrDogEdit, name: '성격 태그 설정', status: '미정', createdAt: a(86400000 * 3 + 1200) },
+      /* ── 인증 화면 ── */
+      { id: scrLogin, sectionId: secAuth, parentId: null, name: '로그인 / 회원가입', status: '기획', createdAt: a(86400000 * 3 + 2000) },
 
-      /* 파트너 매칭 — depth 2 */
-      { id: scrSearch,   sectionId: secMatching, parentId: null, name: '파트너 검색', status: '디자인중', createdAt: a(86400000 * 2 + 5000) },
-      { id: scrPartner,  sectionId: secMatching, parentId: null, name: '파트너 상세', status: '디자인중', createdAt: a(86400000 * 2 + 4000) },
-      { id: scrBook,     sectionId: secMatching, parentId: null, name: '예약 입력',   status: '기획',    createdAt: a(86400000 * 2 + 3000) },
-      { id: scrBookDone, sectionId: secMatching, parentId: null, name: '예약 완료',   status: '기획',    createdAt: a(86400000 * 2 + 2000) },
-      /* 파트너 매칭 — depth 3 */
-      { id: scrSearchRegion, sectionId: secMatching, parentId: scrSearch,  name: '지역 설정', status: '기획', createdAt: a(86400000 * 2 + 1800) },
-      { id: scrSearchFilter, sectionId: secMatching, parentId: scrSearch,  name: '필터 설정', status: '기획', createdAt: a(86400000 * 2 + 1600) },
-      { id: scrReviews,      sectionId: secMatching, parentId: scrPartner, name: '후기 목록', status: '기획', createdAt: a(86400000 * 2 + 1400) },
-      /* 파트너 매칭 — depth 4 */
-      { id: scrReviewWrite, sectionId: secMatching, parentId: scrReviews, name: '후기 작성', status: '미정', createdAt: a(86400000 * 2 + 1200) },
+      /* ── 메인 앱 — depth 2 컨테이너 ── */
+      { id: scrBottomNav, sectionId: secMain, parentId: null, name: '하단 네비게이션 (3탭)', status: '기획', createdAt: a(86400000 * 2 + 9000) },
+      { id: scrDetail,    sectionId: secMain, parentId: null, name: '공통 상세 화면',        status: '기획', createdAt: a(86400000 * 2 + 8000) },
+      { id: scrSupport,   sectionId: secMain, parentId: null, name: '보조 화면',              status: '기획', createdAt: a(86400000 * 2 + 7000) },
 
-      /* 산책 기록 — depth 2 */
-      { id: scrWalkReady,  sectionId: secWalk, parentId: null, name: '산책 시작', status: '기획', createdAt: a(86400000 * 1 + 5000) },
-      { id: scrWalkActive, sectionId: secWalk, parentId: null, name: '산책 중',   status: '기획', createdAt: a(86400000 * 1 + 4000) },
-      { id: scrWalkEnd,    sectionId: secWalk, parentId: null, name: '산책 완료', status: '미정', createdAt: a(86400000 * 1 + 3000) },
-      { id: scrWalkDetail, sectionId: secWalk, parentId: null, name: '기록 상세', status: '미정', createdAt: a(86400000 * 1 + 2000) },
-      /* 산책 기록 — depth 3 */
-      { id: scrWalkPhoto, sectionId: secWalk, parentId: scrWalkActive, name: '사진 촬영', status: '미정', createdAt: a(86400000 * 1 + 1600) },
-      { id: scrWalkShare, sectionId: secWalk, parentId: scrWalkEnd,    name: '공유 옵션', status: '미정', createdAt: a(86400000 * 1 + 1400) },
+      /* ── 메인 앱 — depth 3: 하단 네비 탭 ── */
+      { id: scrHome,     sectionId: secMain, parentId: scrBottomNav, name: '홈',        status: '기획', createdAt: a(86400000 * 2 + 6500) },
+      { id: scrRegister, sectionId: secMain, parentId: scrBottomNav, name: '등록',      status: '기획', createdAt: a(86400000 * 2 + 6000) },
+      { id: scrMyPage,   sectionId: secMain, parentId: scrBottomNav, name: '마이페이지', status: '기획', createdAt: a(86400000 * 2 + 5500) },
+
+      /* ── 메인 앱 — depth 3: 상세 화면 ── */
+      { id: scrDogDetail, sectionId: secMain, parentId: scrDetail, name: '실종 강아지 상세 페이지', status: '기획', createdAt: a(86400000 * 2 + 5000) },
+      { id: scrSighting,  sectionId: secMain, parentId: scrDetail, name: '목격 제보 작성',          status: '기획', createdAt: a(86400000 * 2 + 4800) },
+
+      /* ── 메인 앱 — depth 3: 보조 화면 ── */
+      { id: scrLocation, sectionId: secMain, parentId: scrSupport, name: '위치 설정',        status: '미정', createdAt: a(86400000 * 2 + 4500) },
+      { id: scrFound,    sectionId: secMain, parentId: scrSupport, name: '실종 종료 (찾음 처리)', status: '미정', createdAt: a(86400000 * 2 + 4200) },
+      { id: scrNotif,    sectionId: secMain, parentId: scrSupport, name: '알림 목록',         status: '미정', createdAt: a(86400000 * 2 + 4000) },
+      { id: scrEmpty,    sectionId: secMain, parentId: scrSupport, name: '빈 상태 화면',      status: '미정', createdAt: a(86400000 * 2 + 3800) },
+      { id: scrError,    sectionId: secMain, parentId: scrSupport, name: '에러 화면',         status: '미정', createdAt: a(86400000 * 2 + 3600) },
+
+      /* ── 메인 앱 — depth 4: 홈 하위 ── */
+      { id: scrFeed,   sectionId: secMain, parentId: scrHome, name: '실종 강아지 피드', status: '기획', createdAt: a(86400000 * 2 + 3400) },
+      { id: scrSearch, sectionId: secMain, parentId: scrHome, name: '검색',             status: '미정', createdAt: a(86400000 * 2 + 3200) },
+
+      /* ── 메인 앱 — depth 4: 등록 하위 ── */
+      { id: scrRegForm, sectionId: secMain, parentId: scrRegister, name: '강아지 등록 폼',      status: '기획', createdAt: a(86400000 * 2 + 3000) },
+      { id: scrRegDone, sectionId: secMain, parentId: scrRegister, name: '등록 완료 & 공유 화면', status: '기획', createdAt: a(86400000 * 2 + 2800) },
+
+      /* ── 메인 앱 — depth 4: 마이페이지 하위 ── */
+      { id: scrMyList,    sectionId: secMain, parentId: scrMyPage, name: '내가 등록한 강아지 목록', status: '기획', createdAt: a(86400000 * 2 + 2600) },
+      { id: scrMyReports, sectionId: secMain, parentId: scrMyPage, name: '받은 목격 제보 목록',    status: '기획', createdAt: a(86400000 * 2 + 2400) },
+      { id: scrMyProfile, sectionId: secMain, parentId: scrMyPage, name: '프로필 수정',            status: '미정', createdAt: a(86400000 * 2 + 2200) },
+      { id: scrSettings,  sectionId: secMain, parentId: scrMyPage, name: '설정',                   status: '미정', createdAt: a(86400000 * 2 + 2000) },
+
+      /* ── 메인 앱 — depth 4: 강아지 상세 하위 ── */
+      { id: scrDogInfo,    sectionId: secMain, parentId: scrDogDetail, name: '강아지 정보 + 미니 지도', status: '기획', createdAt: a(86400000 * 2 + 1800) },
+      { id: scrReportArea, sectionId: secMain, parentId: scrDogDetail, name: '목격 제보 영역',          status: '기획', createdAt: a(86400000 * 2 + 1600) },
+
+      /* ── 종료 / 공유 흐름 ── */
+      { id: scrShareSheet, sectionId: secShare, parentId: null, name: '공유 (카카오 · 인스타 · X · 링크복사)', status: '기획', createdAt: a(86400000 * 1 + 2000) },
     ];
 
     let cAt = t - 86400000 * 5;
@@ -207,136 +224,150 @@
 
     const components = [
       /* 스플래시 */
-      nc(scrSplash, '앱 로고 & 슬로건'),
+      nc(scrSplash, '앱 아이콘 & 슬로건'),
       nc(scrSplash, '로딩 인디케이터'),
-      nc(scrSplash, '자동 전환 (2초)'),
-      /* 역할 선택 */
-      nc(scrRole, '헤드 카피'),
-      nc(scrRole, '견주로 시작'),
-      nc(scrRole, '파트너로 시작'),
-      nc(scrRole, '이미 계정 있어요'),
-      /* 견주 온보딩 */
-      nc(scrRoleOwner, '반려견 마릿수 선택'),
-      nc(scrRoleOwner, '주요 관심사 태그'),
-      nc(scrRoleOwner, '위치 권한 요청'),
-      nc(scrRoleOwner, '시작하기 버튼'),
-      /* 파트너 온보딩 */
-      nc(scrRolePartner, '돌봄 가능 견종 선택'),
-      nc(scrRolePartner, '활동 가능 지역 설정'),
-      nc(scrRolePartner, '경력 / 자격 입력'),
-      nc(scrRolePartner, '심사 신청 버튼'),
-      /* 반려견 등록 */
-      nc(scrDogReg, '이름 / 견종 / 나이 입력'),
-      nc(scrDogReg, '성격 태그 선택'),
-      nc(scrDogReg, '프로필 사진 업로드'),
-      nc(scrDogReg, '다음 단계 버튼'),
-      /* 소셜 로그인 */
-      nc(scrLogin, '카카오 로그인'),
-      nc(scrLogin, '애플 로그인'),
-      nc(scrLogin, '이용약관 동의'),
-      nc(scrLogin, '건너뛰기'),
+      nc(scrSplash, '자동 전환 로직'),
+
+      /* 온보딩 */
+      nc(scrOnboarding, '페이지 인디케이터 (3도트)'),
+      nc(scrOnboarding, '스와이프 가능 슬라이드'),
+      nc(scrOnboarding, '각 페이지 일러스트 + 설명'),
+      nc(scrOnboarding, '건너뛰기 / 시작하기 버튼'),
+
+      /* 로그인 */
+      nc(scrLogin, '카카오 1클릭 로그인'),
+      nc(scrLogin, '전화번호 입력 (백업)'),
+      nc(scrLogin, '약관 동의 체크박스'),
+      nc(scrLogin, '비로그인 둘러보기'),
+
+      /* 하단 네비게이션 */
+      nc(scrBottomNav, '홈 탭 아이콘 + 라벨'),
+      nc(scrBottomNav, '등록 탭 (FAB 스타일)'),
+      nc(scrBottomNav, '마이페이지 탭 아이콘 + 라벨'),
+      nc(scrBottomNav, '알림 뱃지'),
+
       /* 홈 */
-      nc(scrHome, '내 주변 파트너 N명'),
-      nc(scrHome, '오늘 예약 현황'),
-      nc(scrHome, '최근 산책 기록'),
-      nc(scrHome, '빠른 매칭 바로가기'),
+      nc(scrHome, '지역 필터 칩'),
       nc(scrHome, '알림 아이콘'),
-      /* 알림 센터 */
-      nc(scrNoti, '읽지 않은 알림 뱃지'),
-      nc(scrNoti, '알림 타입별 아이콘'),
-      nc(scrNoti, '전체 읽음 처리'),
-      /* 매칭 탭 */
-      nc(scrMatchTab, '날짜 / 시간 필터'),
-      nc(scrMatchTab, '지역 선택'),
-      nc(scrMatchTab, '파트너 카드 리스트'),
-      nc(scrMatchTab, '무한 스크롤'),
-      /* 산책 탭 */
-      nc(scrWalkTab, '오늘 산책 현황'),
-      nc(scrWalkTab, '누적 기록 요약'),
-      nc(scrWalkTab, '기록 타임라인'),
+      nc(scrHome, '검색 바 →'),
+      nc(scrHome, '피드 리스트 →'),
+
+      /* 실종 강아지 피드 */
+      nc(scrFeed, '강아지 카드 (사진 + 이름 + 위치 + 날짜)'),
+      nc(scrFeed, '무한 스크롤'),
+      nc(scrFeed, '반경 필터 슬라이더'),
+      nc(scrFeed, '새 제보 뱃지'),
+
+      /* 검색 */
+      nc(scrSearch, '검색창'),
+      nc(scrSearch, '최근 검색어'),
+      nc(scrSearch, '견종 / 색깔 필터'),
+      nc(scrSearch, '검색 결과 리스트'),
+
+      /* 등록 */
+      nc(scrRegister, '사진 업로드 버튼'),
+      nc(scrRegister, '등록 폼 →'),
+      nc(scrRegister, '등록 완료 화면 →'),
+
+      /* 강아지 등록 폼 */
+      nc(scrRegForm, '사진 업로드 (최대 3장)'),
+      nc(scrRegForm, '이름 입력'),
+      nc(scrRegForm, '실종 날짜 & 위치 선택'),
+      nc(scrRegForm, '견종 & 특징 입력'),
+      nc(scrRegForm, '등록하기 버튼'),
+
+      /* 등록 완료 & 공유 */
+      nc(scrRegDone, '등록 완료 카드 미리보기'),
+      nc(scrRegDone, '공유 버튼 (카카오/인스타/X/링크)'),
+      nc(scrRegDone, '홈으로 돌아가기'),
+
       /* 마이페이지 */
-      nc(scrMyTab, '프로필 카드'),
-      nc(scrMyTab, '예약 내역'),
-      nc(scrMyTab, '반려견 관리'),
-      nc(scrMyTab, '앱 설정'),
-      /* 프로필 편집 */
-      nc(scrMyEdit, '닉네임 수정'),
-      nc(scrMyEdit, '프로필 사진 변경'),
-      nc(scrMyEdit, '저장 버튼'),
-      /* 반려견 편집 */
-      nc(scrDogEdit, '이름 / 나이 수정'),
-      nc(scrDogEdit, '견종 수정'),
-      nc(scrDogEdit, '사진 변경'),
-      nc(scrDogEdit, '성격 태그 수정 →'),
-      /* 성격 태그 설정 */
-      nc(scrDogTags, '활발함 / 조용함'),
-      nc(scrDogTags, '친화적 / 낯가림'),
-      nc(scrDogTags, '겁쟁이 / 용감'),
-      nc(scrDogTags, '적용 버튼'),
-      /* 파트너 검색 */
-      nc(scrSearch, '날짜 & 지역 조건'),
-      nc(scrSearch, '정렬 / 필터'),
-      nc(scrSearch, '지도 / 리스트 토글'),
-      nc(scrSearch, '파트너 카드'),
-      /* 지역 설정 */
-      nc(scrSearchRegion, '지도 뷰'),
-      nc(scrSearchRegion, '동 단위 검색'),
-      nc(scrSearchRegion, '반경 설정 슬라이더'),
-      /* 필터 설정 */
-      nc(scrSearchFilter, '가격 범위'),
-      nc(scrSearchFilter, '파트너 경력'),
-      nc(scrSearchFilter, '돌봄 가능 견종'),
-      nc(scrSearchFilter, '적용 / 초기화'),
-      /* 파트너 상세 */
-      nc(scrPartner, '파트너 사진 & 이름'),
-      nc(scrPartner, '자기소개 / 경력'),
-      nc(scrPartner, '후기 미리보기 →'),
-      nc(scrPartner, '예약하기 버튼'),
-      /* 후기 목록 */
-      nc(scrReviews, '후기 키워드 태그 통계'),
-      nc(scrReviews, '후기 카드 리스트'),
-      nc(scrReviews, '후기 작성하기 버튼 →'),
-      /* 후기 작성 */
-      nc(scrReviewWrite, '키워드 태그 선택'),
-      nc(scrReviewWrite, '한줄 코멘트 입력'),
-      nc(scrReviewWrite, '별점 (선택)'),
-      nc(scrReviewWrite, '제출 버튼'),
-      /* 예약 입력 */
-      nc(scrBook, '날짜 / 시간 선택'),
-      nc(scrBook, '반려견 선택'),
-      nc(scrBook, '요청 메시지'),
-      nc(scrBook, '가격 확인 & 결제'),
-      /* 예약 완료 */
-      nc(scrBookDone, '예약 확인 카드'),
-      nc(scrBookDone, '채팅 시작하기'),
-      nc(scrBookDone, '홈으로 돌아가기'),
-      /* 산책 시작 */
-      nc(scrWalkReady, '지도 미리보기'),
-      nc(scrWalkReady, '예상 루트 설정'),
-      nc(scrWalkReady, '시작 버튼 (큰 CTA)'),
-      /* 산책 중 */
-      nc(scrWalkActive, '실시간 GPS 경로'),
-      nc(scrWalkActive, '시간 / 거리 카운터'),
-      nc(scrWalkActive, '사진 찍기 →'),
-      nc(scrWalkActive, '일시정지 / 종료'),
-      /* 사진 촬영 */
-      nc(scrWalkPhoto, '카메라 뷰파인더'),
-      nc(scrWalkPhoto, '셔터 버튼'),
-      nc(scrWalkPhoto, '갤러리 첨부'),
-      /* 산책 완료 */
-      nc(scrWalkEnd, '경로 요약 지도'),
-      nc(scrWalkEnd, '총 시간 / 거리'),
-      nc(scrWalkEnd, '공유하기 →'),
-      nc(scrWalkEnd, '저장 버튼'),
-      /* 공유 옵션 */
-      nc(scrWalkShare, '인스타그램 공유'),
-      nc(scrWalkShare, '카카오 공유'),
-      nc(scrWalkShare, '이미지 저장'),
-      /* 기록 상세 */
-      nc(scrWalkDetail, '지도 확대 보기'),
-      nc(scrWalkDetail, '사진 갤러리'),
-      nc(scrWalkDetail, '날짜 / 날씨 정보'),
-      nc(scrWalkDetail, 'SNS 공유'),
+      nc(scrMyPage, '프로필 요약 (사진 + 닉네임)'),
+      nc(scrMyPage, '내 등록 강아지 섹션 →'),
+      nc(scrMyPage, '받은 제보 섹션 →'),
+      nc(scrMyPage, '설정 링크 →'),
+
+      /* 내가 등록한 강아지 목록 */
+      nc(scrMyList, '등록 카드 리스트'),
+      nc(scrMyList, '상태 배지 (찾는 중 / 찾음)'),
+      nc(scrMyList, '찾음 처리 버튼 →'),
+      nc(scrMyList, '빈 상태 →'),
+
+      /* 받은 목격 제보 목록 */
+      nc(scrMyReports, '제보 카드 (사진 + 위치 + 메시지)'),
+      nc(scrMyReports, '읽음 / 안읽음 표시'),
+      nc(scrMyReports, '상세 보기'),
+
+      /* 프로필 수정 */
+      nc(scrMyProfile, '닉네임 수정'),
+      nc(scrMyProfile, '프로필 사진 변경'),
+      nc(scrMyProfile, '전화번호 수정'),
+      nc(scrMyProfile, '저장 버튼'),
+
+      /* 설정 */
+      nc(scrSettings, '알림 설정'),
+      nc(scrSettings, '위치 권한 설정'),
+      nc(scrSettings, '로그아웃'),
+      nc(scrSettings, '회원 탈퇴'),
+
+      /* 실종 강아지 상세 */
+      nc(scrDogDetail, '슬라이드 사진 뷰어'),
+      nc(scrDogDetail, '강아지 정보 블록 →'),
+      nc(scrDogDetail, '제보 영역 →'),
+      nc(scrDogDetail, '등록자 연락하기'),
+
+      /* 강아지 정보 + 미니 지도 */
+      nc(scrDogInfo, '견종 / 나이 / 성별 태그'),
+      nc(scrDogInfo, '실종 날짜 & 위치'),
+      nc(scrDogInfo, '미니 지도 핀'),
+      nc(scrDogInfo, '특이사항 메모'),
+
+      /* 목격 제보 영역 */
+      nc(scrReportArea, '제보 수 카운트'),
+      nc(scrReportArea, '제보 카드 리스트'),
+      nc(scrReportArea, '제보별 위치 핀 미니맵'),
+      nc(scrReportArea, '제보 작성 CTA →'),
+
+      /* 목격 제보 작성 */
+      nc(scrSighting, '목격 위치 핀 설정'),
+      nc(scrSighting, '사진 첨부 (선택)'),
+      nc(scrSighting, '메모 텍스트 입력'),
+      nc(scrSighting, '제출 버튼'),
+
+      /* 위치 설정 */
+      nc(scrLocation, '현재 위치 자동 감지'),
+      nc(scrLocation, '동 단위 수동 입력'),
+      nc(scrLocation, '반경 슬라이더 (1~10km)'),
+      nc(scrLocation, '적용 버튼'),
+
+      /* 실종 종료 */
+      nc(scrFound, '"찾았어요!" 확인 모달'),
+      nc(scrFound, '감사 메시지 & 일러스트'),
+      nc(scrFound, '커뮤니티 공유 옵션 →'),
+      nc(scrFound, '홈으로 버튼'),
+
+      /* 알림 목록 */
+      nc(scrNotif, '알림 타입 아이콘 (제보 / 댓글 / 시스템)'),
+      nc(scrNotif, '읽음 처리'),
+      nc(scrNotif, '전체 삭제'),
+
+      /* 빈 상태 화면 */
+      nc(scrEmpty, '빈 상태 일러스트'),
+      nc(scrEmpty, '상황별 메시지'),
+      nc(scrEmpty, '액션 CTA 버튼'),
+
+      /* 에러 화면 */
+      nc(scrError, '에러 아이콘'),
+      nc(scrError, '에러 메시지 (네트워크 / 일반)'),
+      nc(scrError, '재시도 버튼'),
+      nc(scrError, '홈으로 버튼'),
+
+      /* 공유 */
+      nc(scrShareSheet, '카카오톡 공유'),
+      nc(scrShareSheet, '인스타그램 스토리 공유'),
+      nc(scrShareSheet, 'X (트위터) 공유'),
+      nc(scrShareSheet, '링크 복사'),
+      nc(scrShareSheet, '공유 카드 미리보기'),
     ];
 
     localStorage.setItem('chloeassist:sitemapSections',   JSON.stringify(sections));
