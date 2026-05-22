@@ -21,30 +21,26 @@ const Projects = (() => {
 
   /* ─ 태스크 패널 (심플) ─ */
   function renderTaskPanel(f) {
-    const tasks    = linkedTasks(f.id);
-    const unlinked = getTasks().filter(t => !t.featureId && !t.done);
+    const tasks = linkedTasks(f.id);
 
     return `
       <div class="feat-panel">
         ${tasks.length === 0
-          ? '<div class="feat-panel-empty">연결된 할 일이 없어요</div>'
+          ? '<div class="feat-panel-empty">아직 할 일이 없어요</div>'
           : `<div class="feat-panel-tasks">
               ${tasks.map(t => `
                 <div class="feat-panel-row ${t.done ? 'done' : ''}">
                   <span class="feat-task-title">${escapeHtml(t.title)}</span>
-                  <button class="feat-task-unlink" onclick="event.stopPropagation();Projects.unlinkTask('${t.id}')" title="연결 해제">✕</button>
+                  <button class="feat-task-del" onclick="event.stopPropagation();Projects.deleteTask('${t.id}')" title="삭제">✕</button>
                 </div>
               `).join('')}
             </div>`
         }
 
-        ${unlinked.length ? `
-          <select class="feat-panel-select"
-            onclick="event.stopPropagation()"
-            onchange="Projects.linkExisting('${f.id}', this.value)">
-            <option value="">＋ 기존 할 일 연결</option>
-            ${unlinked.map(t => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join('')}
-          </select>` : ''}
+        <input type="text" class="feat-task-input"
+          placeholder="+ 할 일 추가 (Enter)"
+          onclick="event.stopPropagation()"
+          onkeydown="Projects.handleTaskAdd(event, '${f.id}')">
       </div>
     `;
   }
@@ -160,14 +156,24 @@ const Projects = (() => {
     render();
   }
 
-  function unlinkTask(taskId) {
-    Store.update('tasks', taskId, { featureId: null });
+  function handleTaskAdd(e, featureId) {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    const input = e.currentTarget;
+    const text  = input.value.trim();
+    if (!text) return;
+    Store.push('tasks', {
+      title: text, featureId, done: false, isToday: false, category: '',
+    });
+    input.value = '';
     render();
+    setTimeout(() => {
+      const next = document.querySelector(`.feature-card.expanded .feat-task-input`);
+      if (next) next.focus();
+    }, 30);
   }
 
-  function linkExisting(featureId, taskId) {
-    if (!taskId) return;
-    Store.update('tasks', taskId, { featureId });
+  function deleteTask(taskId) {
+    Store.remove('tasks', taskId);
     render();
   }
 
@@ -187,7 +193,7 @@ const Projects = (() => {
     render();
   }
 
-  return { render, deleteFeature, moveStatus, toggleExpand, unlinkTask, linkExisting };
+  return { render, deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Projects.render());

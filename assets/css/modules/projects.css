@@ -193,7 +193,7 @@
   color: var(--color-text);
 }
 
-.feat-task-unlink {
+.feat-task-del {
   opacity: 0;
   font-size: 0.7rem;
   color: var(--color-text-3);
@@ -202,24 +202,24 @@
   transition: opacity var(--transition), color var(--transition);
 }
 
-.feat-panel-row:hover .feat-task-unlink { opacity: 1; }
-.feat-task-unlink:hover { color: var(--color-danger); }
+.feat-panel-row:hover .feat-task-del { opacity: 1; }
+.feat-task-del:hover { color: var(--color-danger); }
 
-.feat-panel-select {
+.feat-task-input {
   width: 100%;
   padding: 5px 8px;
   font-size: 0.76rem;
-  color: var(--color-text-3);
+  color: var(--color-text);
   background: transparent;
   border: 1px dashed var(--color-border);
   border-radius: 4px;
   outline: none;
-  cursor: pointer;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), background var(--transition);
 }
 
-.feat-panel-select:hover,
-.feat-panel-select:focus { border-color: var(--color-primary); color: var(--color-primary); }
+.feat-task-input::placeholder { color: var(--color-text-3); }
+.feat-task-input:hover  { border-color: var(--color-primary); }
+.feat-task-input:focus  { border-color: var(--color-primary); background: var(--color-surface); }
 
 /* ─ 펼친 카드 ─ */
 .feature-card.expanded {
