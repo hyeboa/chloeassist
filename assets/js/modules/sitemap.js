@@ -12,17 +12,20 @@ const Sitemap = (() => {
     '완료':    'st-done',
   };
 
-  let viewMode = 'board'; // 'board' | 'diagram'
+  const BRANCH_COLORS = [
+    { border: '#a78bfa', bg: '#faf5ff', text: '#5b21b6', line: '#c4b5fd' },
+    { border: '#60a5fa', bg: '#eff6ff', text: '#1d4ed8', line: '#93c5fd' },
+    { border: '#fb923c', bg: '#fff7ed', text: '#c2410c', line: '#fdba74' },
+    { border: '#34d399', bg: '#f0fdf4', text: '#065f46', line: '#6ee7b7' },
+    { border: '#f472b6', bg: '#fdf2f8', text: '#9d174d', line: '#f9a8d4' },
+    { border: '#fbbf24', bg: '#fefce8', text: '#92400e', line: '#fde68a' },
+  ];
 
-  function getSections() {
-    return (Store.get('sitemapSections') || []).sort((a, b) => a.createdAt - b.createdAt);
-  }
-  function getScreens() {
-    return (Store.get('sitemapScreens') || []).sort((a, b) => a.createdAt - b.createdAt);
-  }
-  function getComponents() {
-    return (Store.get('sitemapComponents') || []).sort((a, b) => a.createdAt - b.createdAt);
-  }
+  let viewMode = 'board';
+
+  function getSections()   { return (Store.get('sitemapSections')   || []).sort((a,b) => a.createdAt - b.createdAt); }
+  function getScreens()    { return (Store.get('sitemapScreens')    || []).sort((a,b) => a.createdAt - b.createdAt); }
+  function getComponents() { return (Store.get('sitemapComponents') || []).sort((a,b) => a.createdAt - b.createdAt); }
 
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -32,15 +35,13 @@ const Sitemap = (() => {
   function renderViewTabs() {
     return `
       <div class="sitemap-view-tabs">
-        <button class="sitemap-view-tab ${viewMode === 'board' ? 'active' : ''}"
-          onclick="Sitemap.setView('board')">&#9776; 보드</button>
-        <button class="sitemap-view-tab ${viewMode === 'diagram' ? 'active' : ''}"
-          onclick="Sitemap.setView('diagram')">&#9633; 구조도</button>
+        <button class="sitemap-view-tab ${viewMode === 'board'   ? 'active' : ''}" onclick="Sitemap.setView('board')">&#9776; 보드</button>
+        <button class="sitemap-view-tab ${viewMode === 'diagram' ? 'active' : ''}" onclick="Sitemap.setView('diagram')">&#9671; 구조도</button>
       </div>
     `;
   }
 
-  /* ─ 와이어프레임 플레이스홀더 (보드 뷰) ─ */
+  /* ─ 보드 뷰: 와이어프레임 ─ */
   function renderWireframe() {
     return `
       <div class="screen-wf">
@@ -56,13 +57,11 @@ const Sitemap = (() => {
   function renderCard(screen, index, allComponents) {
     const cls   = STATUS_CLS[screen.status || '미정'];
     const comps = allComponents.filter(c => c.screenId === screen.id);
-
     return `
       <div class="screen-card ${cls}" data-screen-id="${screen.id}">
         <div class="screen-card-hd">
           <span class="screen-num">${index + 1}</span>
-          <button class="screen-status-btn"
-            onclick="Sitemap.cycleStatus('${screen.id}')">${screen.status || '미정'}</button>
+          <button class="screen-status-btn" onclick="Sitemap.cycleStatus('${screen.id}')">${screen.status || '미정'}</button>
           <button class="screen-del" onclick="Sitemap.deleteScreen('${screen.id}')">&#10005;</button>
         </div>
         <div class="screen-name-area">
@@ -90,7 +89,6 @@ const Sitemap = (() => {
     const sectionScreens = screens.filter(s => s.sectionId === section.id);
     const total = sectionScreens.length;
     const done  = sectionScreens.filter(s => s.status === '완료').length;
-
     return `
       <div class="sitemap-section" data-section-id="${section.id}">
         <div class="sitemap-section-hd">
@@ -120,35 +118,8 @@ const Sitemap = (() => {
     `;
   }
 
-  /* ─ 구조도 뷰: 카드 ─ */
-  function renderDiagCard(screen, index, allComponents) {
-    const cls   = STATUS_CLS[screen.status || '미정'];
-    const comps = allComponents.filter(c => c.screenId === screen.id);
-
-    return `
-      <div class="diag-card ${cls}">
-        <div class="diag-card-hd">
-          <span class="diag-num">${index + 1}</span>
-          <span class="diag-name">${escapeHtml(screen.name)}</span>
-          <span class="diag-status-badge">${screen.status || '미정'}</span>
-        </div>
-        <div class="diag-wf">
-          <div class="diag-wf-rect"></div>
-          <div class="diag-wf-line lg"></div>
-          <div class="diag-wf-line sm"></div>
-        </div>
-        ${comps.length > 0
-          ? `<div class="diag-comp-list">
-               ${comps.map(c => `<div class="diag-comp-item">${escapeHtml(c.name)}</div>`).join('')}
-             </div>`
-          : `<div class="diag-no-comps">항목 없음</div>`
-        }
-      </div>
-    `;
-  }
-
-  /* ─ 구조도 뷰: 전체 ─ */
-  function renderDiagramView(sections, screens, components) {
+  /* ─ 구조도 뷰: 수직 계층 트리 ─ */
+  function renderDiagramView(sections, screens) {
     if (sections.length === 0) {
       return `<div class="sitemap-empty">
         <div class="sitemap-empty-icon">&#128241;</div>
@@ -156,26 +127,57 @@ const Sitemap = (() => {
       </div>`;
     }
 
-    return sections.map(section => {
-      const sectionScreens = screens.filter(s => s.sectionId === section.id);
-      if (sectionScreens.length === 0) return '';
+    const totalScreens = screens.length;
+
+    const branchesHTML = sections.map((section, si) => {
+      const sscreens = screens.filter(s => s.sectionId === section.id);
+      if (sscreens.length === 0) return '';
+      const col = BRANCH_COLORS[si % BRANCH_COLORS.length];
+
+      const screensHTML = sscreens.map((screen, i) => {
+        const scls = STATUS_CLS[screen.status || '미정'];
+        return `
+          <div class="diag-scr-item">
+            <div class="diag-v-connector"></div>
+            <div class="diag-scr-node ${scls}">
+              <span class="diag-scr-num" style="background:${col.border}">${i + 1}</span>
+              <span class="diag-scr-name">${escapeHtml(screen.name)}</span>
+              <span class="diag-scr-status">${screen.status || '미정'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
 
       return `
-        <div class="diag-section">
-          <div class="diag-section-label">
-            <span class="diag-section-icon">&#9703;</span>
+        <div class="diag-branch-wrap">
+          <div class="diag-sec-node"
+            style="border-color:${col.border};background:${col.bg};color:${col.text}">
             ${escapeHtml(section.name)}
-            <span class="diag-section-count">${sectionScreens.length}개 화면</span>
+            <span class="diag-sec-count" style="color:${col.text};opacity:0.6">${sscreens.length}</span>
           </div>
-          <div class="diag-flow">
-            ${sectionScreens.map((s, i) => `
-              ${i > 0 ? '<div class="diag-arrow"><div class="arrow-line"></div><div class="arrow-head">&#9658;</div></div>' : ''}
-              ${renderDiagCard(s, i, components)}
-            `).join('')}
+          <div class="diag-v-connector" style="background:${col.line}"></div>
+          <div class="diag-scr-list">
+            ${screensHTML}
           </div>
         </div>
       `;
     }).join('');
+
+    return `
+      <div class="diag-tree">
+        <div class="diag-root-row">
+          <div class="diag-root-node">
+            <span class="diag-root-icon">&#9679;</span>
+            헬로아지
+            <span class="diag-root-meta">${totalScreens}개 화면</span>
+          </div>
+        </div>
+        <div class="diag-v-connector diag-root-trunk"></div>
+        <div class="diag-branches">
+          ${branchesHTML}
+        </div>
+      </div>
+    `;
   }
 
   /* ─ 범례 ─ */
@@ -184,9 +186,7 @@ const Sitemap = (() => {
     return `
       <div class="sitemap-legend">
         ${STATUSES.map(s => `
-          <span class="legend-item">
-            <span class="legend-dot ${STATUS_CLS[s]}"></span>${s}
-          </span>
+          <span class="legend-item"><span class="legend-dot ${STATUS_CLS[s]}"></span>${s}</span>
         `).join('')}
         <span class="legend-hint">이름 더블클릭 &#8594; 편집 &nbsp;&#183;&nbsp; 뱃지 클릭 &#8594; 상태 변경</span>
       </div>
@@ -219,91 +219,72 @@ const Sitemap = (() => {
     } else {
       document.getElementById('app').innerHTML = `
         ${renderViewTabs()}
-        <div class="sitemap-diagram">
-          ${renderDiagramView(sections, screens, components)}
+        <div class="diag-status-legend">
+          ${STATUSES.map(s => `
+            <span class="legend-item"><span class="legend-dot ${STATUS_CLS[s]}"></span>${s}</span>
+          `).join('')}
+        </div>
+        <div class="diag-scroll-wrap">
+          ${renderDiagramView(sections, screens)}
         </div>
       `;
     }
   }
 
-  /* ─ 섹션 이름 blur 저장 ─ */
   function bindSectionNameBlur() {
     document.querySelectorAll('.section-name[contenteditable]').forEach(el => {
       el.addEventListener('blur', () => {
-        const id   = el.dataset.id;
-        const name = el.textContent.trim();
+        const id = el.dataset.id, name = el.textContent.trim();
         if (name) Store.update('sitemapSections', id, { name });
       });
     });
   }
 
-  /* ─ 화면 이름 포커스 ─ */
   function focusName(id) {
     const el = document.querySelector(`.screen-name[data-id="${id}"]`);
     if (!el) return;
-
     const original = el.textContent;
     el.contentEditable = 'true';
     el.focus();
-
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-
+    const range = document.createRange(); range.selectNodeContents(el);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
     const save = () => {
       el.contentEditable = 'false';
       const name = el.textContent.trim() || original;
       el.textContent = name;
       Store.update('sitemapScreens', id, { name });
-      el.removeEventListener('blur', save);
-      el.removeEventListener('keydown', onKey);
+      el.removeEventListener('blur', save); el.removeEventListener('keydown', onKey);
     };
     const onKey = (e) => {
       if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
       if (e.key === 'Escape') { el.textContent = original; el.blur(); }
     };
-    el.addEventListener('blur', save);
-    el.addEventListener('keydown', onKey);
+    el.addEventListener('blur', save); el.addEventListener('keydown', onKey);
   }
 
-  /* ─ 컴포넌트 이름 포커스 ─ */
   function focusComponent(id) {
     const el = document.querySelector(`.comp-name[data-comp-id="${id}"]`);
     if (!el) return;
-
     const original = el.textContent;
     el.contentEditable = 'true';
     el.focus();
-
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-
+    const range = document.createRange(); range.selectNodeContents(el);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
     const save = () => {
       el.contentEditable = 'false';
       const name = el.textContent.trim() || original;
       el.textContent = name;
       Store.update('sitemapComponents', id, { name });
-      el.removeEventListener('blur', save);
-      el.removeEventListener('keydown', onKey);
+      el.removeEventListener('blur', save); el.removeEventListener('keydown', onKey);
     };
     const onKey = (e) => {
       if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
       if (e.key === 'Escape') { el.textContent = original; el.blur(); }
     };
-    el.addEventListener('blur', save);
-    el.addEventListener('keydown', onKey);
+    el.addEventListener('blur', save); el.addEventListener('keydown', onKey);
   }
 
-  /* ─ 공개 메서드 ─ */
-  function setView(mode) {
-    viewMode = mode;
-    render();
-  }
+  function setView(mode) { viewMode = mode; render(); }
 
   function addSection() {
     Store.push('sitemapSections', { name: '새 플로우' });
@@ -312,11 +293,8 @@ const Sitemap = (() => {
     const last = els[els.length - 1];
     if (last) {
       last.focus();
-      const range = document.createRange();
-      range.selectNodeContents(last);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+      const range = document.createRange(); range.selectNodeContents(last);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
     }
   }
 
@@ -340,33 +318,26 @@ const Sitemap = (() => {
     if (last) setTimeout(() => focusComponent(last.dataset.compId), 50);
   }
 
-  function deleteComponent(id) {
-    Store.remove('sitemapComponents', id);
-    render();
-  }
+  function deleteComponent(id) { Store.remove('sitemapComponents', id); render(); }
 
   function cycleStatus(id) {
     const screen = getScreens().find(s => s.id === id);
     if (!screen) return;
-    const idx  = STATUSES.indexOf(screen.status || '미정');
-    const next = STATUSES[(idx + 1) % STATUSES.length];
-    Store.update('sitemapScreens', id, { status: next });
+    const idx = STATUSES.indexOf(screen.status || '미정');
+    Store.update('sitemapScreens', id, { status: STATUSES[(idx + 1) % STATUSES.length] });
     render();
   }
 
   function deleteScreen(id) {
-    getComponents().filter(c => c.screenId === id)
-      .forEach(c => Store.remove('sitemapComponents', c.id));
+    getComponents().filter(c => c.screenId === id).forEach(c => Store.remove('sitemapComponents', c.id));
     Store.remove('sitemapScreens', id);
     render();
   }
 
   function deleteSection(id) {
     if (!confirm('섹션을 삭제하면 안의 화면도 모두 삭제돼요. 계속할까요?')) return;
-    const screens = getScreens().filter(s => s.sectionId === id);
-    screens.forEach(s => {
-      getComponents().filter(c => c.screenId === s.id)
-        .forEach(c => Store.remove('sitemapComponents', c.id));
+    getScreens().filter(s => s.sectionId === id).forEach(s => {
+      getComponents().filter(c => c.screenId === s.id).forEach(c => Store.remove('sitemapComponents', c.id));
       Store.remove('sitemapScreens', s.id);
     });
     Store.remove('sitemapSections', id);
