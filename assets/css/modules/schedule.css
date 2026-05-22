@@ -70,11 +70,31 @@
   margin: 20px 0 16px;
 }
 
-/* 오늘 섹션 */
+/* 기한 지남 */
+.bl-section-overdue .bl-section-dot  { background: #ef4444; }
+.bl-section-overdue .bl-section-label { color: #ef4444; }
+
+/* 오늘 */
 .bl-section-today .bl-section-dot  { background: var(--color-primary); }
 .bl-section-today .bl-section-label { color: var(--color-primary); }
 
-/* 나머지 섹션 */
+/* 이번 주 */
+.bl-section-week .bl-section-dot  { background: #f59e0b; }
+.bl-section-week .bl-section-label { color: #b45309; }
+
+/* 다음 주 */
+.bl-section-next .bl-section-dot  { background: var(--color-primary); opacity: 0.5; }
+.bl-section-next .bl-section-label { color: var(--color-text-2); }
+
+/* 그 이후 */
+.bl-section-later .bl-section-dot  { background: var(--color-text-3); }
+.bl-section-later .bl-section-label { color: var(--color-text-3); }
+
+/* 날짜 없음 */
+.bl-section-none .bl-section-dot  { background: var(--color-border); }
+.bl-section-none .bl-section-label { color: var(--color-text-3); }
+
+/* 이전 호환 */
 .bl-section-rest .bl-section-dot  { background: var(--color-text-3); }
 .bl-section-rest .bl-section-label { color: var(--color-text-3); }
 
@@ -170,7 +190,52 @@
 .bl-btn-del   { color: var(--color-text-3); }
 .bl-btn-del:hover { background: #fee2e2; color: var(--color-danger); }
 
-/* ===== 빠른 추가 ===== */
+/* ===== 날짜 배지 ===== */
+.task-date-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.task-date-badge:hover { opacity: 0.7; }
+
+.date-overdue { background: #fee2e2; color: #dc2626; }
+.date-today   { background: rgba(108,99,255,0.1); color: var(--color-primary); }
+.date-week    { background: #fef3c7; color: #b45309; }
+.date-later   { background: var(--color-bg); color: var(--color-text-3); border: 1px solid var(--color-border); }
+
+.task-date-add {
+  font-size: 0.7rem;
+  color: var(--color-text-3);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.bl-task:hover .task-date-add { opacity: 1; }
+
+.task-date-edit {
+  width: 110px;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 6px;
+  outline: none;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* ===== 빠른 추가 (이전 호환용) ===== */
 .bl-add-wrap {
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);

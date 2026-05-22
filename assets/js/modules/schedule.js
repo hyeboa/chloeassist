@@ -1,27 +1,254 @@
 /**
- * schedule.js — 할 일 목록 (오늘 뷰에서 넘어온 것 + 미래 태스크)
+ * schedule.js — 할 일 목록 (날짜 기반 일정 관리)
  */
 
 const Schedule = (() => {
   const CATS = ['전체', '기획', '디자인', '개발', '마케팅', '운영'];
-  let activeFilter = '전체';
 
-  function getTasks() {
-    return Store.get('tasks') || [];
+  let activeFilter  = '전체';
+  let selectedCat   = '기획';
+  let editingDateId = null;
+
+  function getTasks() { return Store.get('tasks') || []; }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function filtered() {
-    const all = getTasks();
-    const list = activeFilter === '전체' ? all : all.filter(t => t.category === activeFilter);
-    return list.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.createdAt - a.createdAt);
+  /* ─ 그룹 분류 ─ */
+  const GROUP_ORDER = ['기한 지남', '오늘', '이번 주', '다음 주', '그 이후', '날짜 없음'];
+  const GROUP_CLS   = {
+    '기한 지남': 'overdue',
+    '오늘':     'today',
+    '이번 주':  'week',
+    '다음 주':  'next',
+    '그 이후':  'later',
+    '날짜 없음': 'none',
+  };
+
+  function getGroup(t) {
+    const todayMs  = new Date().setHours(0, 0, 0, 0);
+    const todayStr = new Date(todayMs).toDateString();
+    if (t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === todayStr)) return '오늘';
+    if (!t.dueDate) return '날짜 없음';
+    const diff = Math.ceil((new Date(t.dueDate) - todayMs) / 86400000);
+    if (diff < 0)   return '기한 지남';
+    if (diff <= 7)  return '이번 주';
+    if (diff <= 14) return '다음 주';
+    return '그 이후';
   }
 
-  function addTask(title, category) {
-    if (!title.trim()) return;
-    Store.push('tasks', { title: title.trim(), category, done: false, isToday: false });
-    render();
+  function groupTasks(tasks) {
+    const g = {};
+    GROUP_ORDER.forEach(k => { g[k] = []; });
+    tasks.forEach(t => g[getGroup(t)].push(t));
+    return g;
   }
 
+  /* ─ 날짜 포맷 ─ */
+  function shortDate(str) {
+    const d = new Date(str);
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  function dateBadgeCls(t) {
+    const g = getGroup(t);
+    if (g === '기한 지남') return 'date-overdue';
+    if (g === '오늘')      return 'date-today';
+    if (g === '이번 주')   return 'date-week';
+    return 'date-later';
+  }
+
+  /* ─ 태스크 행 ─ */
+  function taskRow(t) {
+    let dateEl;
+    if (editingDateId === t.id) {
+      dateEl = `<input class="task-date-edit" id="date-edit-${t.id}"
+        placeholder="다음주 금요일" autocomplete="off">`;
+    } else if (t.dueDate) {
+      dateEl = `<span class="task-date-badge ${dateBadgeCls(t)}"
+        onclick="Schedule.startDateEdit('${t.id}')">${shortDate(t.dueDate)}</span>`;
+    } else {
+      dateEl = `<span class="task-date-add" onclick="Schedule.startDateEdit('${t.id}')">+ 날짜</span>`;
+    }
+
+    return `
+      <div class="bl-task ${t.done ? 'done' : ''}">
+        <div class="bl-checkbox ${t.done ? 'checked' : ''}"
+          onclick="Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
+        <span class="bl-title">${escapeHtml(t.title)}</span>
+        ${dateEl}
+        <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
+        <div class="bl-actions">
+          <button class="bl-btn bl-btn-del" onclick="Schedule.deleteTask('${t.id}')">삭제</button>
+        </div>
+      </div>`;
+  }
+
+  /* ─ 그룹 헤더 ─ */
+  function groupHeader(name, tasks) {
+    const left = tasks.filter(t => !t.done).length;
+    return `
+      <div class="bl-section-header bl-section-${GROUP_CLS[name]}">
+        <div class="bl-section-dot"></div>
+        <span class="bl-section-label">${name}</span>
+        <span class="bl-section-count">${left}개 남음</span>
+      </div>`;
+  }
+
+  /* ─ 렌더 ─ */
+  function render() {
+    const all   = getTasks();
+    const list  = (activeFilter === '전체' ? all : all.filter(t => t.category === activeFilter))
+      .sort((a, b) => {
+        if (a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
+        const aD = a.dueDate ? new Date(a.dueDate) : null;
+        const bD = b.dueDate ? new Date(b.dueDate) : null;
+        if (aD && bD) return aD - bD;
+        if (aD) return -1;
+        if (bD) return 1;
+        return b.createdAt - a.createdAt;
+      });
+
+    const groups = groupTasks(list);
+
+    let listHTML = '';
+    if (list.length === 0) {
+      listHTML = '<div class="empty-state"><div class="empty-state-text">할 일이 없어요</div></div>';
+    } else {
+      let first = true;
+      GROUP_ORDER.forEach(name => {
+        const g = groups[name];
+        if (!g.length) return;
+        if (!first) listHTML += '<div style="height:18px"></div>';
+        first = false;
+        listHTML += groupHeader(name, g) + g.map(taskRow).join('');
+      });
+    }
+
+    document.getElementById('app').innerHTML = `
+      <div class="backlog-toolbar">
+        <div class="cat-filter-group">
+          ${CATS.map(c => `
+            <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
+              onclick="Schedule.setFilter('${c}')">${c}</button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="inline-nl-wrap">
+        <input id="bl-input" class="inline-nl-input" type="text"
+          placeholder="유저 인터뷰 섭외 다음주 화요일 기획...">
+        <div class="inline-nl-footer">
+          <div class="cat-pills" id="bl-cat-pills">
+            ${CATS.slice(1).map(c => `
+              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
+                data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
+            `).join('')}
+          </div>
+          <span class="nl-rule-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
+        </div>
+        <div class="inline-nl-status" id="bl-status"></div>
+      </div>
+
+      <div id="bl-list">${listHTML}</div>
+    `;
+
+    bindInput();
+    bindDateEdit();
+  }
+
+  /* ─ 새 할 일 입력 (NL 파싱) ─ */
+  function bindInput() {
+    const input  = document.getElementById('bl-input');
+    const status = document.getElementById('bl-status');
+    if (!input) return;
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter') return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!AI.getApiKey()) {
+        Store.push('tasks', { title: text, category: selectedCat, done: false, isToday: false });
+        input.value = '';
+        render();
+        return;
+      }
+
+      input.disabled = true;
+      status.textContent = '✦ AI가 분석 중...';
+      status.className = 'inline-nl-status';
+
+      try {
+        const result = await NLInput.parse('task', text);
+        Store.push('tasks', {
+          title:    result.title,
+          category: result.category || selectedCat,
+          done:     false,
+          isToday:  false,
+          dueDate:  result.date || null,
+        });
+        input.value = '';
+        status.textContent = '';
+        render();
+      } catch (err) {
+        status.textContent = '⚠ ' + err.message;
+        status.className = 'inline-nl-status error';
+        input.disabled = false;
+        input.focus();
+      }
+    });
+
+    input.focus();
+  }
+
+  /* ─ 날짜 인라인 수정 ─ */
+  function bindDateEdit() {
+    if (!editingDateId) return;
+    const input = document.getElementById(`date-edit-${editingDateId}`);
+    if (!input) return;
+    input.focus();
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key === 'Escape') { editingDateId = null; render(); return; }
+      if (e.key !== 'Enter') return;
+
+      const text = input.value.trim();
+      if (!text) { editingDateId = null; render(); return; }
+
+      if (!AI.getApiKey()) {
+        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+        return;
+      }
+
+      input.disabled = true;
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        const raw = await AI.chat(
+          [{ role: 'user', content: `오늘은 ${today}. "${text}"를 YYYY-MM-DD 날짜로 변환해줘. 날짜만 답해.` }],
+          '', 'claude-haiku-4-5-20251001'
+        );
+        const match = raw.trim().match(/\d{4}-\d{2}-\d{2}/);
+        if (match) {
+          Store.update('tasks', editingDateId, { dueDate: match[0], isToday: match[0] === today });
+          Toast.show('날짜가 설정됐어요.', 'success');
+        } else {
+          Toast.show('날짜를 인식하지 못했어요.', 'error');
+        }
+      } catch {
+        Toast.show('오류가 발생했어요. 다시 시도해주세요.', 'error');
+      }
+      editingDateId = null;
+      render();
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(() => { if (editingDateId) { editingDateId = null; render(); } }, 200);
+    });
+  }
+
+  /* ─ 공개 메서드 ─ */
   function toggleDone(id) {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
@@ -45,12 +272,6 @@ const Schedule = (() => {
     render();
   }
 
-  function escapeHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  let selectedCat = '기획';
-
   function selectCat(cat) {
     selectedCat = cat;
     document.querySelectorAll('#bl-cat-pills .cat-pill').forEach(el => {
@@ -58,95 +279,12 @@ const Schedule = (() => {
     });
   }
 
-  function isToday(t) {
-    const todayStr = new Date().toDateString();
-    return t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === todayStr);
+  function startDateEdit(id) {
+    editingDateId = id;
+    render();
   }
 
-  function taskRow(t) {
-    const today = isToday(t);
-    return `
-      <div class="bl-task ${t.done ? 'done' : ''} ${today ? 'is-today' : ''}">
-        <div class="bl-checkbox ${t.done ? 'checked' : ''}"
-          onclick="Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
-        <span class="bl-title">${escapeHtml(t.title)}</span>
-        <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
-        <div class="bl-actions">
-          ${!today && !t.done ? `<button class="bl-btn bl-btn-today" onclick="Schedule.moveToToday('${t.id}')">오늘로</button>` : ''}
-          <button class="bl-btn bl-btn-del" onclick="Schedule.deleteTask('${t.id}')">삭제</button>
-        </div>
-      </div>
-    `;
-  }
-
-  function render() {
-    const tasks    = filtered();
-    const todayList = tasks.filter(t => isToday(t));
-    const restList  = tasks.filter(t => !isToday(t));
-
-    document.getElementById('app').innerHTML = `
-      <div class="backlog-toolbar">
-        <div class="cat-filter-group">
-          ${CATS.map(c => `
-            <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
-              onclick="Schedule.setFilter('${c}')">${c}</button>
-          `).join('')}
-        </div>
-      </div>
-
-      <div class="bl-add-wrap">
-        <input id="bl-input" class="bl-add-input" type="text" placeholder="할 일을 입력하세요">
-        <div class="bl-add-footer">
-          <div class="cat-pills" id="bl-cat-pills">
-            ${CATS.slice(1).map(c => `
-              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
-                data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
-            `).join('')}
-          </div>
-          <span class="bl-add-hint">Enter로 추가</span>
-        </div>
-      </div>
-
-      <div id="bl-list">
-        ${tasks.length === 0
-          ? '<div class="empty-state"><div class="empty-state-text">할 일이 없어요</div></div>'
-          : `
-            ${todayList.length > 0 ? `
-              <div class="bl-section-header bl-section-today">
-                <div class="bl-section-dot"></div>
-                <span class="bl-section-label">오늘 할 일</span>
-                <span class="bl-section-count">${todayList.filter(t => !t.done).length}개 남음</span>
-              </div>
-              ${todayList.map(t => taskRow(t)).join('')}
-            ` : ''}
-
-            ${todayList.length > 0 && restList.length > 0 ? '<div class="bl-section-divider"></div>' : ''}
-
-            ${restList.length > 0 ? `
-              <div class="bl-section-header bl-section-rest">
-                <div class="bl-section-dot"></div>
-                <span class="bl-section-label">예정 할 일</span>
-                <span class="bl-section-count">${restList.filter(t => !t.done).length}개</span>
-              </div>
-              ${restList.map(t => taskRow(t)).join('')}
-            ` : ''}
-          `
-        }
-      </div>
-    `;
-
-    const input = document.getElementById('bl-input');
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        addTask(input.value, selectedCat);
-        input.value = '';
-        input.focus();
-      }
-    });
-    input?.focus();
-  }
-
-  return { render, setFilter, toggleDone, moveToToday, deleteTask, selectCat };
+  return { render, setFilter, toggleDone, moveToToday, deleteTask, selectCat, startDateEdit };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Schedule.render());
