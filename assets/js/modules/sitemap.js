@@ -160,28 +160,40 @@ const Sitemap = (() => {
   }
 
   /* ════════════════════════════════
-     구조도 뷰 — 세로 트리
+     구조도 뷰 — 좌→우 수평 트리
+     각 깊이 = 한 컬럼, 자식은 세로로 쌓임
   ════════════════════════════════ */
 
-  /* 화면 노드 하나 + 그 자식들을 세로로 재귀 렌더 */
-  function renderVNode(screen, allScreens, isLast) {
+  const HT_LEAF_H = 44; // px: 리프 노드 1개당 할당 높이
+
+  /* 서브트리의 리프 노드 수 (= 세로 공간 단위) */
+  function countLeaves(screenId, allScreens) {
+    const children = allScreens.filter(s => s.parentId === screenId);
+    if (!children.length) return 1;
+    return children.reduce((sum, c) => sum + countLeaves(c.id, allScreens), 0);
+  }
+
+  /* 화면 노드 하나 + 자식들을 수평으로 재귀 렌더 */
+  function renderHTNode(screen, allScreens, col) {
     const cls      = STATUS_CLS[screen.status || '미정'];
     const children = allScreens
       .filter(s => s.parentId === screen.id)
       .sort((a, b) => a.createdAt - b.createdAt);
+    const h = countLeaves(screen.id, allScreens) * HT_LEAF_H;
 
     return `
-      <div class="vtree-node ${isLast ? 'is-last' : ''}">
-        <div class="vtree-row">
-          <span class="diag-scr-node ${cls}">
+      <div class="ht-cw" style="height:${h}px">
+        <div class="ht-inner">
+          <div class="diag-scr-node ${cls}">
             <span class="diag-scr-name">${escapeHtml(screen.name)}</span>
             <span class="diag-scr-status">${screen.status || '미정'}</span>
-          </span>
+          </div>
+          ${children.length ? `
+            <div class="ht-hline" style="background:${col.line}"></div>
+            <div class="ht-kids" style="--vline:${col.line}">
+              ${children.map(c => renderHTNode(c, allScreens, col)).join('')}
+            </div>` : ''}
         </div>
-        ${children.length ? `
-          <div class="vtree-children">
-            ${children.map((c, i) => renderVNode(c, allScreens, i === children.length - 1)).join('')}
-          </div>` : ''}
       </div>`;
   }
 
@@ -193,37 +205,39 @@ const Sitemap = (() => {
       </div>`;
 
     const sectionsHTML = sections.map((section, si) => {
-      const level2 = screens
+      const level2   = screens
         .filter(s => s.sectionId === section.id && !s.parentId)
         .sort((a, b) => a.createdAt - b.createdAt);
-
-      const col = BRANCH_COLORS[si % BRANCH_COLORS.length];
-      const isLast = si === sections.length - 1;
+      const col      = BRANCH_COLORS[si % BRANCH_COLORS.length];
+      const secLeaves = level2.reduce((sum, s) => sum + countLeaves(s.id, screens), 0) || 1;
+      const secH     = secLeaves * HT_LEAF_H;
 
       return `
-        <div class="vtree-node vtree-section-node ${isLast ? 'is-last' : ''}" style="--vline:${col.line}">
-          <div class="vtree-row">
-            <div class="vtree-section-hd"
+        <div class="ht-sec-cw" style="height:${secH}px">
+          <div class="ht-inner">
+            <div class="ht-sec-node"
               style="border-color:${col.border};background:${col.bg};color:${col.text}">
               ${escapeHtml(section.name)}
-              <span class="vtree-section-count">${level2.length}</span>
+              <span class="ht-sec-count">${level2.length}</span>
             </div>
+            ${level2.length ? `
+              <div class="ht-hline" style="background:${col.line}"></div>
+              <div class="ht-kids" style="--vline:${col.line}">
+                ${level2.map(s => renderHTNode(s, screens, col)).join('')}
+              </div>` : ''}
           </div>
-          ${level2.length ? `
-            <div class="vtree-children">
-              ${level2.map((s, i) => renderVNode(s, screens, i === level2.length - 1)).join('')}
-            </div>` : ''}
         </div>`;
     }).join('');
 
     return `
-      <div class="vtree-root">
-        <div class="vtree-root-node">
-          <span style="font-size:0.7rem;opacity:0.85">&#9679;</span>
-          전체 구조
-          <span class="vtree-root-meta">${screens.length}개 화면</span>
+      <div class="ht-wrap">
+        <div class="ht-header">
+          <div class="ht-header-node">
+            전체 화면 구조
+            <span class="ht-header-count">${screens.length}개 화면</span>
+          </div>
         </div>
-        <div class="vtree-children vtree-top">
+        <div class="ht-tree">
           ${sectionsHTML}
         </div>
       </div>`;

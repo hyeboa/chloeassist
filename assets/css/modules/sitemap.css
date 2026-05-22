@@ -618,3 +618,139 @@
   border-radius: 20px;
   padding: 1px 7px;
 }
+
+
+/* ═════ 구조도 — 좌→우 수평 트리 (ht-*) ═════
+   뎁스 = 컬럼, 형제 = 세로로 쌓임
+   각 노드는 리프 수만큼 px 높이를 가져 세로 중앙 정렬
+═══════════════════════════════════════════════ */
+
+.ht-wrap {
+  padding: 0 32px 32px;
+  min-width: max-content;
+}
+
+/* ─ 헤더 (루트 노드, 중앙 고정) ─ */
+.ht-header {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 28px;
+  position: sticky;
+  left: 0;
+}
+
+.ht-header-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(108,99,255,0.25);
+}
+
+.ht-header-count {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.78;
+}
+
+/* ─ 섹션 목록 ─ */
+.ht-tree {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─ 섹션 컨테이너 (고정 높이 = 리프 수 × 44px) ─ */
+.ht-sec-cw {
+  display: flex;
+  align-items: center;
+}
+
+/* ─ 섹션 노드 ─ */
+.ht-sec-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1.5px solid;
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 110px;
+}
+
+.ht-sec-count {
+  font-size: 0.68rem;
+  font-weight: 500;
+  background: rgba(255,255,255,0.7);
+  border-radius: 20px;
+  padding: 1px 7px;
+}
+
+/* ─ 수평 연결선 (부모 노드 → 자식 스파인) ─ */
+.ht-hline {
+  width: 18px;
+  height: 1.5px;
+  flex-shrink: 0;
+  background: var(--color-border);
+  align-self: center;
+}
+
+/* ─ 자식 컬럼 (세로 스택, 스파인 포함) ─ */
+.ht-kids {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 24px;
+  position: relative;
+}
+
+/* ─ 자식 래퍼 (고정 높이 = 리프 수 × 44px) ─ */
+.ht-cw {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 세로 스파인 세그먼트 */
+.ht-cw::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--vline, var(--color-border));
+  pointer-events: none;
+}
+/* 첫 자식: 스파인이 노드 중앙(50%)에서 시작 */
+.ht-cw:first-child::before { top: 50%; }
+/* 마지막 자식: 스파인이 노드 중앙(50%)에서 종료 */
+.ht-cw:last-child::before  { bottom: 50%; }
+/* 유일 자식: 스파인 없음 */
+.ht-cw:only-child::before  { display: none; }
+
+/* 수평 스텁 (스파인 → 노드 좌측) */
+.ht-cw::after {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 50%;
+  width: 24px;
+  height: 1.5px;
+  background: var(--vline, var(--color-border));
+  pointer-events: none;
+}
+
+/* ─ 내부 행 (노드 + hline + kids) ─ */
+.ht-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
