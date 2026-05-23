@@ -11,11 +11,18 @@ const Braindump = (() => {
     { val: 'none',     label: '날짜 없음' },
   ];
   const TAG_COLORS = [
-    { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' },
-    { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' },
-    { bg: '#fce7f3', text: '#be185d', border: '#f9a8d4' },
-    { bg: '#ffedd5', text: '#c2410c', border: '#fdba74' },
-    { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' },
+    { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' }, // 바이올렛
+    { bg: '#e0e7ff', text: '#4338ca', border: '#a5b4fc' }, // 인디고
+    { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' }, // 블루
+    { bg: '#cffafe', text: '#0e7490', border: '#67e8f9' }, // 시안
+    { bg: '#ccfbf1', text: '#0f766e', border: '#5eead4' }, // 틸
+    { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' }, // 에메랄드
+    { bg: '#dcfce7', text: '#15803d', border: '#86efac' }, // 그린
+    { bg: '#fef9c3', text: '#a16207', border: '#fde047' }, // 옐로
+    { bg: '#ffedd5', text: '#c2410c', border: '#fdba74' }, // 오렌지
+    { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' }, // 레드
+    { bg: '#fce7f3', text: '#be185d', border: '#f9a8d4' }, // 핑크
+    { bg: '#fae8ff', text: '#a21caf', border: '#f0abfc' }, // 푸시아
   ];
 
   let convertingId  = null;
