@@ -110,22 +110,28 @@
 
 /* ─ 접기/펼치기 토글 ─ */
 .section-toggle {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  color: var(--color-text-2);
   background: transparent;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all var(--transition);
+  color: var(--color-text-3);
+  transition: color 0.15s, background 0.15s;
+}
+.section-toggle svg {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotate(90deg);
+}
+.section-toggle.collapsed svg {
+  transform: rotate(0deg);
 }
 .section-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-text);
   background: var(--color-surface);
 }
 

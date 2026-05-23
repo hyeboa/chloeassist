@@ -232,8 +232,11 @@ const Sitemap = (() => {
               onchange="Sitemap.setOrder('${section.id}', this.value)"
               onclick="event.stopPropagation()"
               title="표시 순서 (작을수록 위/앞)">
-            <button class="section-toggle" onclick="Sitemap.toggleCollapse('${section.id}')"
-              title="${collapsed ? '펼치기' : '접기'}">${collapsed ? '▶' : '▼'}</button>
+            <button class="section-toggle${collapsed ? ' collapsed' : ''}" onclick="Sitemap.toggleCollapse('${section.id}')" title="${collapsed ? '펼치기' : '접기'}">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
             <span class="section-icon">&#9703;</span>
             <span class="section-name" data-id="${section.id}"
               contenteditable="true"
