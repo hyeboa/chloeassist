@@ -5,9 +5,30 @@
 const Dashboard = (() => {
   const CATS = ['기획', '디자인', '개발', '마케팅', '운영'];
   const FOCUS_KEY = 'chloeassist:focusMode';
+  const TAG_COLORS = [
+    { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' },
+    { bg: '#e0e7ff', text: '#4338ca', border: '#a5b4fc' },
+    { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' },
+    { bg: '#cffafe', text: '#0e7490', border: '#67e8f9' },
+    { bg: '#ccfbf1', text: '#0f766e', border: '#5eead4' },
+    { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' },
+    { bg: '#dcfce7', text: '#15803d', border: '#86efac' },
+    { bg: '#fef9c3', text: '#a16207', border: '#fde047' },
+    { bg: '#ffedd5', text: '#c2410c', border: '#fdba74' },
+    { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' },
+    { bg: '#fce7f3', text: '#be185d', border: '#f9a8d4' },
+    { bg: '#fae8ff', text: '#a21caf', border: '#f0abfc' },
+  ];
   let showDone    = false;
   let focusMode   = localStorage.getItem(FOCUS_KEY) === 'true';
   let focusOffset = 0;
+
+  function projectColor(name) {
+    if (!name) return TAG_COLORS[0];
+    let hash = 0;
+    for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
+    return TAG_COLORS[hash % TAG_COLORS.length];
+  }
 
   function todayStr() { return new Date().toDateString(); }
 
@@ -242,6 +263,59 @@ const Dashboard = (() => {
       </div>`;
   }
 
+  /* ─ 프로젝트 마감 임박 ─ */
+  function getProjectDeadlineTasks() {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const limit = new Date(today); limit.setDate(today.getDate() + 3);
+    return (Store.get('projectTasks') || [])
+      .filter(t => !t.done && t.dueDate && new Date(t.dueDate + 'T00:00:00') <= limit)
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  }
+
+  function toggleProjectDone(id) {
+    const t = (Store.get('projectTasks') || []).find(x => x.id === id);
+    if (!t) return;
+    Store.update('projectTasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
+    Toast.show('프로젝트 할 일 완료!', 'success');
+    render();
+  }
+
+  function renderProjectDeadlines() {
+    const tasks = getProjectDeadlineTasks();
+    if (tasks.length === 0) return '';
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    return `
+      <div class="proj-deadline-section">
+        <div class="proj-deadline-header">
+          <span class="proj-deadline-title">◉ 프로젝트 마감 임박</span>
+          <span class="proj-deadline-count">${tasks.length}개</span>
+        </div>
+        ${tasks.map(t => {
+          const color = projectColor(t.project);
+          const due   = new Date(t.dueDate + 'T00:00:00');
+          const diff  = Math.round((due - today) / 86400000);
+          let dcls = 'proj-due', dlabel;
+          if (diff < 0)       { dcls += ' overdue'; dlabel = `${-diff}일 지남`; }
+          else if (diff === 0){ dcls += ' today';   dlabel = '오늘'; }
+          else if (diff === 1){ dlabel = '내일'; }
+          else                { dlabel = `${due.getMonth() + 1}/${due.getDate()}`; }
+
+          return `
+            <div class="proj-deadline-item">
+              <div class="today-checkbox" onclick="Dashboard.toggleProjectDone('${t.id}')"></div>
+              <span class="proj-deadline-badge"
+                style="background:${color.bg};color:${color.text};border-color:${color.border}">
+                ${escapeHtml(t.project)}
+              </span>
+              <span class="proj-deadline-text">${escapeHtml(t.title)}</span>
+              <span class="${dcls}">${dlabel}</span>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
   function selectCat(cat) {
     selectedCat = cat;
     document.querySelectorAll('#quick-cat-pills .cat-pill').forEach(el => {
@@ -314,6 +388,8 @@ const Dashboard = (() => {
             🌙 오늘 끝! · 남은 ${total - done}개 내일로
           </button>` : ''}
       </div>
+
+      ${renderProjectDeadlines()}
     `;
 
     const input = document.getElementById('quick-input');
@@ -333,7 +409,7 @@ const Dashboard = (() => {
 
   return {
     render, toggleDone, toggleStar, deleteTask, toggleShowDone, selectCat,
-    toggleFocusMode, nextFocus, prevFocus, endOfDay,
+    toggleFocusMode, nextFocus, prevFocus, endOfDay, toggleProjectDone,
   };
 })();
 

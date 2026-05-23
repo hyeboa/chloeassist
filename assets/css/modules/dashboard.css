@@ -540,3 +540,73 @@
   margin-bottom: 8px;
 }
 .focus-empty-sub { font-size: 0.9rem; color: var(--color-text-3); }
+
+/* ===== 프로젝트 마감 임박 ===== */
+.proj-deadline-section {
+  margin-top: 28px;
+  padding: 20px 22px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.proj-deadline-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.proj-deadline-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.proj-deadline-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+}
+
+.proj-deadline-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.proj-deadline-item:hover { background: var(--color-surface-2); }
+
+.proj-deadline-badge {
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 700;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+.proj-deadline-text {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.proj-due {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  color: var(--color-text-3);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+.proj-due.today   { background: #ffedd5; color: #c2410c; border-color: #fdba74; }
+.proj-due.overdue { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
