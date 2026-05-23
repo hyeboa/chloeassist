@@ -8,36 +8,39 @@
   gap: 10px;
 }
 
-/* ─ 카테고리 필터 바 (입력창 바로 아래) ─ */
+/* ─ 카테고리 필터 바 (세그먼트 컨트롤) ─ */
 .cat-filter-bar {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding: 14px 0 18px;
-  border-bottom: 1px solid var(--color-border);
+  align-items: center;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  padding: 4px;
   margin-bottom: 20px;
+  gap: 2px;
+  width: fit-content;
 }
 
 .cat-filter-btn {
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-full);
-  font-size: 0.92rem;
-  font-weight: 500;
-  border: 1.5px solid var(--color-border);
-  color: var(--color-text-2);
-  background: var(--color-surface);
-  transition: all var(--transition);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
   cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
 }
 
-.cat-filter-btn:hover { opacity: 0.8; }
+.cat-filter-btn:hover { color: var(--color-text); }
 
-.cat-filter-btn.active-기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text);  border-color: var(--cat-기획-text); }
-.cat-filter-btn.active-디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); border-color: var(--cat-디자인-text); }
-.cat-filter-btn.active-개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text);  border-color: var(--cat-개발-text); }
-.cat-filter-btn.active-마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); border-color: var(--cat-마케팅-text); }
-.cat-filter-btn.active-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text); }
-.cat-filter-btn.active-전체  { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.cat-filter-btn.active-전체  { background: var(--color-surface); color: var(--color-primary);      box-shadow: var(--shadow-sm); }
+.cat-filter-btn.active-기획  { background: var(--color-surface); color: var(--cat-기획-text);      box-shadow: var(--shadow-sm); }
+.cat-filter-btn.active-디자인 { background: var(--color-surface); color: var(--cat-디자인-text);    box-shadow: var(--shadow-sm); }
+.cat-filter-btn.active-개발  { background: var(--color-surface); color: var(--cat-개발-text);      box-shadow: var(--shadow-sm); }
+.cat-filter-btn.active-마케팅 { background: var(--color-surface); color: var(--cat-마케팅-text);    box-shadow: var(--shadow-sm); }
+.cat-filter-btn.active-운영  { background: var(--color-surface); color: var(--cat-운영-text);      box-shadow: var(--shadow-sm); }
 
 /* ─ 검색 & 완료 토글 ─ */
 .bl-search-group {
@@ -248,7 +251,7 @@
 .bl-star {
   font-size: 1.1rem;
   color: var(--color-text-3);
-  opacity: 0;
+  opacity: 0.2;
   flex-shrink: 0;
   padding: 2px 4px;
   transition: opacity var(--transition), color var(--transition);
@@ -315,7 +318,7 @@
 .bl-actions {
   display: flex;
   gap: 4px;
-  opacity: 0;
+  opacity: 0.25;
   transition: opacity var(--transition);
 }
 

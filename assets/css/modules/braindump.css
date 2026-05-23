@@ -64,7 +64,7 @@
 }
 
 .dump-action {
-  opacity: 0;
+  opacity: 0.25;
   height: 34px;
   border-radius: var(--radius-sm);
   display: flex;

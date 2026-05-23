@@ -334,7 +334,7 @@
 }
 
 .today-task-del {
-  opacity: 0;
+  opacity: 0.25;
   font-size: 0.9rem;
   color: var(--color-text-3);
   padding: 4px 8px;
@@ -350,7 +350,7 @@
 .today-star {
   font-size: 1.05rem;
   color: var(--color-text-3);
-  opacity: 0;
+  opacity: 0.2;
   flex-shrink: 0;
   padding: 2px 4px;
   transition: opacity var(--transition), color var(--transition);

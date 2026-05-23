@@ -128,8 +128,8 @@
 /* ─ 2컬럼 레이아웃 ─ */
 .ms-two-col {
   display: grid;
-  grid-template-columns: 1fr 420px;
-  gap: 24px;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
   align-items: start;
 }
 
@@ -160,18 +160,17 @@
 .milestone-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .milestone-item {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 22px 26px;
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
   display: flex;
   align-items: center;
-  gap: 20px;
-  box-shadow: var(--shadow-sm);
+  gap: 14px;
   transition: box-shadow var(--transition);
   position: relative;
   overflow: hidden;
@@ -230,11 +229,11 @@
 .milestone-body { flex: 1; }
 
 .milestone-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 6px;
-  letter-spacing: -0.2px;
+  flex: 1;
+  letter-spacing: -0.1px;
 }
 
 .milestone-item.done .milestone-title {
@@ -243,9 +242,7 @@
 }
 
 .milestone-desc {
-  font-size: 0.92rem;
-  color: var(--color-text-2);
-  line-height: 1.5;
+  display: none;
 }
 
 .milestone-dday {
@@ -264,14 +261,11 @@
 .dday-overdue { background: #fee2e2; color: var(--color-danger); }
 
 .milestone-date {
-  font-size: 0.9rem;
-  color: var(--color-text-3);
-  flex-shrink: 0;
-  font-weight: 500;
+  display: none;
 }
 
 .milestone-actions {
-  opacity: 0;
+  opacity: 0.3;
   display: flex;
   gap: 4px;
   transition: opacity var(--transition);
@@ -471,3 +465,40 @@
   padding: 20px 0 8px;
   line-height: 1.8;
 }
+
+/* ─ 기능 상태 칩 (summary card 내) ─ */
+.feat-status-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.feat-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+}
+
+.feat-sc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.feat-sc-num {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.feat-sc-아이디어 .feat-sc-dot { background: #94a3b8; }
+.feat-sc-기획중   .feat-sc-dot { background: var(--cat-기획-text); }
+.feat-sc-디자인중 .feat-sc-dot { background: var(--cat-디자인-text); }
+.feat-sc-개발중   .feat-sc-dot { background: var(--cat-개발-text); }
+.feat-sc-완료     .feat-sc-dot { background: var(--color-success); }

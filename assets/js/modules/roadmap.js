@@ -24,14 +24,6 @@ const Roadmap = (() => {
     return { total, done, pct, bySt };
   }
 
-  function todayStats() {
-    const all   = getTasks();
-    const today = new Date().toDateString();
-    const list  = all.filter(t => t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === today));
-    const done  = list.filter(t => t.done).length;
-    return { total: list.length, done, pct: list.length ? Math.round(done / list.length * 100) : 0 };
-  }
-
   function nextMilestone() {
     const ms = getMilestones().filter(m => !m.done).sort((a, b) => new Date(a.date) - new Date(b.date));
     return ms[0] || null;
@@ -95,11 +87,7 @@ const Roadmap = (() => {
                 <div class="milestone-item ${milestoneClass(m)}">
                   <div class="milestone-check ${m.done ? 'checked' : ''}"
                     onclick="Roadmap.toggleDone('${m.id}')">${m.done ? '✓' : ''}</div>
-                  <div class="milestone-body">
-                    <div class="milestone-title">${escapeHtml(m.title)}</div>
-                    ${m.desc ? `<div class="milestone-desc">${escapeHtml(m.desc)}</div>` : ''}
-                  </div>
-                  <span class="milestone-date">${formatDate(m.date)}</span>
+                  <div class="milestone-title">${escapeHtml(m.title)}</div>
                   <span class="milestone-dday ${dd.cls}">${dd.label}</span>
                   <div class="milestone-actions">
                     <button class="ms-del-btn" onclick="Roadmap.deleteMilestone('${m.id}')">삭제</button>
@@ -215,25 +203,15 @@ const Roadmap = (() => {
                <div class="summary-sub">마일스톤을 추가해보세요</div>`
           }
         </div>
-      </div>
-
-      <!-- 기능 개발 현황 -->
-      <div class="feature-status-section">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div class="section-title" style="margin:0">기능 개발 현황</div>
-          <span style="font-size:0.78rem;color:var(--color-text-3)">전체 ${feat.total}개</span>
-        </div>
-        <div class="feature-status-bars">
-          ${STATUSES.map(s => `
-            <div class="status-bar-row">
-              <span class="status-bar-label">${s}</span>
-              <div class="status-bar-track">
-                <div class="status-bar-fill ${s}"
-                  style="width:${feat.total ? Math.round(feat.bySt[s] / feat.total * 100) : 0}%"></div>
-              </div>
-              <span class="status-bar-count">${feat.bySt[s]}</span>
-            </div>
-          `).join('')}
+        <div class="summary-card">
+          <div class="summary-label">기능 상태</div>
+          <div class="feat-status-chips">
+            ${STATUSES.map(s => feat.bySt[s] > 0 ? `
+              <span class="feat-status-chip feat-sc-${s}">
+                <span class="feat-sc-dot"></span>${s}<span class="feat-sc-num">${feat.bySt[s]}</span>
+              </span>` : '').join('')}
+          </div>
+          ${feat.total === 0 ? '<div class="summary-sub">기능이 없어요</div>' : ''}
         </div>
       </div>
 
