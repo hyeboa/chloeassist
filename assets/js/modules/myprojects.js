@@ -210,6 +210,62 @@ const MyProjects = (() => {
     `;
   }
 
+  /* ─ 대시보드 ─ */
+  function renderDashboard(all, projects) {
+    const el = document.getElementById('mp-dashboard');
+    if (!el || projects.length === 0) { if (el) el.innerHTML = ''; return; }
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+
+    el.innerHTML = `
+      <div class="mp-dashboard">
+        ${projects.map(proj => {
+          const tasks    = all.filter(t => t.project === proj);
+          const total    = tasks.length;
+          const doneNum  = tasks.filter(t => t.done).length;
+          const todoNum  = total - doneNum;
+          const pct      = total ? Math.round(doneNum / total * 100) : 0;
+          const color    = projectColor(proj);
+          const isActive = activeProject === proj;
+
+          const withDue  = tasks.filter(t => !t.done && t.dueDate)
+            .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+          const overdue  = withDue.filter(t => new Date(t.dueDate + 'T00:00:00') < today);
+
+          let dueHtml = '';
+          if (overdue.length) {
+            dueHtml = `<span class="mp-dash-due overdue">${overdue.length}개 마감 초과</span>`;
+          } else if (withDue.length) {
+            const d    = new Date(withDue[0].dueDate + 'T00:00:00');
+            const diff = Math.round((d - today) / 86400000);
+            const lbl  = diff === 0 ? '오늘 마감' : diff === 1 ? '내일 마감' : `${d.getMonth() + 1}/${d.getDate()} 마감`;
+            dueHtml = `<span class="mp-dash-due">${lbl}</span>`;
+          }
+
+          return `
+            <div class="mp-dash-card${isActive ? ' active' : ''}"
+              onclick="MyProjects.setFilter('${escapeHtml(proj)}')"
+              style="${isActive ? `border-color:${color.text};box-shadow:0 0 0 2px ${color.bg}` : ''}">
+              <span class="mp-project-badge"
+                style="background:${color.bg};color:${color.text};border-color:${color.border}">
+                ${escapeHtml(proj)}
+              </span>
+              <div class="mp-dash-progress-wrap">
+                <div class="mp-dash-progress-bar">
+                  <div class="mp-dash-progress-fill" style="width:${pct}%;background:${color.text}"></div>
+                </div>
+                <span class="mp-dash-pct">${pct}%</span>
+              </div>
+              <div class="mp-dash-stats">
+                <span class="mp-dash-remain">${todoNum > 0 ? `${todoNum}개 남음` : '모두 완료 ✓'}</span>
+                ${dueHtml}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
   /* ─ 리스트 재렌더 ─ */
   function renderList() {
     const listEl = document.getElementById('mp-list');
@@ -217,6 +273,8 @@ const MyProjects = (() => {
 
     const all      = getTasks();
     const projects = [...new Set(all.map(t => t.project).filter(Boolean))];
+
+    renderDashboard(all, projects);
 
     if (projects.length === 0) {
       listEl.innerHTML = `
@@ -227,7 +285,6 @@ const MyProjects = (() => {
     }
 
     const filtered = activeProject === '전체' ? projects : [activeProject];
-
     listEl.innerHTML = filtered
       .map(proj => renderSection(proj, sortTasks(all.filter(t => t.project === proj))))
       .join('');
@@ -244,8 +301,9 @@ const MyProjects = (() => {
       .join('');
 
     document.getElementById('app').innerHTML = `
-      ${projects.length > 1 ? `<div class="mp-filter-bar">${filterBtns}</div>` : ''}
-      <div id="mp-list"></div>
+      <div id="mp-dashboard"></div>
+      ${projects.length > 1 ? `<div class="mp-filter-bar" style="margin-top:20px">${filterBtns}</div>` : ''}
+      <div id="mp-list" style="margin-top:24px"></div>
     `;
 
     renderList();
