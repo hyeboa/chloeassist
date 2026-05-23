@@ -9,8 +9,8 @@
 }
 
 .mo-nav-btn {
-  padding: 6px 14px;
-  font-size: 0.78rem;
+  padding: 10px 20px;
+  font-size: 0.92rem;
   font-weight: 500;
   color: var(--color-text-2);
   border: 1.5px solid var(--color-border);
@@ -35,13 +35,14 @@
 }
 
 .mo-month {
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--color-text);
+  letter-spacing: -0.3px;
 }
 
 .mo-current-badge {
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 600;
   background: var(--color-primary);
   color: #fff;
@@ -54,41 +55,44 @@
 .mo-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 16px;
+  gap: 18px;
+  margin-bottom: 24px;
 }
 
 .mo-stat-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  padding: 24px 26px;
 }
 
 .mo-stat-label {
-  font-size: 0.72rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--color-text-3);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .mo-stat-value {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   color: var(--color-text);
   line-height: 1;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  letter-spacing: -0.5px;
 }
 
-.mo-stat-value span { font-size: 1rem; font-weight: 400; color: var(--color-text-3); }
-.mo-stat-unit { font-size: 1.1rem; }
+.mo-stat-value span { font-size: 1.2rem; font-weight: 400; color: var(--color-text-3); }
+.mo-stat-unit { font-size: 1.3rem; }
 
 .mo-stat-bar {
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 4px;
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .mo-stat-bar-fill {
@@ -98,34 +102,34 @@
   transition: width 0.5s ease;
 }
 
-.mo-stat-sub { font-size: 0.72rem; color: var(--color-text-3); }
+.mo-stat-sub { font-size: 0.88rem; color: var(--color-text-3); }
 
 /* ─ 섹션 공통 ─ */
 .mo-section {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
+  margin-bottom: 18px;
 }
 
 .mo-section:last-child { margin-bottom: 0; }
 
 .mo-section-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-3);
-  margin-bottom: 14px;
+  color: var(--color-text-2);
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .mo-section-count {
-  font-size: 0.7rem;
-  font-weight: 400;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--color-text-3);
   letter-spacing: 0;
   text-transform: none;
@@ -156,17 +160,17 @@
 }
 
 .mo-week-pct {
-  font-size: 0.68rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text-2);
-  height: 16px;
+  height: 18px;
   display: flex;
   align-items: center;
 }
 
 .mo-week-bar-track {
   width: 100%;
-  height: 80px;
+  height: 110px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -189,7 +193,7 @@
 .mo-week-bar-fill.empty  { min-height: 0; background: transparent; }
 
 .mo-week-label {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text-3);
 }
@@ -197,7 +201,7 @@
 .mo-week-label.current { color: var(--color-primary); }
 
 .mo-week-sub {
-  font-size: 0.62rem;
+  font-size: 0.78rem;
   color: var(--color-text-3);
 }
 
@@ -205,7 +209,7 @@
 .mo-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 20px;
   align-items: start;
 }
 
@@ -213,11 +217,11 @@
 .mo-task-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  font-size: 0.82rem;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
 .mo-task-row.done {
@@ -231,9 +235,9 @@
 }
 
 .mo-task-check {
-  font-size: 0.7rem;
+  font-size: 0.95rem;
   flex-shrink: 0;
-  width: 14px;
+  width: 18px;
   text-align: center;
   color: var(--color-text-3);
 }
@@ -255,8 +259,8 @@
 
 /* 카테고리 점 */
 .mo-cat-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -268,23 +272,23 @@
 .mo-cat-dot.운영   { background: #065f46; }
 
 .mo-miss-header {
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #f59e0b;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 12px 0 6px;
+  letter-spacing: 0.06em;
+  margin: 18px 0 8px;
 }
 
 /* ─ 마일스톤 행 ─ */
 .mo-ms-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  font-size: 0.82rem;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
 .mo-ms-row.done    { background: rgba(16,185,129,0.07); color: #065f46; }
@@ -292,51 +296,52 @@
 
 .mo-ms-date {
   margin-left: auto;
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   color: var(--color-text-3);
+  font-weight: 500;
 }
 
 /* ─ 기능 행 ─ */
 .mo-feat-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-  font-size: 0.82rem;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
   background: rgba(16,185,129,0.05);
   border-left: 3px solid #10b981;
 }
 
-.mo-feat-check { font-size: 0.7rem; color: #10b981; flex-shrink: 0; }
+.mo-feat-check { font-size: 0.95rem; color: #10b981; flex-shrink: 0; }
 .mo-feat-name  { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ─ AI 요약 ─ */
 .mo-ai-empty {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   color: var(--color-text-3);
-  margin-bottom: 12px;
-  line-height: 1.5;
+  margin-bottom: 14px;
+  line-height: 1.55;
 }
 
 .mo-ai-result, .mo-ai-streaming {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   color: var(--color-text);
   line-height: 1.8;
   white-space: pre-wrap;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   background: var(--color-bg);
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 16px 18px;
 }
 
-.mo-ai-streaming { min-height: 60px; }
+.mo-ai-streaming { min-height: 72px; }
 
 .mo-ai-btn {
   width: 100%;
-  padding: 9px 0;
-  font-size: 0.8rem;
+  padding: 12px 0;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-primary);
   border: 1.5px solid rgba(108,99,255,0.2);

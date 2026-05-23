@@ -12,40 +12,41 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: 26px 28px;
   box-shadow: var(--shadow-sm);
 }
 
 .summary-label {
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--color-text-3);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .summary-value {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 800;
   line-height: 1;
   color: var(--color-text);
+  letter-spacing: -0.6px;
 }
 
 .summary-value span {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: var(--color-text-3);
 }
 
 .summary-sub {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   color: var(--color-text-3);
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .summary-bar {
-  height: 4px;
+  height: 6px;
   background: var(--color-surface-2);
   border-radius: var(--radius-full);
   margin-top: 12px;
@@ -67,7 +68,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 22px;
+  padding: 28px 32px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 32px;
 }
@@ -81,20 +82,20 @@
 
 .status-bar-row {
   display: grid;
-  grid-template-columns: 80px 1fr 36px;
+  grid-template-columns: 100px 1fr 48px;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .status-bar-label {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   color: var(--color-text-2);
   font-weight: 500;
   text-align: right;
 }
 
 .status-bar-track {
-  height: 8px;
+  height: 12px;
   background: var(--color-surface-2);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -113,7 +114,7 @@
 .status-bar-fill.완료     { background: var(--color-success); }
 
 .status-bar-count {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text-3);
   text-align: right;
@@ -141,10 +142,10 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 16px 20px;
+  padding: 22px 26px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition);
   position: relative;
@@ -161,7 +162,7 @@
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
+  width: 5px;
   background: var(--color-success);
 }
 
@@ -169,7 +170,7 @@
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
+  width: 5px;
   background: var(--color-primary);
 }
 
@@ -177,13 +178,13 @@
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
+  width: 5px;
   background: var(--color-danger);
 }
 
 .milestone-check {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 2px solid var(--color-border);
   flex-shrink: 0;
@@ -191,7 +192,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   transition: all var(--transition);
 }
 
@@ -204,10 +205,11 @@
 .milestone-body { flex: 1; }
 
 .milestone-title {
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 3px;
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
 }
 
 .milestone-item.done .milestone-title {
@@ -216,14 +218,15 @@
 }
 
 .milestone-desc {
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   color: var(--color-text-2);
+  line-height: 1.5;
 }
 
 .milestone-dday {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
   white-space: nowrap;
   flex-shrink: 0;
@@ -236,9 +239,10 @@
 .dday-overdue { background: #fee2e2; color: var(--color-danger); }
 
 .milestone-date {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: var(--color-text-3);
   flex-shrink: 0;
+  font-weight: 500;
 }
 
 .milestone-actions {
@@ -251,9 +255,9 @@
 .milestone-item:hover .milestone-actions { opacity: 1; }
 
 .ms-del-btn {
-  padding: 3px 7px;
-  border-radius: 4px;
-  font-size: 0.72rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.88rem;
   color: var(--color-text-3);
   transition: background var(--transition), color var(--transition);
 }

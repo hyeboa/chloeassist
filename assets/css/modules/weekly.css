@@ -9,8 +9,8 @@
 }
 
 .wk-nav-btn {
-  padding: 6px 14px;
-  font-size: 0.78rem;
+  padding: 10px 20px;
+  font-size: 0.92rem;
   font-weight: 500;
   color: var(--color-text-2);
   border: 1.5px solid var(--color-border);
@@ -38,13 +38,14 @@
 }
 
 .wk-range {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--color-text);
+  letter-spacing: -0.2px;
 }
 
 .wk-current-badge {
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 600;
   background: var(--color-primary);
   color: #fff;
@@ -57,44 +58,47 @@
 .wk-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .wk-stat {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  padding: 24px 26px;
 }
 
 .wk-stat-label {
-  font-size: 0.72rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--color-text-3);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .wk-stat-value {
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 700;
   color: var(--color-text);
   line-height: 1;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  letter-spacing: -0.5px;
 }
 
 .wk-stat-value span {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 400;
   color: var(--color-text-3);
 }
 
 .wk-stat-bar {
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 4px;
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .wk-stat-bar-fill {
@@ -107,20 +111,20 @@
 .wk-stat-bar-fill.green { background: #10b981; }
 
 .wk-stat-sub {
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   color: var(--color-text-3);
 }
 
 .wk-ms-title {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 6px;
-  line-height: 1.3;
+  margin-bottom: 8px;
+  line-height: 1.35;
 }
 
 .wk-ms-dday {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -129,7 +133,7 @@
 .wk-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
   align-items: start;
 }
 
@@ -137,9 +141,9 @@
 .wk-section {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 16px 18px;
-  margin-bottom: 14px;
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
+  margin-bottom: 18px;
 }
 
 .wk-section:last-child { margin-bottom: 0; }
@@ -147,18 +151,18 @@
 .wk-section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
+  gap: 10px;
+  font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-2);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .wk-section-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -172,8 +176,8 @@
 
 .wk-section-count {
   margin-left: auto;
-  font-size: 0.7rem;
-  font-weight: 400;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--color-text-3);
   letter-spacing: 0;
   text-transform: none;
@@ -183,12 +187,12 @@
 .wk-task-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  margin-bottom: 6px;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 8px;
   border-left: 3px solid transparent;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
 }
 
 .wk-task-chip:last-child { margin-bottom: 0; }
@@ -210,9 +214,9 @@
 }
 
 .wk-chip-check {
-  font-size: 0.7rem;
+  font-size: 0.92rem;
   flex-shrink: 0;
-  width: 14px;
+  width: 18px;
   text-align: center;
   color: var(--color-text-3);
 }
@@ -222,7 +226,7 @@
 
 .wk-chip-title {
   flex: 1;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -234,15 +238,16 @@
 }
 
 .wk-chip-date {
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   color: var(--color-text-3);
   flex-shrink: 0;
+  font-weight: 500;
 }
 
 /* 카테고리 점 */
 .cat-wk-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -256,11 +261,11 @@
 .wk-ms-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  margin-bottom: 6px;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
 }
 
 .wk-ms-chip.done    { background: rgba(16,185,129,0.07); color: #065f46; }
@@ -268,39 +273,39 @@
 
 /* ─ AI 요약 ─ */
 .wk-ai-empty {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   color: var(--color-text-3);
-  margin-bottom: 12px;
-  line-height: 1.5;
+  margin-bottom: 14px;
+  line-height: 1.55;
 }
 
 .wk-ai-result {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   color: var(--color-text);
   line-height: 1.8;
   white-space: pre-wrap;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   background: var(--color-bg);
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 16px 18px;
 }
 
 .wk-ai-streaming {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   color: var(--color-text);
   line-height: 1.8;
   white-space: pre-wrap;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   background: var(--color-bg);
-  border-radius: 8px;
-  padding: 12px 14px;
-  min-height: 60px;
+  border-radius: 10px;
+  padding: 16px 18px;
+  min-height: 72px;
 }
 
 .wk-ai-btn {
   width: 100%;
-  padding: 9px 0;
-  font-size: 0.8rem;
+  padding: 12px 0;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-primary);
   border: 1.5px solid var(--color-primary-light, rgba(108,99,255,0.2));
