@@ -149,7 +149,6 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius-md);
   padding: 20px 22px 18px;
   margin-bottom: 28px;
-  transition: border-color var(--transition);
 }
 
 .inline-nl-wrap:focus-within {
