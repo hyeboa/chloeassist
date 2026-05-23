@@ -10,7 +10,6 @@ const Schedule = (() => {
   let editingDateId = null;
   let searchQuery   = '';
   let hideDone      = false;
-  let expandedNoteId = null;
 
   function getTasks() { return Store.get('tasks') || []; }
 
@@ -64,8 +63,6 @@ const Schedule = (() => {
 
   /* ─ 태스크 행 ─ */
   function taskRow(t) {
-    const isExpanded = expandedNoteId === t.id;
-
     let dateEl;
     if (editingDateId === t.id) {
       dateEl = `<input class="task-date-edit" id="date-edit-${t.id}"
@@ -80,12 +77,10 @@ const Schedule = (() => {
 
     return `
       <div class="bl-task-wrap ${t.starred ? 'starred' : ''}">
-        <div class="bl-task ${t.done ? 'done' : ''} ${t.starred ? 'starred' : ''}"
-          onclick="Schedule.toggleNote('${t.id}')">
+        <div class="bl-task ${t.done ? 'done' : ''} ${t.starred ? 'starred' : ''}">
           <div class="bl-checkbox ${t.done ? 'checked' : ''}"
             onclick="event.stopPropagation();Schedule.toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
           <span class="bl-title">${escapeHtml(t.title)}</span>
-          ${t.note ? '<span class="bl-note-dot" title="메모 있음">•</span>' : ''}
           ${dateEl}
           ${t.category
             ? `<span class="cat-badge ${t.category}">${t.category}</span>`
@@ -100,13 +95,6 @@ const Schedule = (() => {
               onclick="event.stopPropagation();Schedule.deleteTask('${t.id}')">삭제</button>
           </div>
         </div>
-        ${isExpanded ? `
-          <div class="bl-note-wrap">
-            <textarea class="bl-note-input" id="note-${t.id}"
-              placeholder="이 할 일을 왜 하는지, 관련 컨텍스트, 참고 링크..."
-              onblur="Schedule.saveNote('${t.id}', this.value)"
-              onclick="event.stopPropagation()">${escapeHtml(t.note || '')}</textarea>
-          </div>` : ''}
       </div>`;
   }
 
@@ -188,7 +176,6 @@ const Schedule = (() => {
     const el = document.getElementById('bl-list');
     if (el) el.innerHTML = buildListHTML();
     bindDateEdit();
-    bindNoteAutoSave();
   }
 
   /* ─ 렌더 ─ */
@@ -234,7 +221,6 @@ const Schedule = (() => {
     bindInput();
     bindSearch();
     bindDateEdit();
-    bindNoteAutoSave();
   }
 
   /* ─ 검색바 ─ */
@@ -350,15 +336,6 @@ const Schedule = (() => {
     });
   }
 
-  /* ─ 노트 자동 저장 ─ */
-  function bindNoteAutoSave() {
-    if (!expandedNoteId) return;
-    const ta = document.getElementById(`note-${expandedNoteId}`);
-    if (!ta) return;
-    ta.focus();
-    ta.setSelectionRange(ta.value.length, ta.value.length);
-  }
-
   /* ─ 공개 메서드 ─ */
   function toggleDone(id) {
     const t = getTasks().find(t => t.id === id);
@@ -374,15 +351,6 @@ const Schedule = (() => {
     renderList();
   }
 
-  function toggleNote(id) {
-    expandedNoteId = expandedNoteId === id ? null : id;
-    renderList();
-  }
-
-  function saveNote(id, text) {
-    Store.update('tasks', id, { note: text });
-  }
-
   function moveToToday(id) {
     Store.update('tasks', id, { isToday: true, dueDate: new Date().toISOString().slice(0, 10) });
     Toast.show('오늘 할 일로 추가됐어요.', 'success');
@@ -390,14 +358,12 @@ const Schedule = (() => {
   }
 
   function deleteTask(id) {
-    if (expandedNoteId === id) expandedNoteId = null;
     Store.remove('tasks', id);
     renderList();
   }
 
   function setFilter(f) {
     activeFilter = f;
-    expandedNoteId = null;
     render();
   }
 
@@ -419,7 +385,7 @@ const Schedule = (() => {
   }
 
   return {
-    render, setFilter, toggleDone, toggleStar, toggleNote, saveNote,
+    render, setFilter, toggleDone, toggleStar,
     moveToToday, deleteTask, selectCat, startDateEdit, toggleHideDone,
   };
 })();
