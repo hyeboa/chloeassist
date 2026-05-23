@@ -23,6 +23,7 @@ const Sitemap = (() => {
 
   const MAX_DEPTH = 4;
   let viewMode = 'board';
+  let pageTab  = 'screens';
   let linkPickerScreenId = null;
 
   /* ─ drag state ─ */
@@ -61,6 +62,15 @@ const Sitemap = (() => {
     return depth;
   }
 
+  /* ─ 페이지 탭 (화면 / 기능) ─ */
+  function renderPageTabs() {
+    return `
+      <div class="review-tabs" style="margin-bottom:20px">
+        <button class="review-tab ${pageTab === 'screens'  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens')">화면</button>
+        <button class="review-tab ${pageTab === 'features' ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">기능</button>
+      </div>`;
+  }
+
   /* ─ 뷰 탭 ─ */
   function renderViewTabs() {
     return `
@@ -95,13 +105,13 @@ const Sitemap = (() => {
       <div class="screen-links">
         <div class="screen-links-row">
           ${linked.map(f => `
-            <a class="screen-link-chip cat-${f.category || ''}" href="projects.html"
-              onclick="event.stopPropagation()" title="기능 보드로 이동">
+            <span class="screen-link-chip cat-${f.category || ''}"
+              onclick="event.stopPropagation();Sitemap.setPageTab('features')" title="기능 탭으로 이동" style="cursor:pointer">
               <span class="screen-link-chip-name">${escapeHtml(f.name)}</span>
               <button class="screen-link-chip-x"
                 onclick="event.preventDefault();event.stopPropagation();Sitemap.unlinkFeature('${screen.id}','${f.id}')"
                 title="연결 해제">&#10005;</button>
-            </a>
+            </span>
           `).join('')}
           <button class="screen-link-add ${isPickerOpen ? 'is-open' : ''}"
             onclick="event.stopPropagation();Sitemap.toggleLinkPicker('${screen.id}')">
@@ -111,7 +121,7 @@ const Sitemap = (() => {
         ${isPickerOpen ? `
           <div class="screen-link-picker" onclick="event.stopPropagation()">
             ${allFeatures.length === 0
-              ? '<div class="screen-link-empty">기능 보드에서 먼저 기능을 추가하세요</div>'
+              ? '<div class="screen-link-empty">기능 탭에서 먼저 기능을 추가해보세요 <button style="margin-left:6px;font-size:0.78rem;color:var(--color-primary);background:none;border:none;cursor:pointer" onclick="event.stopPropagation();Sitemap.setPageTab(\'features\')">기능 탭 열기 →</button></div>'
               : allFeatures.map(f => {
                   const on = (screen.featureIds || []).includes(f.id);
                   return `
@@ -346,12 +356,19 @@ const Sitemap = (() => {
   }
 
   function render() {
+    if (pageTab === 'features') {
+      document.getElementById('app').innerHTML = renderPageTabs() + Projects.buildHTML();
+      Projects.bindFeatInput();
+      return;
+    }
+
     const sections   = getSections();
     const screens    = getScreens();
     const components = getComponents();
 
     if (viewMode === 'board') {
       document.getElementById('app').innerHTML = `
+        ${renderPageTabs()}
         ${renderViewTabs()}
         ${renderLegend()}
         <div class="sitemap-board">
@@ -367,6 +384,7 @@ const Sitemap = (() => {
       bindSectionNameBlur();
     } else {
       document.getElementById('app').innerHTML = `
+        ${renderPageTabs()}
         ${renderViewTabs()}
         <div class="diag-status-legend">
           ${STATUSES.map(s => `<span class="legend-item"><span class="legend-dot ${STATUS_CLS[s]}"></span>${s}</span>`).join('')}
@@ -436,7 +454,9 @@ const Sitemap = (() => {
   }
 
   /* ─ 공개 메서드 ─ */
-  function setView(mode) { viewMode = mode; render(); }
+  function setView(mode)    { viewMode = mode; render(); }
+  function setPageTab(tab)  { pageTab = tab; render(); }
+  function rerender()       { render(); }
 
   function addSection() {
     const sections = getSections();
@@ -670,7 +690,8 @@ const Sitemap = (() => {
   }
 
   return {
-    render, setView, addSection, addScreen, addComponent, deleteComponent,
+    render, setView, setPageTab, rerender,
+    addSection, addScreen, addComponent, deleteComponent,
     cycleStatus, deleteScreen, deleteSection, focusName, focusComponent,
     setOrder, toggleCollapse,
     toggleLinkPicker, toggleLinkFeature, unlinkFeature,

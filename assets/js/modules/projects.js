@@ -103,11 +103,11 @@ const Projects = (() => {
                 <div class="feat-linked-label">관련 화면 <span class="feat-linked-count">${screens.length}</span></div>
                 <div class="feat-linked-list">
                   ${screens.map(s => `
-                    <a class="feat-linked-chip" href="sitemap.html"
-                      onclick="event.stopPropagation()" title="사이트맵으로 이동">
+                    <span class="feat-linked-chip"
+                      onclick="event.stopPropagation();Projects.goToScreens()" title="화면 탭으로 이동">
                       ${escapeHtml(s.name)}
                       <span class="feat-linked-status">${s.status || '미정'}</span>
-                    </a>
+                    </span>
                   `).join('')}
                 </div>
               </div>`;
@@ -122,11 +122,10 @@ const Projects = (() => {
     `;
   }
 
-  /* ─ 렌더 ─ */
-  function render() {
+  /* ─ HTML 빌더 ─ */
+  function buildHTML() {
     const features = getFeatures();
-
-    document.getElementById('app').innerHTML = `
+    return `
       <div class="inline-nl-wrap">
         <div class="inline-nl-label">새 기능 추가</div>
         <input id="feat-input" class="inline-nl-input" type="text"
@@ -153,7 +152,15 @@ const Projects = (() => {
         }).join('')}
       </div>
     `;
+  }
 
+  /* ─ 렌더 ─ */
+  function render() {
+    if (typeof Sitemap !== 'undefined') {
+      Sitemap.rerender();
+      return;
+    }
+    document.getElementById('app').innerHTML = buildHTML();
     bindFeatInput();
   }
 
@@ -173,6 +180,15 @@ const Projects = (() => {
       input.value = '';
       render();
     });
+  }
+
+  /* ─ 화면 탭으로 이동 ─ */
+  function goToScreens() {
+    if (typeof Sitemap !== 'undefined') {
+      Sitemap.setPageTab('screens');
+    } else {
+      location.href = 'sitemap.html';
+    }
   }
 
   /* ─ 공개 메서드 ─ */
@@ -225,7 +241,13 @@ const Projects = (() => {
     render();
   }
 
-  return { render, deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask, toggleTaskDone };
+  return {
+    render, buildHTML, bindFeatInput, goToScreens,
+    deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask, toggleTaskDone,
+  };
 })();
 
-document.addEventListener('DOMContentLoaded', () => Projects.render());
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof Sitemap === 'undefined') Projects.render();
+});
+

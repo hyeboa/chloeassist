@@ -16,9 +16,8 @@ const Nav = (() => {
     {
       label: '프로젝트',
       items: [
-        { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
-        { href: 'projects.html', label: '기능 보드',   icon: '◉' },
-        { href: 'sitemap.html',  label: '사이트맵',    icon: '◧' },
+        { href: 'roadmap.html',  label: '로드맵',       icon: '◈' },
+        { href: 'sitemap.html',  label: '화면 & 기능',  icon: '◧' },
       ]
     },
     {
