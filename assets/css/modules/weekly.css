@@ -344,6 +344,53 @@
 
 .wk-memo::placeholder { color: var(--color-text-3); }
 
+/* ─ 회고 구조 ─ */
+.wk-reflect-group { margin-bottom: 14px; }
+.wk-reflect-group:last-of-type { margin-bottom: 0; }
+.wk-reflect-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin-bottom: 6px;
+}
+.wk-reflect-input {
+  width: 100%;
+  min-height: 64px;
+  font-size: 0.84rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: border-color var(--transition);
+  box-sizing: border-box;
+}
+.wk-reflect-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.08);
+}
+.wk-reflect-input::placeholder { color: var(--color-text-3); }
+.wk-reflect-legacy {
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+}
+.wk-reflect-legacy summary { cursor: pointer; padding: 4px 0; }
+.wk-reflect-legacy-body {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--color-surface-2);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--color-text-2);
+  line-height: 1.6;
+}
+
 /* ─ 빈 상태 ─ */
 .wk-empty {
   font-size: 0.78rem;

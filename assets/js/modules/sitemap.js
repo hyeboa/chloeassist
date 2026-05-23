@@ -23,10 +23,13 @@ const Sitemap = (() => {
 
   const MAX_DEPTH = 4;
   let viewMode = 'board';
+  let linkPickerScreenId = null;
 
   /* ─ drag state ─ */
   let dragSectionId = null;
   let dragScreenId  = null;
+
+  function getFeatures() { return Store.get('features') || []; }
 
   function getSections() {
     let sections = Store.get('sitemapSections') || [];
@@ -81,6 +84,48 @@ const Sitemap = (() => {
       </div>`;
   }
 
+  function renderFeatureLinks(screen) {
+    const allFeatures = getFeatures();
+    const linked = (screen.featureIds || [])
+      .map(id => allFeatures.find(f => f.id === id))
+      .filter(Boolean);
+    const isPickerOpen = linkPickerScreenId === screen.id;
+
+    return `
+      <div class="screen-links">
+        <div class="screen-links-row">
+          ${linked.map(f => `
+            <a class="screen-link-chip cat-${f.category || ''}" href="projects.html"
+              onclick="event.stopPropagation()" title="기능 보드로 이동">
+              <span class="screen-link-chip-name">${escapeHtml(f.name)}</span>
+              <button class="screen-link-chip-x"
+                onclick="event.preventDefault();event.stopPropagation();Sitemap.unlinkFeature('${screen.id}','${f.id}')"
+                title="연결 해제">&#10005;</button>
+            </a>
+          `).join('')}
+          <button class="screen-link-add ${isPickerOpen ? 'is-open' : ''}"
+            onclick="event.stopPropagation();Sitemap.toggleLinkPicker('${screen.id}')">
+            ${isPickerOpen ? '닫기' : '+ 관련 기능'}
+          </button>
+        </div>
+        ${isPickerOpen ? `
+          <div class="screen-link-picker" onclick="event.stopPropagation()">
+            ${allFeatures.length === 0
+              ? '<div class="screen-link-empty">기능 보드에서 먼저 기능을 추가하세요</div>'
+              : allFeatures.map(f => {
+                  const on = (screen.featureIds || []).includes(f.id);
+                  return `
+                    <button class="screen-link-opt ${on ? 'on' : ''}"
+                      onclick="event.stopPropagation();Sitemap.toggleLinkFeature('${screen.id}','${f.id}')">
+                      <span class="screen-link-opt-mark">${on ? '✓' : ''}</span>
+                      <span class="screen-link-opt-name">${escapeHtml(f.name)}</span>
+                      <span class="screen-link-opt-status">${f.status}</span>
+                    </button>`;
+                }).join('')}
+          </div>` : ''}
+      </div>`;
+  }
+
   function renderCard(screen, index, allComponents, canAddChild) {
     const cls   = STATUS_CLS[screen.status || '미정'];
     const comps = allComponents.filter(c => c.screenId === screen.id);
@@ -112,6 +157,7 @@ const Sitemap = (() => {
             </div>`).join('')}
           <button class="comp-add-btn" onclick="Sitemap.addComponent('${screen.id}')">+ 항목 추가</button>
         </div>
+        ${renderFeatureLinks(screen)}
         ${canAddChild ? `
           <button class="screen-add-sub"
             onclick="event.stopPropagation();Sitemap.addScreen('${screen.sectionId}','${screen.id}')">
@@ -471,6 +517,29 @@ const Sitemap = (() => {
     render();
   }
 
+  function toggleLinkPicker(screenId) {
+    linkPickerScreenId = linkPickerScreenId === screenId ? null : screenId;
+    render();
+  }
+
+  function toggleLinkFeature(screenId, featureId) {
+    const screen = getScreens().find(s => s.id === screenId);
+    if (!screen) return;
+    const ids = Array.isArray(screen.featureIds) ? [...screen.featureIds] : [];
+    const idx = ids.indexOf(featureId);
+    if (idx >= 0) ids.splice(idx, 1); else ids.push(featureId);
+    Store.update('sitemapScreens', screenId, { featureIds: ids });
+    render();
+  }
+
+  function unlinkFeature(screenId, featureId) {
+    const screen = getScreens().find(s => s.id === screenId);
+    if (!screen) return;
+    const ids = (screen.featureIds || []).filter(id => id !== featureId);
+    Store.update('sitemapScreens', screenId, { featureIds: ids });
+    render();
+  }
+
   function deleteSection(id) {
     if (!confirm('섹션을 삭제하면 안의 화면도 모두 삭제돼요. 계속할까요?')) return;
     getScreens().filter(s => s.sectionId === id).forEach(s => {
@@ -604,6 +673,7 @@ const Sitemap = (() => {
     render, setView, addSection, addScreen, addComponent, deleteComponent,
     cycleStatus, deleteScreen, deleteSection, focusName, focusComponent,
     setOrder, toggleCollapse,
+    toggleLinkPicker, toggleLinkFeature, unlinkFeature,
     sectionDragStart, sectionDragOver, sectionDragLeave, sectionDrop, sectionDragEnd,
     screenDragStart,  screenDragOver,  screenDragLeave,  screenDrop,  screenDragEnd,
   };

@@ -58,7 +58,7 @@ const Weekly = (() => {
   /* ─ 주간 메모 저장/불러오기 ─ */
   function getMemo(weekStart) {
     const all = Store.get('weeklyReviews') || {};
-    return all[weekKey(weekStart)] || { memo: '', aiSummary: '' };
+    return all[weekKey(weekStart)] || { memo: '', aiSummary: '', reflectGood: '', reflectBad: '', reflectNext: '' };
   }
 
   function saveMemo(weekStart, patch) {
@@ -241,10 +241,28 @@ const Weekly = (() => {
           <div class="wk-section">
             <div class="wk-section-header">
               <span class="wk-section-dot memo"></span>
-              주간 메모
+              회고
             </div>
-            <textarea class="wk-memo" id="wk-memo"
-              placeholder="이번 주 느낀 점, 개선할 점, 다음 주 다짐...">${escapeHtml(memo.memo)}</textarea>
+            <div class="wk-reflect-group">
+              <label class="wk-reflect-label">✅ 이번 주 잘한 점</label>
+              <textarea class="wk-reflect-input" id="wk-reflect-good"
+                placeholder="작게라도 해낸 것을 적어보세요">${escapeHtml(memo.reflectGood || '')}</textarea>
+            </div>
+            <div class="wk-reflect-group">
+              <label class="wk-reflect-label">⚠️ 아쉬운 점</label>
+              <textarea class="wk-reflect-input" id="wk-reflect-bad"
+                placeholder="잘 안 풀렸던 일, 막힌 부분">${escapeHtml(memo.reflectBad || '')}</textarea>
+            </div>
+            <div class="wk-reflect-group">
+              <label class="wk-reflect-label">🎯 다음 주 집중할 것</label>
+              <textarea class="wk-reflect-input" id="wk-reflect-next"
+                placeholder="딱 1~2개만 골라보세요">${escapeHtml(memo.reflectNext || '')}</textarea>
+            </div>
+            ${memo.memo ? `
+              <details class="wk-reflect-legacy">
+                <summary>이전 메모 보기</summary>
+                <div class="wk-reflect-legacy-body">${escapeHtml(memo.memo).replace(/\n/g, '<br>')}</div>
+              </details>` : ''}
           </div>
         </div>
       </div>
@@ -255,12 +273,19 @@ const Weekly = (() => {
 
   /* ─ 메모 자동 저장 ─ */
   function bindMemo() {
-    const ta = document.getElementById('wk-memo');
-    if (!ta) return;
+    const FIELDS = [
+      ['wk-reflect-good', 'reflectGood'],
+      ['wk-reflect-bad',  'reflectBad'],
+      ['wk-reflect-next', 'reflectNext'],
+    ];
     let timer;
-    ta.addEventListener('input', () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => saveMemo(currentWeekStart, { memo: ta.value }), 600);
+    FIELDS.forEach(([id, key]) => {
+      const ta = document.getElementById(id);
+      if (!ta) return;
+      ta.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => saveMemo(currentWeekStart, { [key]: ta.value }), 600);
+      });
     });
   }
 
@@ -301,6 +326,7 @@ const Weekly = (() => {
     const featDone = features.filter(f => f.status === '완료').length;
     const upcomingMs = milestones.filter(m => !m.done && new Date(m.date) >= today)
       .sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 2);
+    const reflect = getMemo(currentWeekStart);
 
     const prompt = `나는 헬로아지(반려견 플랫폼 모바일 앱)를 1인으로 기획·디자인·운영하고 있어.
 
@@ -309,6 +335,9 @@ const Weekly = (() => {
 - 못 끝낸 일: ${miss.length ? miss.join(', ') : '없음'}
 - 기능 개발 진행도: ${featDone}/${features.length}개 완료
 ${upcomingMs.map(m => `- 마일스톤 예정: ${m.title} (${m.date})`).join('\n')}
+${reflect.reflectGood ? `\n내가 적은 잘한 점: ${reflect.reflectGood}` : ''}
+${reflect.reflectBad  ? `\n내가 적은 아쉬운 점: ${reflect.reflectBad}` : ''}
+${reflect.reflectNext ? `\n내가 적은 다음 주 집중: ${reflect.reflectNext}` : ''}
 
 위 상황을 바탕으로 짧고 따뜻한 주간 리뷰를 써줘. 마크다운 없이 일반 텍스트로.
 

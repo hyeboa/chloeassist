@@ -288,6 +288,28 @@
 
 .done-section-toggle:hover { color: var(--color-text-2); }
 
+/* ===== 오늘 끝! 버튼 ===== */
+.end-of-day-btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px 18px;
+  background: transparent;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.end-of-day-btn:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-primary);
+  border-style: solid;
+  color: var(--color-primary);
+}
+
 /* ===== 집중 모드 ===== */
 .today-header-row {
   display: flex;

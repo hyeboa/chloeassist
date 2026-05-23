@@ -10,6 +10,11 @@ const Projects = (() => {
 
   function getFeatures() { return Store.get('features') || []; }
   function getTasks()    { return Store.get('tasks')    || []; }
+  function getScreens()  { return Store.get('sitemapScreens') || []; }
+
+  function linkedScreens(featureId) {
+    return getScreens().filter(s => Array.isArray(s.featureIds) && s.featureIds.includes(featureId));
+  }
 
   function linkedTasks(featureId) {
     return getTasks().filter(t => t.featureId === featureId);
@@ -90,6 +95,23 @@ const Projects = (() => {
           </div>`}
 
         ${isOpen ? `
+          ${(() => {
+            const screens = linkedScreens(f.id);
+            if (!screens.length) return '';
+            return `
+              <div class="feat-linked-screens">
+                <div class="feat-linked-label">관련 화면 <span class="feat-linked-count">${screens.length}</span></div>
+                <div class="feat-linked-list">
+                  ${screens.map(s => `
+                    <a class="feat-linked-chip" href="sitemap.html"
+                      onclick="event.stopPropagation()" title="사이트맵으로 이동">
+                      ${escapeHtml(s.name)}
+                      <span class="feat-linked-status">${s.status || '미정'}</span>
+                    </a>
+                  `).join('')}
+                </div>
+              </div>`;
+          })()}
           ${renderTaskPanel(f)}
           <div class="feature-card-actions-row">
             ${prevStatus ? `<button class="feature-action-btn prev" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${prevStatus}')">◀ ${prevStatus}</button>` : ''}

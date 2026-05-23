@@ -295,6 +295,45 @@
   border-color: transparent;
 }
 
+/* ═════ 관련 화면 ═════ */
+.feat-linked-screens {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.feat-linked-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.68rem; font-weight: 600;
+  color: var(--color-text-3);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.feat-linked-count {
+  font-size: 0.68rem; color: var(--color-text-3); font-weight: 400;
+}
+.feat-linked-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.feat-linked-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: border-color var(--transition), background var(--transition);
+}
+.feat-linked-chip:hover {
+  border-color: var(--color-primary);
+  background: rgba(108,99,255,0.04);
+}
+.feat-linked-status {
+  font-size: 0.64rem;
+  color: var(--color-text-3);
+  padding-left: 5px;
+  border-left: 1px solid var(--color-border);
+}
+
 /* ═════ 태스크 패널 ═════ */
 .feat-panel {
   margin-top: 12px;

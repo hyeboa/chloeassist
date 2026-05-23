@@ -127,6 +127,21 @@ const Dashboard = (() => {
     render();
   }
 
+  function endOfDay() {
+    const undone = getTodayTasks().filter(t => !t.done);
+    if (undone.length === 0) return;
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const iso = tomorrow.toISOString().slice(0, 10);
+
+    undone.forEach(t => {
+      Store.update('tasks', t.id, { isToday: false, dueDate: iso });
+    });
+    Toast.show(`${undone.length}개를 내일로 옮겼어요. 오늘도 수고했어요!`, 'success');
+    render();
+  }
+
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -317,6 +332,11 @@ const Dashboard = (() => {
           <div class="done-section-toggle" onclick="Dashboard.toggleShowDone()">
             ${showDone ? '▴' : '▾'} 완료된 항목 ${done}개 ${showDone ? '숨기기' : '보기'}
           </div>` : ''}
+        ${total - done > 0 ? `
+          <button class="end-of-day-btn" onclick="Dashboard.endOfDay()"
+            title="남은 ${total - done}개를 내일로 옮기고 오늘 마무리">
+            🌙 오늘 끝! · 남은 ${total - done}개 내일로
+          </button>` : ''}
       </div>
     `;
 
@@ -337,7 +357,7 @@ const Dashboard = (() => {
 
   return {
     render, toggleDone, toggleStar, deleteTask, toggleShowDone, selectCat,
-    toggleFocusMode, nextFocus, prevFocus,
+    toggleFocusMode, nextFocus, prevFocus, endOfDay,
   };
 })();
 
