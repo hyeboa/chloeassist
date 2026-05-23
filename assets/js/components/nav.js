@@ -9,6 +9,7 @@ const Nav = (() => {
     { href: 'hello.html',    label: '한눈에',      icon: '⬡' },
     { href: 'weekly.html',   label: '주간 리뷰',   icon: '◫' },
     { href: 'monthly.html',  label: '월간 리뷰',   icon: '◰' },
+    { href: 'reflect.html',  label: '회고 모음',   icon: '❀' },
     { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
     { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
     { href: 'braindump.html',label: '브레인 덤프', icon: '✦' },
