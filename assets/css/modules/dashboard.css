@@ -199,6 +199,8 @@
 .cat-마케팅 .cat-label { color: var(--cat-마케팅-text); }
 .cat-운영  .cat-dot { background: var(--cat-운영-text); }
 .cat-운영  .cat-label { color: var(--cat-운영-text); }
+.cat-미분류 .cat-dot { background: var(--cat-미분류-text); }
+.cat-미분류 .cat-label { color: var(--cat-미분류-text); }
 
 /* ===== 오늘 태스크 아이템 ===== */
 .today-task {

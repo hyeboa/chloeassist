@@ -174,6 +174,7 @@ const Dashboard = (() => {
 
     const byCat = {};
     CATS.forEach(c => { byCat[c] = tasks.filter(t => t.category === c); });
+    const uncategorized = tasks.filter(t => !CATS.includes(t.category));
     const hasAny = tasks.filter(t => !t.done).length > 0 || (showDone && done > 0);
 
     document.getElementById('app').innerHTML = `
@@ -209,7 +210,7 @@ const Dashboard = (() => {
                <div class="empty-state-icon">✦</div>
                <div class="empty-state-text">오늘 할 일을 추가해보세요</div>
              </div>`
-          : CATS.map(c => renderCatGroup(c, byCat[c])).join('')}
+          : CATS.map(c => renderCatGroup(c, byCat[c])).join('') + renderCatGroup('미분류', uncategorized)}
         ${done > 0 ? `
           <div class="done-section-toggle" onclick="Dashboard.toggleShowDone()">
             ${showDone ? '▴' : '▾'} 완료된 항목 ${done}개 ${showDone ? '숨기기' : '보기'}

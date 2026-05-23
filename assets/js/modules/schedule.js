@@ -87,7 +87,9 @@ const Schedule = (() => {
           <span class="bl-title">${escapeHtml(t.title)}</span>
           ${t.note ? '<span class="bl-note-dot" title="메모 있음">•</span>' : ''}
           ${dateEl}
-          <span class="cat-badge ${t.category || ''}">${t.category || ''}</span>
+          ${t.category
+            ? `<span class="cat-badge ${t.category}">${t.category}</span>`
+            : '<span class="cat-badge cat-empty">미분류</span>'}
           <button class="bl-star ${t.starred ? 'on' : ''}"
             onclick="event.stopPropagation();Schedule.toggleStar('${t.id}')"
             title="${t.starred ? '별표 해제' : '별표 추가'}">
@@ -288,13 +290,26 @@ const Schedule = (() => {
       const text = input.value.trim();
       if (!text) { editingDateId = null; renderList(); return; }
 
+      const today = new Date().toISOString().slice(0, 10);
+
+      const direct = text.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
+      if (direct) {
+        const iso = `${direct[1]}-${direct[2].padStart(2, '0')}-${direct[3].padStart(2, '0')}`;
+        Store.update('tasks', editingDateId, { dueDate: iso, isToday: iso === today });
+        Toast.show('날짜가 설정됐어요.', 'success');
+        editingDateId = null;
+        renderList();
+        return;
+      }
+
       if (!AI.getApiKey()) {
-        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+        Toast.show('API 키 없이는 자연어 날짜를 쓸 수 없어요. YYYY-MM-DD 형식으로 입력해 주세요.', 'warning');
+        editingDateId = null;
+        renderList();
         return;
       }
 
       input.disabled = true;
-      const today = new Date().toISOString().slice(0, 10);
       try {
         const raw = await AI.chat(
           [{ role: 'user', content: `오늘은 ${today}. "${text}"를 YYYY-MM-DD 날짜로 변환해줘. 날짜만 답해.` }],

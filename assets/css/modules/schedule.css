@@ -279,6 +279,7 @@
 .cat-badge.개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text); }
 .cat-badge.마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); }
 .cat-badge.운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text); }
+.cat-badge.cat-empty { background: var(--cat-미분류-bg); color: var(--cat-미분류-text); }
 
 .bl-actions {
   display: flex;
