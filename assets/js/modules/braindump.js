@@ -127,17 +127,45 @@ const Braindump = (() => {
       dueDate = d.toISOString().slice(0, 10);
     }
 
-    Store.push('tasks', {
-      title: note.text, done: false, category: convertCat, dueDate, isToday,
-    });
+    if (note.project) {
+      Store.push('projectTasks', { project: note.project, title: note.text, done: false });
+      Toast.show(`${note.project} 할 일로 추가됐어요!`, 'success');
+    } else {
+      Store.push('tasks', {
+        title: note.text, done: false, category: convertCat, dueDate, isToday,
+      });
+      Toast.show('할 일로 추가됐어요!', 'success');
+    }
     Store.remove('notes', convertingId);
     convertingId = null;
-    Toast.show('할 일로 추가됐어요!', 'success');
     render();
   }
 
   /* ─ 변환 폼 렌더 ─ */
   function renderConvertForm(n) {
+    if (n.project) {
+      const color = projectColor(n.project);
+      return `
+        <div class="dump-item converting">
+          <div class="dump-convert-top">
+            <span class="dump-text">${escapeHtml(n.text)}</span>
+            <button class="dump-action dump-delete" style="opacity:1"
+              onclick="Braindump.cancelConvert()" title="취소">✕</button>
+          </div>
+          <div class="dump-convert-form">
+            <div class="convert-row">
+              <span class="dump-project-badge"
+                style="background:${color.bg};color:${color.text};border-color:${color.border}">
+                ${escapeHtml(n.project)}
+              </span>
+              <span style="font-size:0.82rem;color:var(--color-text-3)">프로젝트 할 일로 추가돼요</span>
+              <button class="convert-confirm-btn" onclick="Braindump.confirmConvert()">추가 →</button>
+            </div>
+            <div class="convert-hint">Enter 확인 · Esc 취소</div>
+          </div>
+        </div>`;
+    }
+
     return `
       <div class="dump-item converting">
         <div class="dump-convert-top">

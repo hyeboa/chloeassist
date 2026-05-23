@@ -1,0 +1,167 @@
+/* ===== 내 프로젝트 ===== */
+
+/* ─ 필터 바 ─ */
+.mp-filter-bar {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  gap: 2px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.mp-filter-btn {
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.mp-filter-btn:hover { color: var(--color-text); }
+.mp-filter-btn.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─ 프로젝트 섹션 ─ */
+.mp-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.mp-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mp-project-badge {
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1.5px solid;
+}
+
+.mp-section-count {
+  font-size: 0.82rem;
+  color: var(--color-text-3);
+}
+
+/* ─ 할 일 목록 ─ */
+.mp-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.mp-task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.mp-task-item:hover { background: var(--color-surface-2); }
+
+.mp-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all var(--transition);
+}
+.mp-check:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light, rgba(108,99,255,0.07));
+}
+.mp-check.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.mp-task-title {
+  flex: 1;
+  font-size: 0.97rem;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.mp-task-item.done .mp-task-title {
+  text-decoration: line-through;
+  color: var(--color-text-3);
+}
+.mp-task-item.done { opacity: 0.55; }
+
+.mp-delete {
+  opacity: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.mp-task-item:hover .mp-delete { opacity: 1; }
+.mp-delete:hover { background: #fee2e2; color: var(--color-danger); }
+
+/* ─ 완료 보기 버튼 ─ */
+.mp-show-done-btn {
+  margin: 4px 0 2px 32px;
+  padding: 4px 0;
+  font-size: 0.8rem;
+  color: var(--color-text-3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.mp-show-done-btn:hover { color: var(--color-text); }
+
+/* ─ 할 일 추가 입력 ─ */
+.mp-add-row {
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.mp-add-input {
+  width: 100%;
+  padding: 9px 4px;
+  font-size: 0.9rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  outline: none;
+}
+.mp-add-input::placeholder { color: var(--color-text-3); }

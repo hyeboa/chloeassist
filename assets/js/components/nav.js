@@ -10,11 +10,12 @@ const Nav = (() => {
       items: [
         { href: 'index.html',    label: '오늘',       icon: '◎' },
         { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
-        { href: 'braindump.html',label: '브레인 덤프', icon: '✦' },
+        { href: 'braindump.html',  label: '브레인 덤프', icon: '✦' },
+      { href: 'myprojects.html', label: '내 프로젝트', icon: '◉' },
       ]
     },
     {
-      label: '프로젝트',
+      label: '헬로아지',
       items: [
         { href: 'roadmap.html',  label: '로드맵',       icon: '◈' },
         { href: 'sitemap.html',  label: '화면 & 기능',  icon: '◧' },
