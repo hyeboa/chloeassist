@@ -63,7 +63,7 @@
 /* ─ 요약 카드 ─ */
 .wk-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 18px;
   margin-bottom: 28px;
 }
@@ -408,4 +408,36 @@
   color: var(--color-text-3);
   padding: 6px 0;
   text-align: center;
+}
+
+/* ─ 리뷰 탭 (주간/월간) ─ */
+.review-tabs {
+    display: inline-flex;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-full);
+    padding: 4px;
+    margin-bottom: 24px;
+    gap: 2px;
+}
+
+.review-tab {
+    padding: 10px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-3);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.review-tab:hover {
+    color: var(--color-text);
+}
+
+.review-tab.active {
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-sm);
 }

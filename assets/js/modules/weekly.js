@@ -4,6 +4,7 @@
 
 const Weekly = (() => {
   let currentWeekStart = getWeekStart(new Date());
+  let reviewTab = 'weekly';
 
   /* ─ 날짜 유틸 ─ */
   function getWeekStart(date) {
@@ -79,6 +80,27 @@ const Weekly = (() => {
       </div>`;
   }
 
+  /* ─ 탭 바 ─ */
+  function renderTabBar() {
+    return `
+      <div class="review-tabs">
+        <button class="review-tab ${reviewTab === 'weekly' ? 'active' : ''}"
+          onclick="Weekly.setReviewTab('weekly')">주간</button>
+        <button class="review-tab ${reviewTab === 'monthly' ? 'active' : ''}"
+          onclick="Weekly.setReviewTab('monthly')">월간</button>
+      </div>`;
+  }
+
+  function setReviewTab(tab) {
+    reviewTab = tab;
+    if (tab === 'monthly') {
+      document.getElementById('app').innerHTML = renderTabBar() + Monthly.renderHTML();
+      Monthly.bindMemo();
+    } else {
+      render();
+    }
+  }
+
   /* ─ 렌더 ─ */
   function render() {
     const weekEnd   = getWeekEnd(currentWeekStart);
@@ -122,12 +144,10 @@ const Weekly = (() => {
     /* 통계 */
     const totalWeek   = weekTasks.length;
     const completePct = totalWeek ? Math.round(doneTasks.length / totalWeek * 100) : 0;
-    const featDone    = features.filter(f => f.status === '완료').length;
-    const featPct     = features.length ? Math.round(featDone / features.length * 100) : 0;
 
     const memo = getMemo(currentWeekStart);
 
-    document.getElementById('app').innerHTML = `
+    document.getElementById('app').innerHTML = renderTabBar() + `
       <!-- 주 네비게이션 -->
       <div class="wk-nav">
         <button class="wk-nav-btn" onclick="Weekly.prevWeek()">← 이전 주</button>
@@ -145,12 +165,6 @@ const Weekly = (() => {
           <div class="wk-stat-value">${completePct}<span>%</span></div>
           <div class="wk-stat-bar"><div class="wk-stat-bar-fill" style="width:${completePct}%"></div></div>
           <div class="wk-stat-sub">${doneTasks.length} / ${totalWeek}개 완료</div>
-        </div>
-        <div class="wk-stat">
-          <div class="wk-stat-label">기능 개발 진행도</div>
-          <div class="wk-stat-value">${featPct}<span>%</span></div>
-          <div class="wk-stat-bar"><div class="wk-stat-bar-fill green" style="width:${featPct}%"></div></div>
-          <div class="wk-stat-sub">${featDone} / ${features.length}개 완료</div>
         </div>
         <div class="wk-stat">
           <div class="wk-stat-label">다음 마일스톤</div>
@@ -385,7 +399,7 @@ ${reflect.reflectNext ? `\n내가 적은 다음 주 집중: ${reflect.reflectNex
     render();
   }
 
-  return { render, prevWeek, nextWeek, generateSummary };
+  return { render, prevWeek, nextWeek, generateSummary, setReviewTab };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Weekly.render());

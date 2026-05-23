@@ -4,17 +4,30 @@
  */
 
 const Nav = (() => {
-  const NAV_ITEMS = [
-    { href: 'index.html',    label: '오늘',       icon: '◎' },
-    { href: 'hello.html',    label: '한눈에',      icon: '⬡' },
-    { href: 'weekly.html',   label: '주간 리뷰',   icon: '◫' },
-    { href: 'monthly.html',  label: '월간 리뷰',   icon: '◰' },
-    { href: 'reflect.html',  label: '회고 모음',   icon: '❀' },
-    { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
-    { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
-    { href: 'braindump.html',label: '브레인 덤프', icon: '✦' },
-    { href: 'projects.html', label: '기능 보드',   icon: '◉' },
-    { href: 'sitemap.html',  label: '사이트맵',    icon: '◧' },
+  const NAV_SECTIONS = [
+    {
+      label: '매일',
+      items: [
+        { href: 'index.html',    label: '오늘',       icon: '◎' },
+        { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
+        { href: 'braindump.html',label: '브레인 덤프', icon: '✦' },
+      ]
+    },
+    {
+      label: '프로젝트',
+      items: [
+        { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
+        { href: 'projects.html', label: '기능 보드',   icon: '◉' },
+        { href: 'sitemap.html',  label: '사이트맵',    icon: '◧' },
+      ]
+    },
+    {
+      label: '돌아보기',
+      items: [
+        { href: 'weekly.html',   label: '리뷰',        icon: '◫' },
+        { href: 'reflect.html',  label: '회고 모음',   icon: '❀' },
+      ]
+    },
   ];
 
   function currentPage() {
@@ -24,29 +37,32 @@ const Nav = (() => {
 
   function render() {
     const current = currentPage();
+    const navHTML = NAV_SECTIONS.map(section => `
+        <div class="sidebar-section-label">${section.label}</div>
+        ${section.items.map(({ href, label, icon }) => `
+            <a href="${href}" class="nav-item ${(current === href || (href === 'weekly.html' && current === 'monthly.html')) ? 'active' : ''}">
+                <span class="nav-icon">${icon}</span>
+                <span>${label}</span>
+            </a>
+        `).join('')}
+    `).join('');
 
     const sidebarHTML = `
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-          <div class="sidebar-logo-text">헬로아지</div>
-          <div class="sidebar-logo-sub">작업 관리 by Chloe</div>
-        </div>
-        <nav class="sidebar-nav">
-          <div class="sidebar-section-label">메뉴</div>
-          ${NAV_ITEMS.map(({ href, label, icon }) => `
-            <a href="${href}" class="nav-item ${current === href ? 'active' : ''}">
-              <span class="nav-icon">${icon}</span>
-              <span>${label}</span>
-            </a>
-          `).join('')}
-        </nav>
-        <div class="sidebar-footer">
-          <button class="nav-item" id="btn-settings" style="width:100%">
-            <span class="nav-icon">⚙</span>
-            <span>설정</span>
-          </button>
-        </div>
-      </aside>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-text">헬로아지</div>
+                <div class="sidebar-logo-sub">작업 관리 by Chloe</div>
+            </div>
+            <nav class="sidebar-nav">
+                ${navHTML}
+            </nav>
+            <div class="sidebar-footer">
+                <button class="nav-item" id="btn-settings" style="width:100%">
+                    <span class="nav-icon">⚙</span>
+                    <span>설정</span>
+                </button>
+            </div>
+        </aside>
     `;
 
     document.body.insertAdjacentHTML('afterbegin', sidebarHTML);

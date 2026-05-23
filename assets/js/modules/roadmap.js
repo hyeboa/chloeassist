@@ -192,7 +192,6 @@ const Roadmap = (() => {
   /* ─ 렌더 ─ */
   function render() {
     const feat   = featureStats();
-    const today  = todayStats();
     const next   = nextMilestone();
     const dd     = next ? dday(next.date, next.done) : null;
     const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -205,12 +204,6 @@ const Roadmap = (() => {
           <div class="summary-value">${feat.pct}<span>%</span></div>
           <div class="summary-sub">${feat.done} / ${feat.total}개 완료</div>
           <div class="summary-bar"><div class="summary-bar-fill green" style="width:${feat.pct}%"></div></div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-label">오늘 달성률</div>
-          <div class="summary-value">${today.pct}<span>%</span></div>
-          <div class="summary-sub">${today.done} / ${today.total}개 완료</div>
-          <div class="summary-bar"><div class="summary-bar-fill orange" style="width:${today.pct}%"></div></div>
         </div>
         <div class="summary-card">
           <div class="summary-label">다음 마일스톤</div>

@@ -88,7 +88,7 @@ const Monthly = (() => {
   }
 
   /* ─ 렌더 ─ */
-  function render() {
+  function buildHTML() {
     const today      = new Date();
     const isCurrent  = monthKey(currentMonth) === monthKey(today);
     const end        = monthEnd(currentMonth);
@@ -123,7 +123,7 @@ const Monthly = (() => {
 
     const memo      = getMemo(currentMonth);
 
-    document.getElementById('app').innerHTML = `
+    return `
       <!-- 월 네비게이션 -->
       <div class="mo-nav">
         <button class="mo-nav-btn" onclick="Monthly.prevMonth()">← 이전 달</button>
@@ -280,7 +280,10 @@ const Monthly = (() => {
         </div>
       </div>
     `;
+  }
 
+  function render() {
+    document.getElementById('app').innerHTML = buildHTML();
     bindMemo();
   }
 
@@ -389,7 +392,7 @@ ${reflect.reflectNext ? `\n내가 적은 다음 달 집중: ${reflect.reflectNex
     render();
   }
 
-  return { render, prevMonth, nextMonth, generateSummary };
+  return { render, prevMonth, nextMonth, generateSummary, renderHTML: buildHTML, bindMemo };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Monthly.render());
