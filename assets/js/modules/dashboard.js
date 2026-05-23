@@ -63,42 +63,31 @@ const Dashboard = (() => {
     return { done, total: all.length, pct: all.length ? Math.round(done / all.length * 100) : 0 };
   }
 
-  /* ─ 현황 스냅샷 HTML ─ */
-  function renderPulse() {
-    const ms   = nextMilestone();
-    const week = weekStats();
-    const feat = featStats();
-
-    const msChip = ms
+  /* ─ 오늘 배너 ─ */
+  function renderBanner(done, total, pct) {
+    const ms = nextMilestone();
+    const msRow = ms
       ? (() => {
           const dd = ddayInfo(ms.date);
-          return `
-            <a class="pulse-chip pulse-ms pulse-ms-${dd.cls}" href="roadmap.html">
-              <div class="pulse-label">다음 마일스톤</div>
-              <div class="pulse-value">${dd.label}</div>
-              <div class="pulse-sub">${escapeHtml(ms.title)}</div>
-            </a>`;
+          return `<div class="today-banner-ms">◈ 다음 마일스톤: ${escapeHtml(ms.title)} &nbsp; ${dd.label}</div>`;
         })()
-      : `<a class="pulse-chip pulse-ms" href="roadmap.html">
-           <div class="pulse-label">다음 마일스톤</div>
-           <div class="pulse-value" style="font-size:1rem;color:var(--color-text-3)">모두 완료!</div>
-         </a>`;
+      : '';
 
     return `
-      <div class="today-pulse">
-        ${msChip}
-        <a class="pulse-chip" href="weekly.html">
-          <div class="pulse-label">이번 주 달성률</div>
-          <div class="pulse-value">${week.pct}<span>%</span></div>
-          <div class="pulse-bar"><div class="pulse-bar-fill" style="width:${week.pct}%"></div></div>
-          <div class="pulse-sub">${week.done} / ${week.total}개 완료</div>
-        </a>
-        <a class="pulse-chip" href="projects.html">
-          <div class="pulse-label">기능 개발</div>
-          <div class="pulse-value">${feat.pct}<span>%</span></div>
-          <div class="pulse-bar"><div class="pulse-bar-fill green" style="width:${feat.pct}%"></div></div>
-          <div class="pulse-sub">${feat.done} / ${feat.total}개 완료</div>
-        </a>
+      <div class="today-banner">
+        <div class="today-banner-main">
+          <div class="today-banner-date">${formatDate()}</div>
+          <div class="today-banner-progress-row">
+            <div class="today-banner-bar">
+              <div class="today-banner-bar-fill" style="width:${pct}%"></div>
+            </div>
+            <span class="today-banner-stat">${done} / ${total} 완료</span>
+          </div>
+          ${msRow}
+        </div>
+        <div class="today-banner-actions">
+          ${focusToggleBtn()}
+        </div>
       </div>`;
   }
 
@@ -292,20 +281,7 @@ const Dashboard = (() => {
     const hasAny = tasks.filter(t => !t.done).length > 0 || (showDone && done > 0);
 
     document.getElementById('app').innerHTML = `
-      ${renderPulse()}
-
-      <div class="today-header">
-        <div class="today-header-row">
-          <div class="today-date">${formatDate()}</div>
-          ${focusToggleBtn()}
-        </div>
-        <div class="today-progress-row">
-          <div class="today-progress-bar">
-            <div class="today-progress-fill" style="width:${pct}%"></div>
-          </div>
-          <span class="today-progress-text">${done} / ${total} 완료</span>
-        </div>
-      </div>
+      ${renderBanner(done, total, pct)}
 
       <div class="quick-add-wrap">
         <input id="quick-input" class="quick-add-input" type="text"

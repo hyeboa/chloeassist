@@ -19,48 +19,48 @@
 }
 
 .sidebar-logo {
-  padding: 24px 20px 20px;
+  padding: 28px 24px 22px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .sidebar-logo-text {
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.3px;
 }
 
 .sidebar-logo-sub {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   color: var(--color-sidebar-text);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 16px 12px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
 .sidebar-section-label {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--color-sidebar-text);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 12px 8px 6px;
+  padding: 14px 10px 8px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 12px;
+  padding: 12px 14px;
   border-radius: var(--radius-sm);
   color: var(--color-sidebar-text);
-  font-size: 0.875rem;
+  font-size: 0.98rem;
   font-weight: 500;
   transition: background var(--transition), color var(--transition);
 }
@@ -76,16 +76,20 @@
 }
 
 .nav-item .nav-icon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.75;
+  width: 22px;
+  height: 22px;
+  font-size: 1.05rem;
+  opacity: 0.8;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-item.active .nav-icon { opacity: 1; }
 
 .sidebar-footer {
-  padding: 16px 12px;
+  padding: 18px 14px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -105,37 +109,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 0 40px;
   position: sticky;
   top: 0;
   z-index: 50;
 }
 
 .page-title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--color-text);
+  letter-spacing: -0.3px;
 }
 
 .page-header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .page-content {
-  padding: 28px;
+  padding: 36px 40px 48px;
   flex: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* ===== Section Heading ===== */
 .section-title {
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--color-text-3);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 /* ===== Grid Helpers ===== */

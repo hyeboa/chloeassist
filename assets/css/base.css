@@ -30,17 +30,17 @@
   --cat-운영-bg: #d1fae5; --cat-운영-text: #065f46;
   --cat-미분류-bg: #f1f5f9; --cat-미분류-text: #475569;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10);
 
-  --sidebar-width: 220px;
-  --header-height: 60px;
+  --sidebar-width: 260px;
+  --header-height: 76px;
 
   --font-base: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -55,14 +55,15 @@
   padding: 0;
 }
 
-html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+html { font-size: 17px; -webkit-font-smoothing: antialiased; }
 
 body {
   font-family: var(--font-base);
   background: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.6;
+  line-height: 1.65;
   min-height: 100vh;
+  font-size: 1rem;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -97,10 +98,10 @@ img { max-width: 100%; display: block; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   transition: background var(--transition), opacity var(--transition);
 }
 
@@ -146,8 +147,8 @@ img { max-width: 100%; display: block; }
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 14px 14px 12px;
-  margin-bottom: 24px;
+  padding: 20px 22px 18px;
+  margin-bottom: 28px;
   transition: border-color var(--transition);
 }
 
@@ -158,12 +159,13 @@ img { max-width: 100%; display: block; }
 .inline-nl-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
+  gap: 8px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-text-2);
-  letter-spacing: 0.02em;
-  margin-bottom: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
 }
 
 .inline-nl-label::before {
@@ -174,8 +176,8 @@ img { max-width: 100%; display: block; }
 
 .inline-nl-input {
   width: 100%;
-  padding: 13px 16px;
-  font-size: 0.92rem;
+  padding: 16px 20px;
+  font-size: 1.05rem;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -303,9 +305,9 @@ img { max-width: 100%; display: block; }
 }
 
 .cat-pill {
-  padding: 5px 13px;
+  padding: 8px 18px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   font-weight: 500;
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
