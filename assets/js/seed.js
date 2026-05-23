@@ -7,24 +7,33 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v8 */
+  /* v4 → v9 */
   if (version === 'v4') {
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v8');
+    injectProjectTasks();
+    localStorage.setItem('chloeassist:seeded', 'v9');
     return;
   }
 
-  /* v5 / v6 / v7 → v8: 사이트맵 데이터 교체 (섹션 순서 재정렬 포함) */
+  /* v5 / v6 / v7 → v9 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
     localStorage.removeItem('chloeassist:sitemapComponents');
     injectSitemapData();
-    localStorage.setItem('chloeassist:seeded', 'v8');
+    injectProjectTasks();
+    localStorage.setItem('chloeassist:seeded', 'v9');
     return;
   }
 
-  if (version === 'v8') return;
+  /* v8 → v9: projectTasks만 추가 */
+  if (version === 'v8') {
+    injectProjectTasks();
+    localStorage.setItem('chloeassist:seeded', 'v9');
+    return;
+  }
+
+  if (version === 'v9') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -96,7 +105,8 @@
   localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
 
   injectSitemapData();
-  localStorage.setItem('chloeassist:seeded', 'v8');
+  injectProjectTasks();
+  localStorage.setItem('chloeassist:seeded', 'v9');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -374,5 +384,46 @@
     localStorage.setItem('chloeassist:sitemapSections',   JSON.stringify(sections));
     localStorage.setItem('chloeassist:sitemapScreens',    JSON.stringify(screens));
     localStorage.setItem('chloeassist:sitemapComponents', JSON.stringify(components));
+  }
+
+  /* ══════════════════════════════════════════════
+     프로젝트 할 일 샘플 데이터 — v9
+  ══════════════════════════════════════════════ */
+  function injectProjectTasks() {
+    if (localStorage.getItem('chloeassist:projectTasks')) return;
+
+    const t  = Date.now();
+    const d  = (offset) => new Date(t + offset * 86400000).toISOString().slice(0, 10);
+    const a  = (ms) => t - ms;
+
+    const projectTasks = [
+      /* ── 헬로아지 앱 ── */
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '매칭 화면 와이어프레임 최종 확정',       done: true,  doneAt: a(86400000 * 2), priority: 'high',   dueDate: d(-3), memo: '',    createdAt: a(86400000 * 7) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '피그마 컴포넌트 라이브러리 정리',         done: true,  doneAt: a(86400000 * 1), priority: 'normal', dueDate: d(-1), memo: '',    createdAt: a(86400000 * 6) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: 'iOS 앱 심사 피드백 반영',                done: false, doneAt: null,            priority: 'high',   dueDate: d(0),  memo: '스크린샷 해상도 문제, 개인정보 문구 수정 필요', createdAt: a(86400000 * 5) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '파트너 프로필 화면 QA',                  done: false, doneAt: null,            priority: 'high',   dueDate: d(1),  memo: '',    createdAt: a(86400000 * 4) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '푸시 알림 권한 요청 타이밍 조정',         done: false, doneAt: null,            priority: 'normal', dueDate: d(3),  memo: '',    createdAt: a(86400000 * 4) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '산책 기록 화면 GPS 경로 표시 구현',       done: false, doneAt: null,            priority: 'normal', dueDate: d(7),  memo: '',    createdAt: a(86400000 * 3) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '카카오페이 결제 모듈 연동 테스트',        done: false, doneAt: null,            priority: 'high',   dueDate: d(10), memo: '',    createdAt: a(86400000 * 3) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '반려견 성격 태그 필터 UI 연결',           done: false, doneAt: null,            priority: 'normal', dueDate: d(14), memo: '',    createdAt: a(86400000 * 2) },
+      { id: crypto.randomUUID(), project: '헬로아지 앱', title: '다크모드 컬러 토큰 적용 전체 검수',       done: false, doneAt: null,            priority: 'low',    dueDate: d(20), memo: '',    createdAt: a(86400000 * 1) },
+
+      /* ── 베타 마케팅 ── */
+      { id: crypto.randomUUID(), project: '베타 마케팅', title: '네이버 강사모 카페 홍보 글 게시',         done: true,  doneAt: a(86400000 * 3), priority: 'high',   dueDate: d(-4), memo: '',    createdAt: a(86400000 * 8) },
+      { id: crypto.randomUUID(), project: '베타 마케팅', title: '인스타그램 론칭 예고 릴스 업로드',        done: false, doneAt: null,            priority: 'high',   dueDate: d(-1), memo: '촬영 완료, 편집만 남음', createdAt: a(86400000 * 5) },
+      { id: crypto.randomUUID(), project: '베타 마케팅', title: '베타 테스터 100명 신청폼 오픈',           done: false, doneAt: null,            priority: 'high',   dueDate: d(0),  memo: '',    createdAt: a(86400000 * 4) },
+      { id: crypto.randomUUID(), project: '베타 마케팅', title: '강아지 인플루언서 DM 협업 제안 발송',    done: false, doneAt: null,            priority: 'normal', dueDate: d(2),  memo: '팔로워 1만 이상 계정 10곳 리스트업 완료',    createdAt: a(86400000 * 3) },
+      { id: crypto.randomUUID(), project: '베타 마케팅', title: '카카오채널 개설 및 메시지 템플릿 작성',   done: false, doneAt: null,            priority: 'normal', dueDate: d(5),  memo: '',    createdAt: a(86400000 * 2) },
+      { id: crypto.randomUUID(), project: '베타 마케팅', title: '베타 후기 이벤트 기획 (커피쿠폰 증정)',   done: false, doneAt: null,            priority: 'low',    dueDate: d(9),  memo: '',    createdAt: a(86400000 * 1) },
+
+      /* ── 파트너 인증 ── */
+      { id: crypto.randomUUID(), project: '파트너 인증', title: '신분증 인증 API 벤더사 선정',             done: true,  doneAt: a(86400000 * 1), priority: 'high',   dueDate: d(-2), memo: '',    createdAt: a(86400000 * 6) },
+      { id: crypto.randomUUID(), project: '파트너 인증', title: '인증 단계 UX 플로우 확정',                done: false, doneAt: null,            priority: 'high',   dueDate: d(1),  memo: '신분증 → 경력 → 승인 3단계로 정리',          createdAt: a(86400000 * 4) },
+      { id: crypto.randomUUID(), project: '파트너 인증', title: '인증 배지 디자인 (3단계: 기본·인증·전문)', done: false, doneAt: null,            priority: 'normal', dueDate: d(4),  memo: '',    createdAt: a(86400000 * 3) },
+      { id: crypto.randomUUID(), project: '파트너 인증', title: '관리자 심사 대시보드 와이어프레임',        done: false, doneAt: null,            priority: 'normal', dueDate: d(8),  memo: '',    createdAt: a(86400000 * 2) },
+      { id: crypto.randomUUID(), project: '파트너 인증', title: '인증 거절 알림 메시지 문구 작성',          done: false, doneAt: null,            priority: 'low',    dueDate: d(12), memo: '',    createdAt: a(86400000 * 1) },
+    ];
+
+    localStorage.setItem('chloeassist:projectTasks', JSON.stringify(projectTasks));
   }
 })();
