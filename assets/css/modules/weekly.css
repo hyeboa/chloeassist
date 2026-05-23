@@ -179,6 +179,58 @@
 .wk-section-dot.ms   { background: #6366f1; }
 .wk-section-dot.ai   { background: #8b5cf6; }
 .wk-section-dot.memo { background: var(--color-text-3); }
+.wk-section-dot.proj { background: #0ea5e9; }
+
+/* ─ 프로젝트 진행 행 ─ */
+.wk-proj-row {
+  padding: 8px 0;
+}
+.wk-proj-row + .wk-proj-row { border-top: 1px solid var(--color-border); }
+
+.wk-proj-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.wk-proj-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.wk-proj-week {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.wk-proj-bar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.wk-proj-bar-fill {
+  height: 100%;
+  background: #0ea5e9;
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.wk-proj-sub {
+  margin-top: 5px;
+  font-size: 0.74rem;
+  color: var(--color-text-3);
+}
 
 .wk-section-count {
   margin-left: auto;

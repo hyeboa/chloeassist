@@ -56,6 +56,22 @@ const Weekly = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /* ─ 프로젝트별 진행 계산 ─ */
+  function projectProgress(start, end) {
+    const all = Store.get('projectTasks') || [];
+    const names = [...new Set(all.map(t => t.project).filter(Boolean))];
+    return names.map(name => {
+      const ts       = all.filter(t => t.project === name);
+      const total    = ts.length;
+      const done     = ts.filter(t => t.done).length;
+      const weekDone = ts.filter(t =>
+        t.done && t.doneAt &&
+        inWeek(new Date(t.doneAt).toISOString().slice(0, 10), start, end)
+      ).length;
+      return { name, total, done, weekDone, pct: total ? Math.round(done / total * 100) : 0 };
+    }).sort((a, b) => b.weekDone - a.weekDone || b.pct - a.pct);
+  }
+
   /* ─ 주간 메모 저장/불러오기 ─ */
   function getMemo(weekStart) {
     const all = Store.get('weeklyReviews') || {};
@@ -132,6 +148,9 @@ const Weekly = (() => {
     const nextTasks = isCurrent
       ? tasks.filter(t => !t.done && inWeek(t.dueDate, nextWeekStart, nextWeekEnd))
       : [];
+
+    /* 프로젝트별 진행 (전체 누적 + 이번 주 완료 수) */
+    const projStats = projectProgress(currentWeekStart, weekEnd);
 
     /* 이번 주 마일스톤 */
     const weekMs = milestones.filter(m => inWeek(m.date, currentWeekStart, weekEnd));
@@ -214,7 +233,25 @@ const Weekly = (() => {
               </div>`).join('')}
           </div>` : ''}
 
-          ${!weekMs.length && !missTasks.length && !doneTasks.length ? `
+          ${projStats.length ? `
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot proj"></span>
+              프로젝트 진행
+              <span class="wk-section-count">${projStats.length}개</span>
+            </div>
+            ${projStats.map(p => `
+              <div class="wk-proj-row">
+                <div class="wk-proj-top">
+                  <span class="wk-proj-name">${escapeHtml(p.name)}</span>
+                  ${p.weekDone ? `<span class="wk-proj-week">이번 주 +${p.weekDone}</span>` : ''}
+                </div>
+                <div class="wk-proj-bar"><div class="wk-proj-bar-fill" style="width:${p.pct}%"></div></div>
+                <div class="wk-proj-sub">${p.done} / ${p.total}개 완료 · ${p.pct}%</div>
+              </div>`).join('')}
+          </div>` : ''}
+
+          ${!weekMs.length && !missTasks.length && !doneTasks.length && !projStats.length ? `
           <div class="wk-section">
             <div class="wk-empty" style="padding:20px 0">
               이번 주 기한이 설정된 할 일이 없어요.<br>
@@ -340,6 +377,7 @@ const Weekly = (() => {
     const featDone = features.filter(f => f.status === '완료').length;
     const upcomingMs = milestones.filter(m => !m.done && new Date(m.date) >= today)
       .sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 2);
+    const projSummary = projectProgress(currentWeekStart, wEnd2);
     const reflect = getMemo(currentWeekStart);
 
     const prompt = `나는 헬로아지(반려견 플랫폼 모바일 앱)를 1인으로 기획·디자인·운영하고 있어.
@@ -348,6 +386,7 @@ const Weekly = (() => {
 - 완료한 일: ${done.length ? done.join(', ') : '없음'}
 - 못 끝낸 일: ${miss.length ? miss.join(', ') : '없음'}
 - 기능 개발 진행도: ${featDone}/${features.length}개 완료
+${projSummary.map(p => `- 프로젝트 「${p.name}」: ${p.pct}% 진행 (이번 주 ${p.weekDone}개 완료)`).join('\n')}
 ${upcomingMs.map(m => `- 마일스톤 예정: ${m.title} (${m.date})`).join('\n')}
 ${reflect.reflectGood ? `\n내가 적은 잘한 점: ${reflect.reflectGood}` : ''}
 ${reflect.reflectBad  ? `\n내가 적은 아쉬운 점: ${reflect.reflectBad}` : ''}

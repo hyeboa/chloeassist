@@ -35,14 +35,26 @@ const Nav = (() => {
     return path === '' ? 'index.html' : path;
   }
 
+  /* 마감 초과 + 오늘 마감인 미완료 프로젝트 할 일 수 */
+  function deadlineCount() {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return (Store.get('projectTasks') || [])
+      .filter(t => !t.done && t.dueDate && new Date(t.dueDate + 'T00:00:00') <= today)
+      .length;
+  }
+
   function render() {
     const current = currentPage();
+    const dlCount = deadlineCount();
     const navHTML = NAV_SECTIONS.map(section => `
         <div class="sidebar-section-label">${section.label}</div>
         ${section.items.map(({ href, label, icon }) => `
             <a href="${href}" class="nav-item ${(current === href || (href === 'weekly.html' && current === 'monthly.html')) ? 'active' : ''}">
                 <span class="nav-icon">${icon}</span>
                 <span>${label}</span>
+                ${href === 'myprojects.html' && dlCount > 0
+                  ? `<span class="nav-badge" title="마감 임박 ${dlCount}개">${dlCount}</span>`
+                  : ''}
             </a>
         `).join('')}
     `).join('');
