@@ -125,6 +125,31 @@
   margin-bottom: 32px;
 }
 
+/* ─ 2컬럼 레이아웃 ─ */
+.ms-two-col {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 24px;
+  align-items: start;
+}
+
+.ms-col-cal {
+  min-width: 0;
+}
+
+.ms-col-list {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (max-width: 1100px) {
+  .ms-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
 .milestone-section-header {
   display: flex;
   align-items: center;
@@ -289,10 +314,20 @@
   margin-bottom: 12px;
 }
 
+/* ─ 마일스톤 빈 상태 ─ */
+.ms-list-empty {
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: 12px;
+}
+
 /* ─ 캘린더 ─ */
 .cal-wrap {
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .cal-nav {

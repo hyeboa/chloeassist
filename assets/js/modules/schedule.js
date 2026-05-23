@@ -151,10 +151,25 @@ const Schedule = (() => {
     const groups = groupTasks(list);
 
     if (list.length === 0) {
-      const msg = searchQuery
-        ? `"${escapeHtml(searchQuery)}"에 일치하는 할 일이 없어요`
-        : '할 일이 없어요';
-      return `<div class="empty-state"><div class="empty-state-text">${msg}</div></div>`;
+      if (searchQuery) {
+        return `<div class="bl-empty">
+          <div class="bl-empty-icon">🔍</div>
+          <div class="bl-empty-title">"${escapeHtml(searchQuery)}"에 일치하는 할 일이 없어요</div>
+          <div class="bl-empty-sub">검색어를 바꿔보세요</div>
+        </div>`;
+      }
+      if (activeFilter !== '전체') {
+        return `<div class="bl-empty">
+          <div class="bl-empty-icon">📂</div>
+          <div class="bl-empty-title">${activeFilter} 할 일이 없어요</div>
+          <div class="bl-empty-sub">위 입력창에서 새 할 일을 추가해보세요</div>
+        </div>`;
+      }
+      return `<div class="bl-empty">
+        <div class="bl-empty-icon">✨</div>
+        <div class="bl-empty-title">할 일이 없어요</div>
+        <div class="bl-empty-sub">위 입력창에서 할 일을 추가하면 여기 나타나요</div>
+      </div>`;
     }
 
     let html  = '';
@@ -180,12 +195,6 @@ const Schedule = (() => {
   function render() {
     document.getElementById('app').innerHTML = `
       <div class="backlog-toolbar">
-        <div class="cat-filter-group">
-          ${CATS.map(c => `
-            <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
-              onclick="Schedule.setFilter('${c}')">${c}</button>
-          `).join('')}
-        </div>
         <div class="bl-search-group">
           <input id="bl-search" class="bl-search-input" type="text"
             placeholder="🔍 할 일 검색..." value="${escapeHtml(searchQuery)}">
@@ -210,6 +219,13 @@ const Schedule = (() => {
           <span class="nl-rule-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
         </div>
         <div class="inline-nl-status" id="bl-status"></div>
+      </div>
+
+      <div class="cat-filter-bar">
+        ${CATS.map(c => `
+          <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
+            onclick="Schedule.setFilter('${c}')">${c}</button>
+        `).join('')}
       </div>
 
       <div id="bl-list">${buildListHTML()}</div>

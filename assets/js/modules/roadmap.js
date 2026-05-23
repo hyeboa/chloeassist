@@ -81,9 +81,13 @@ const Roadmap = (() => {
 
   /* ─ 마일스톤 리스트 ─ */
   function renderMilestoneList(milestones) {
-    if (milestones.length === 0) return '';
+    if (milestones.length === 0) return `
+      <div class="ms-list-empty">
+        <div style="font-size:2rem;opacity:0.5;margin-bottom:10px">🏁</div>
+        <div style="font-size:0.95rem;color:var(--color-text-2);font-weight:500">마일스톤이 없어요</div>
+        <div style="font-size:0.85rem;color:var(--color-text-3);margin-top:4px">위 입력창에서 추가해보세요</div>
+      </div>`;
     return `
-      <div class="ms-sub-label" style="margin-top:24px">목록</div>
       <div class="milestone-list">
         ${milestones.map(m => {
               const dd = dday(m.date, m.done);
@@ -143,7 +147,6 @@ const Roadmap = (() => {
 
     return `
       <div class="cal-wrap">
-        <div class="ms-sub-label">달력</div>
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="Roadmap.prevMonth()">← 이전</button>
           <div class="cal-month-label">
@@ -241,15 +244,23 @@ const Roadmap = (() => {
         </div>
       </div>
 
-      <!-- 마일스톤 -->
+      <!-- 마일스톤 (2컬럼 레이아웃) -->
       <div class="milestone-section">
         <div class="ms-section-hd">
           <div class="section-title" style="margin:0">마일스톤</div>
-          <span class="ms-section-meta">전체 ${milestones.length}개 · 달력에서 일정, 아래에서 관리</span>
+          <span class="ms-section-meta">전체 ${milestones.length}개</span>
         </div>
-        ${renderAddInput()}
-        ${renderCalendarView(milestones)}
-        ${renderMilestoneList(milestones)}
+        <div class="ms-two-col">
+          <!-- 왼쪽: 달력 -->
+          <div class="ms-col-cal">
+            ${renderCalendarView(milestones)}
+          </div>
+          <!-- 오른쪽: 추가 + 목록 -->
+          <div class="ms-col-list">
+            ${renderAddInput()}
+            ${renderMilestoneList(milestones)}
+          </div>
+        </div>
       </div>
     `;
 
