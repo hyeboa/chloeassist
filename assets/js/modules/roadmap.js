@@ -6,6 +6,7 @@ const Roadmap = (() => {
   let calYear  = new Date().getFullYear();
   let calMonth = new Date().getMonth();
   let activeTab = 'schedule';
+  let pageMode  = 'schedule'; // 'goals' | 'schedule' | 'milestones'
 
   /* ─ 데이터 ─ */
   function getMilestones() { return Store.get('milestones') || []; }
@@ -276,36 +277,43 @@ const Roadmap = (() => {
 
   /* ─ 렌더 ─ */
   function render() {
+    const app = document.getElementById('app');
+    if (!app) return;
     const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    document.getElementById('app').innerHTML = `
-      <!-- 단계별 목표 -->
-      ${renderGoalsSection()}
+    if (pageMode === 'goals') {
+      app.innerHTML = renderGoalsSection();
+      bindGoalInputs();
+      return;
+    }
 
-      <!-- 스케줄 / 마일스톤 탭 -->
-      <div class="rm-tabs">
-        <button class="rm-tab ${activeTab === 'schedule' ? 'active' : ''}"
-          onclick="Roadmap.setTab('schedule')">스케줄</button>
-        <button class="rm-tab ${activeTab === 'milestone' ? 'active' : ''}"
-          onclick="Roadmap.setTab('milestone')">마일스톤</button>
-      </div>
+    if (pageMode === 'schedule') {
+      app.innerHTML = `
+        <div class="milestone-section">
+          <div class="ms-section-hd">
+            <div class="section-title" style="margin:0">스케줄</div>
+            <span class="ms-section-meta">마일스톤 ${milestones.length}개</span>
+          </div>
+          ${renderCalendarView(milestones)}
+        </div>`;
+      return;
+    }
 
-      <div class="milestone-section">
-        <div class="ms-section-hd">
-          <div class="section-title" style="margin:0">${activeTab === 'schedule' ? '스케줄' : '마일스톤'}</div>
-          <span class="ms-section-meta">전체 ${milestones.length}개</span>
-        </div>
-        ${activeTab === 'schedule'
-          ? renderCalendarView(milestones)
-          : `<div class="ms-col-list">
-               ${renderAddInput()}
-               ${renderMilestoneList(milestones)}
-             </div>`}
-      </div>
-    `;
-
-    bindMsInput();
-    bindGoalInputs();
+    if (pageMode === 'milestones') {
+      app.innerHTML = `
+        <div class="milestone-section">
+          <div class="ms-section-hd">
+            <div class="section-title" style="margin:0">마일스톤</div>
+            <span class="ms-section-meta">전체 ${milestones.length}개</span>
+          </div>
+          <div class="ms-col-list">
+            ${renderAddInput()}
+            ${renderMilestoneList(milestones)}
+          </div>
+        </div>`;
+      bindMsInput();
+      return;
+    }
   }
 
   function bindGoalInputs() {
@@ -458,11 +466,19 @@ const Roadmap = (() => {
     render();
   }
 
+  function setPageMode(mode) { pageMode = mode; }
+
   return {
-    render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab,
+    render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab, setPageMode,
     addGoal, editGoalTitle, deleteGoal, moveGoalUp, moveGoalDown,
     addItem, toggleItem, deleteItem, assignMilestoneGoal,
   };
 })();
 
-document.addEventListener('DOMContentLoaded', () => Roadmap.render());
+document.addEventListener('DOMContentLoaded', () => {
+  const page = location.pathname.split('/').pop() || 'index.html';
+  if (page === 'goals.html')      Roadmap.setPageMode('goals');
+  else if (page === 'milestones.html') Roadmap.setPageMode('milestones');
+  else                             Roadmap.setPageMode('schedule');
+  Roadmap.render();
+});

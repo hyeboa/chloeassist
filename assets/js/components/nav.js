@@ -17,8 +17,10 @@ const Nav = (() => {
     {
       label: '헬로아지',
       items: [
-        { href: 'roadmap.html',  label: '로드맵',       icon: '◈' },
-        { href: 'sitemap.html',  label: '화면 & 기능',  icon: '◧' },
+        { href: 'goals.html',      label: '단계별 목표', icon: '◎' },
+        { href: 'roadmap.html',    label: '스케줄',      icon: '◈' },
+        { href: 'milestones.html', label: '마일스톤',    icon: '⊙' },
+        { href: 'sitemap.html',    label: '화면 & 기능', icon: '◧' },
       ]
     },
     {
