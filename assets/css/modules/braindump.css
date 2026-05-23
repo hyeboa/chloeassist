@@ -98,3 +98,104 @@
   background: #fee2e2;
   color: var(--color-danger);
 }
+
+/* ===== 인라인 변환 폼 ===== */
+.dump-item.converting {
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-primary);
+  padding: 0;
+  gap: 0;
+}
+
+.dump-convert-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px 10px;
+}
+
+.dump-convert-form {
+  padding: 10px 16px 13px;
+  border-top: 1px solid var(--color-border);
+}
+
+.convert-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.convert-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.convert-sep {
+  color: var(--color-text-3);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+/* 카테고리 칩 */
+.convert-cat-pill {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.convert-cat-pill:hover { border-color: var(--color-text-2); }
+.convert-cat-pill.selected-기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text);  border-color: var(--cat-기획-text); }
+.convert-cat-pill.selected-디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); border-color: var(--cat-디자인-text); }
+.convert-cat-pill.selected-개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text);  border-color: var(--cat-개발-text); }
+.convert-cat-pill.selected-마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); border-color: var(--cat-마케팅-text); }
+.convert-cat-pill.selected-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text); }
+
+/* 날짜 칩 */
+.convert-date-chip {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.convert-date-chip:hover { border-color: var(--color-text-2); }
+.convert-date-chip.selected {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* 확인 버튼 */
+.convert-confirm-btn {
+  margin-left: auto;
+  padding: 4px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition);
+  flex-shrink: 0;
+}
+.convert-confirm-btn:hover { opacity: 0.85; }
+
+.convert-hint {
+  margin-top: 7px;
+  font-size: 0.68rem;
+  color: var(--color-text-3);
+}
