@@ -1,6 +1,6 @@
 /**
  * myprojects.js — 내 프로젝트 할 일 관리
- * projectTasks store: { id, project, title, done, doneAt, createdAt }
+ * projectTasks store: { id, project, title, done, doneAt, dueDate?, priority?, memo?, createdAt }
  */
 
 const MyProjects = (() => {
@@ -11,9 +11,16 @@ const MyProjects = (() => {
     { bg: '#ffedd5', text: '#c2410c', border: '#fdba74' },
     { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' },
   ];
+  const PRIORITIES = [
+    { val: 'high',   label: '높음' },
+    { val: 'normal', label: '보통' },
+    { val: 'low',    label: '낮음' },
+  ];
+  const PRIORITY_ORDER = { high: 0, normal: 1, low: 2 };
 
-  let activeProject = '전체';
-  let showDoneMap   = {}; // { [project]: boolean }
+  let activeProject  = '전체';
+  let showDoneMap    = {}; // { [project]: boolean }
+  let expandedTaskId = null;
 
   function getTasks() { return Store.get('projectTasks') || []; }
 
@@ -30,7 +37,22 @@ const MyProjects = (() => {
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /* ─ 완료 토글 ─ */
+  /* ─ 마감일 배지 ─ */
+  function dueBadge(t) {
+    if (!t.dueDate) return '';
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const due   = new Date(t.dueDate + 'T00:00:00');
+    const diff  = Math.round((due - today) / 86400000);
+
+    let cls = 'mp-due', label;
+    if (!t.done && diff < 0)      { cls += ' overdue'; label = `${-diff}일 지남`; }
+    else if (diff === 0)          { cls += ' today';   label = '오늘'; }
+    else if (diff === 1)          { label = '내일'; }
+    else                          { label = `${due.getMonth() + 1}/${due.getDate()}`; }
+    return `<span class="${cls}">${label}</span>`;
+  }
+
+  /* ─ 동작 ─ */
   function toggleDone(id) {
     const t = getTasks().find(x => x.id === id);
     if (!t) return;
@@ -40,33 +62,72 @@ const MyProjects = (() => {
 
   function deleteTask(id) {
     Store.remove('projectTasks', id);
+    if (expandedTaskId === id) expandedTaskId = null;
     renderList();
   }
 
   function addTask(project, title) {
     if (!title.trim()) return;
-    Store.push('projectTasks', { project, title: title.trim(), done: false });
+    Store.push('projectTasks', { project, title: title.trim(), done: false, priority: 'normal' });
     renderList();
   }
 
-  /* ─ 완료 보기 토글 ─ */
+  function toggleExpand(id) {
+    expandedTaskId = expandedTaskId === id ? null : id;
+    renderList();
+  }
+
+  function setPriority(id, priority) {
+    Store.update('projectTasks', id, { priority });
+    renderList();
+  }
+
+  function setDueDate(id, dateStr) {
+    Store.update('projectTasks', id, { dueDate: dateStr || null });
+    renderList();
+  }
+
+  function clearDueDate(id) {
+    Store.update('projectTasks', id, { dueDate: null });
+    renderList();
+  }
+
+  function saveMemo(id, text) {
+    Store.update('projectTasks', id, { memo: text.trim() || null });
+    renderList();
+  }
+
   function toggleShowDone(project) {
     showDoneMap[project] = !showDoneMap[project];
     renderList();
   }
 
-  /* ─ 필터 ─ */
   function setFilter(proj) {
     activeProject = proj;
     render();
   }
 
-  /* ─ 프로젝트 섹션 렌더 ─ */
+  /* ─ 정렬 ─ */
+  function sortTasks(tasks) {
+    return [...tasks].sort((a, b) => {
+      if (a.done !== b.done) return a.done - b.done;       // 미완료 우선
+      if (a.done) return b.doneAt - a.doneAt;              // 완료: 최근순
+      const pa = PRIORITY_ORDER[a.priority || 'normal'];
+      const pb = PRIORITY_ORDER[b.priority || 'normal'];
+      if (pa !== pb) return pa - pb;                       // 우선순위
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return b.createdAt - a.createdAt;
+    });
+  }
+
+  /* ─ 프로젝트 섹션 ─ */
   function renderSection(project, tasks) {
-    const color     = projectColor(project);
-    const todo      = tasks.filter(t => !t.done);
-    const done      = tasks.filter(t => t.done);
-    const showDone  = showDoneMap[project];
+    const color    = projectColor(project);
+    const todo     = tasks.filter(t => !t.done);
+    const done     = tasks.filter(t => t.done);
+    const showDone = showDoneMap[project];
 
     return `
       <div class="mp-section">
@@ -99,15 +160,45 @@ const MyProjects = (() => {
     `;
   }
 
+  /* ─ 할 일 아이템 ─ */
   function renderTask(t) {
+    const isOpen   = expandedTaskId === t.id;
+    const priority = t.priority || 'normal';
+    const hasMemo  = !!t.memo;
+
     return `
-      <div class="mp-task-item${t.done ? ' done' : ''}">
-        <button class="mp-check${t.done ? ' checked' : ''}"
-          onclick="MyProjects.toggleDone('${t.id}')" title="${t.done ? '완료 해제' : '완료'}">
-          ${t.done ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
-        </button>
-        <span class="mp-task-title">${escapeHtml(t.title)}</span>
-        <button class="mp-delete" onclick="MyProjects.deleteTask('${t.id}')" title="삭제">✕</button>
+      <div class="mp-task-item${t.done ? ' done' : ''}${isOpen ? ' expanded' : ''}">
+        <div class="mp-task-main">
+          <button class="mp-check${t.done ? ' checked' : ''}"
+            onclick="MyProjects.toggleDone('${t.id}')" title="${t.done ? '완료 해제' : '완료'}">
+            ${t.done ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+          </button>
+          ${priority !== 'normal' ? `<span class="mp-prio-dot ${priority}" title="우선순위 ${priority === 'high' ? '높음' : '낮음'}"></span>` : ''}
+          <span class="mp-task-title" onclick="MyProjects.toggleExpand('${t.id}')">${escapeHtml(t.title)}</span>
+          ${dueBadge(t)}
+          ${hasMemo ? `<span class="mp-memo-icon" title="메모 있음">✎</span>` : ''}
+          <button class="mp-delete" onclick="MyProjects.deleteTask('${t.id}')" title="삭제">✕</button>
+        </div>
+
+        ${isOpen ? `
+          <div class="mp-task-editor">
+            <div class="mp-edit-group">
+              <span class="mp-edit-label">우선순위</span>
+              ${PRIORITIES.map(p => `
+                <button class="mp-prio-chip ${p.val}${priority === p.val ? ' selected' : ''}"
+                  onclick="MyProjects.setPriority('${t.id}','${p.val}')">${p.label}</button>
+              `).join('')}
+            </div>
+            <div class="mp-edit-group">
+              <span class="mp-edit-label">마감일</span>
+              <input type="date" class="mp-date-input" value="${t.dueDate || ''}"
+                onchange="MyProjects.setDueDate('${t.id}', this.value)">
+              ${t.dueDate ? `<button class="mp-date-clear" onclick="MyProjects.clearDueDate('${t.id}')">지우기</button>` : ''}
+            </div>
+            <textarea class="mp-memo-input" placeholder="메모..."
+              onblur="MyProjects.saveMemo('${t.id}', this.value)">${escapeHtml(t.memo || '')}</textarea>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -131,11 +222,7 @@ const MyProjects = (() => {
     const filtered = activeProject === '전체' ? projects : [activeProject];
 
     listEl.innerHTML = filtered
-      .map(proj => {
-        const tasks = all.filter(t => t.project === proj)
-          .sort((a, b) => a.done - b.done || b.createdAt - a.createdAt);
-        return renderSection(proj, tasks);
-      })
+      .map(proj => renderSection(proj, sortTasks(all.filter(t => t.project === proj))))
       .join('');
   }
 
@@ -168,7 +255,10 @@ const MyProjects = (() => {
     input.value = '';
   }
 
-  return { render, toggleDone, deleteTask, toggleShowDone, setFilter, handleAdd };
+  return {
+    render, toggleDone, deleteTask, toggleShowDone, setFilter, handleAdd,
+    toggleExpand, setPriority, setDueDate, clearDueDate, saveMemo,
+  };
 })();
 
 document.addEventListener('DOMContentLoaded', () => MyProjects.render());
