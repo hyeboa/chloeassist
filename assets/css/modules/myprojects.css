@@ -296,16 +296,6 @@
 }
 .mp-date-input:focus { border-color: var(--color-primary); }
 
-.mp-date-clear {
-  font-size: 0.76rem;
-  color: var(--color-text-3);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px 6px;
-}
-.mp-date-clear:hover { color: var(--color-danger); }
-
 .mp-memo-input {
   width: 100%;
   min-height: 56px;
@@ -338,13 +328,24 @@
 
 /* ─ 할 일 추가 입력 ─ */
 .mp-add-row {
-  padding-top: 10px;
-  border-top: 1px solid var(--color-border);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.mp-add-row:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
 }
 
 .mp-add-input {
-  width: 100%;
-  padding: 9px 4px;
+  flex: 1;
+  padding: 0;
   font-size: 0.9rem;
   border: none;
   background: transparent;
@@ -352,3 +353,9 @@
   outline: none;
 }
 .mp-add-input::placeholder { color: var(--color-text-3); }
+
+.mp-add-hint {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}

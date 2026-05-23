@@ -94,11 +94,6 @@ const MyProjects = (() => {
     renderList();
   }
 
-  function clearDueDate(id) {
-    Store.update('projectTasks', id, { dueDate: null });
-    renderList();
-  }
-
   function saveMemo(id, text) {
     Store.update('projectTasks', id, { memo: text.trim() || null });
     renderList();
@@ -159,9 +154,10 @@ const MyProjects = (() => {
 
         <div class="mp-add-row">
           <input class="mp-add-input" type="text"
-            placeholder="+ 할 일 추가 (Enter)"
+            placeholder="할 일 추가"
             data-project="${escapeHtml(project)}"
             onkeydown="MyProjects.handleAdd(event)">
+          <span class="mp-add-hint">Enter</span>
         </div>
       </div>
     `;
@@ -200,7 +196,6 @@ const MyProjects = (() => {
               <span class="mp-edit-label">마감일</span>
               <input type="date" class="mp-date-input" value="${t.dueDate || ''}"
                 onchange="MyProjects.setDueDate('${t.id}', this.value)">
-              ${t.dueDate ? `<button class="mp-date-clear" onclick="MyProjects.clearDueDate('${t.id}')">지우기</button>` : ''}
             </div>
             <textarea class="mp-memo-input" placeholder="메모..."
               onblur="MyProjects.saveMemo('${t.id}', this.value)">${escapeHtml(t.memo || '')}</textarea>
@@ -322,7 +317,7 @@ const MyProjects = (() => {
 
   return {
     render, toggleDone, deleteTask, toggleShowDone, setFilter, handleAdd,
-    toggleExpand, setPriority, setDueDate, clearDueDate, saveMemo,
+    toggleExpand, setPriority, setDueDate, saveMemo,
   };
 })();
 
