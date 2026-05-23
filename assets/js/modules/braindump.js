@@ -1,5 +1,5 @@
 /**
- * braindump.js — 브레인 덤프 (입력 후 Enter → 저장)
+ * braindump.js — 브레인 덤프 (프로젝트 태그 + 완료 관리)
  */
 
 const Braindump = (() => {
@@ -10,23 +10,73 @@ const Braindump = (() => {
     { val: 'week',     label: '이번 주' },
     { val: 'none',     label: '날짜 없음' },
   ];
+  const TAG_COLORS = [
+    { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' },
+    { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' },
+    { bg: '#fce7f3', text: '#be185d', border: '#f9a8d4' },
+    { bg: '#ffedd5', text: '#c2410c', border: '#fdba74' },
+    { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' },
+  ];
 
-  let convertingId = null;
-  let convertCat   = '기획';
-  let convertDate  = 'none';
-  let keyHandler   = null;
+  let convertingId  = null;
+  let convertCat    = '기획';
+  let convertDate   = 'none';
+  let keyHandler    = null;
+  let activeProject = '전체';
+  let hideDone      = false;
+  let lastProject   = '';
 
   function getNotes() { return Store.get('notes') || []; }
 
-  function saveNote(text) {
+  function projectColor(name) {
+    if (!name) return null;
+    let hash = 0;
+    for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) & 0xffff;
+    return TAG_COLORS[hash % TAG_COLORS.length];
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ─ 저장 ─ */
+  function saveNote(text, project) {
     if (!text.trim()) return;
-    Store.push('notes', { text: text.trim() });
+    const proj = project.trim() || null;
+    if (proj) lastProject = proj;
+    Store.push('notes', { text: text.trim(), project: proj, done: false });
     render();
   }
 
   function deleteNote(id) {
     Store.remove('notes', id);
     render();
+  }
+
+  /* ─ 완료 토글 ─ */
+  function toggleDone(id) {
+    const n = getNotes().find(x => x.id === id);
+    if (!n) return;
+    Store.update('notes', id, { done: !n.done, doneAt: !n.done ? Date.now() : null });
+    renderList();
+  }
+
+  /* ─ 필터 ─ */
+  function setProjectFilter(proj) {
+    activeProject = proj;
+    document.querySelectorAll('.dump-filter-btn').forEach(el => {
+      el.className = `dump-filter-btn${el.dataset.proj === proj ? ' active' : ''}`;
+    });
+    renderList();
+  }
+
+  function toggleHideDone() {
+    hideDone = !hideDone;
+    const btn = document.getElementById('dump-hide-done');
+    if (btn) btn.textContent = hideDone ? '완료 보기' : '완료 숨기기';
+    renderList();
   }
 
   /* ─ 변환 플로우 ─ */
@@ -86,13 +136,7 @@ const Braindump = (() => {
     render();
   }
 
-  /* ─ 렌더 ─ */
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
+  /* ─ 변환 폼 렌더 ─ */
   function renderConvertForm(n) {
     return `
       <div class="dump-item converting">
@@ -123,52 +167,122 @@ const Braindump = (() => {
       </div>`;
   }
 
+  /* ─ 아이템 렌더 ─ */
+  function renderItem(n) {
+    if (n.id === convertingId) return renderConvertForm(n);
+
+    const color = projectColor(n.project);
+    const badge = n.project && color
+      ? `<span class="dump-project-badge"
+           style="background:${color.bg};color:${color.text};border-color:${color.border}"
+         >${escapeHtml(n.project)}</span>`
+      : '';
+
+    return `
+      <div class="dump-item${n.done ? ' done' : ''}">
+        <button class="dump-check${n.done ? ' checked' : ''}"
+          onclick="Braindump.toggleDone('${n.id}')" title="${n.done ? '완료 해제' : '완료'}">
+          ${n.done ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+        </button>
+        <span class="dump-text">${escapeHtml(n.text)}</span>
+        ${badge}
+        <span class="dump-meta">${formatDate(n.createdAt)}</span>
+        <button class="dump-action dump-convert"
+          onclick="Braindump.startConvert('${n.id}')" title="할 일로 변환">→ 할 일</button>
+        <button class="dump-action dump-delete"
+          onclick="Braindump.deleteNote('${n.id}')" title="삭제">✕</button>
+      </div>`;
+  }
+
+  /* ─ 리스트만 재렌더 ─ */
+  function renderList() {
+    const listEl = document.getElementById('dump-list');
+    if (!listEl) return;
+
+    let notes = [...getNotes()].sort((a, b) => b.createdAt - a.createdAt);
+
+    if (activeProject === '태그없음') {
+      notes = notes.filter(n => !n.project);
+    } else if (activeProject !== '전체') {
+      notes = notes.filter(n => n.project === activeProject);
+    }
+
+    if (hideDone) notes = notes.filter(n => !n.done);
+
+    listEl.innerHTML = notes.length === 0
+      ? '<div class="empty-state"><div class="empty-state-text">기록이 없어요</div></div>'
+      : notes.map(n => renderItem(n)).join('');
+  }
+
+  /* ─ 전체 렌더 ─ */
   function render() {
-    /* 이전 키 핸들러 제거 */
     if (keyHandler) { document.removeEventListener('keydown', keyHandler); keyHandler = null; }
 
-    const notes = [...getNotes()].sort((a, b) => b.createdAt - a.createdAt);
+    const allNotes = [...getNotes()].sort((a, b) => b.createdAt - a.createdAt);
+    const projects = [...new Set(allNotes.map(n => n.project).filter(Boolean))];
+    const hasUntagged = allNotes.some(n => !n.project);
+    const doneCount = allNotes.filter(n => n.done).length;
+
+    const filterBtns = ['전체', ...projects, ...(hasUntagged ? ['태그없음'] : '')]
+      .map(p => `<button class="dump-filter-btn${activeProject === p ? ' active' : ''}"
+          data-proj="${p}" onclick="Braindump.setProjectFilter('${p}')">${p}</button>`)
+      .join('');
 
     document.getElementById('app').innerHTML = `
       <div class="dump-input-wrap">
         <input id="dump-input" class="dump-input" type="text"
           placeholder="생각이 떠오르면 입력하고 Enter"
           ${convertingId ? '' : 'autofocus'}>
+        <input id="dump-tag-input" class="dump-tag-input" type="text"
+          placeholder="프로젝트 태그 (선택)"
+          value="${escapeHtml(lastProject)}">
       </div>
-      <div class="dump-list">
-        ${notes.length === 0
-          ? '<div class="empty-state"><div class="empty-state-text">아직 기록된 생각이 없어요</div></div>'
-          : notes.map(n =>
-              n.id === convertingId
-                ? renderConvertForm(n)
-                : `<div class="dump-item">
-                     <span class="dump-text">${escapeHtml(n.text)}</span>
-                     <span class="dump-meta">${formatDate(n.createdAt)}</span>
-                     <button class="dump-action dump-convert"
-                       onclick="Braindump.startConvert('${n.id}')" title="할 일로 변환">→ 할 일</button>
-                     <button class="dump-action dump-delete"
-                       onclick="Braindump.deleteNote('${n.id}')" title="삭제">✕</button>
-                   </div>`
-            ).join('')
-        }
+
+      <div class="dump-list-header">
+        <div class="dump-filter-bar">${filterBtns}</div>
+        <div class="dump-toolbar-right">
+          ${doneCount > 0 ? `<button id="dump-hide-done" class="dump-hide-done-btn"
+            onclick="Braindump.toggleHideDone()">${hideDone ? '완료 보기' : '완료 숨기기'}</button>` : ''}
+        </div>
       </div>
+
+      <div class="dump-list" id="dump-list"></div>
     `;
 
-    const input = document.getElementById('dump-input');
-    input?.addEventListener('keydown', (e) => {
+    renderList();
+    bindInputs();
+  }
+
+  /* ─ 입력 바인딩 ─ */
+  function bindInputs() {
+    const input    = document.getElementById('dump-input');
+    const tagInput = document.getElementById('dump-tag-input');
+    if (!input) return;
+
+    // 텍스트 입력창 Enter → 저장
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      if (convertingId) { confirmConvert(); return; }
+      const text = input.value.trim();
+      if (!text) return;
+      const proj = tagInput ? tagInput.value.trim() : '';
+      saveNote(text, proj);
+      input.value = '';
+      if (tagInput) tagInput.value = proj; // 마지막 태그 유지
+    });
+
+    // 태그 입력창 Enter → 텍스트 입력창으로 포커스 이동
+    tagInput?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.isComposing) {
-        if (convertingId) { confirmConvert(); return; }
-        saveNote(input.value);
-        input.value = '';
+        e.preventDefault();
+        input.focus();
       }
     });
-    if (!convertingId) input?.focus();
 
-    /* 변환 폼 열려있을 때 Esc 키 처리 */
+    if (!convertingId) input.focus();
+
     if (convertingId) {
-      keyHandler = (e) => {
-        if (e.key === 'Escape') cancelConvert();
-      };
+      keyHandler = (e) => { if (e.key === 'Escape') cancelConvert(); };
       document.addEventListener('keydown', keyHandler);
     }
   }
@@ -181,7 +295,11 @@ const Braindump = (() => {
     return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
   }
 
-  return { render, deleteNote, startConvert, cancelConvert, selectConvertCat, selectConvertDate, confirmConvert };
+  return {
+    render, deleteNote,
+    startConvert, cancelConvert, selectConvertCat, selectConvertDate, confirmConvert,
+    toggleDone, setProjectFilter, toggleHideDone,
+  };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Braindump.render());
