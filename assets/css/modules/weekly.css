@@ -412,29 +412,32 @@
 
 /* ─ 리뷰 탭 (주간/월간) ─ */
 .review-tabs {
-    display: flex;
-    gap: 6px;
+    display: inline-flex;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-full);
+    padding: 4px;
     margin-bottom: 24px;
+    gap: 2px;
 }
 
 .review-tab {
-    padding: 5px 20px;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border: 1.5px solid var(--color-border);
+    padding: 10px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
     background: transparent;
     color: var(--color-text-3);
+    border: none;
     cursor: pointer;
     transition: all var(--transition);
-    white-space: nowrap;
 }
 
-.review-tab:hover { border-color: var(--color-text-2); color: var(--color-text); }
+.review-tab:hover {
+    color: var(--color-text);
+}
 
 .review-tab.active {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-    border-color: var(--color-primary);
-    font-weight: 600;
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-sm);
 }
