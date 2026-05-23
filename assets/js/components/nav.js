@@ -6,6 +6,7 @@
 const Nav = (() => {
   const NAV_ITEMS = [
     { href: 'index.html',    label: '오늘',       icon: '◎' },
+    { href: 'hello.html',    label: '한눈에',      icon: '⬡' },
     { href: 'weekly.html',   label: '주간 리뷰',   icon: '◫' },
     { href: 'monthly.html',  label: '월간 리뷰',   icon: '◰' },
     { href: 'roadmap.html',  label: '로드맵',      icon: '◈' },
