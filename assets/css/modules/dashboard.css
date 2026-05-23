@@ -287,3 +287,147 @@
 }
 
 .done-section-toggle:hover { color: var(--color-text-2); }
+
+/* ===== 집중 모드 ===== */
+.today-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.focus-toggle {
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.focus-toggle:hover { border-color: var(--color-text-2); color: var(--color-text); }
+.focus-toggle.on {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.focus-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.focus-card {
+  margin: 60px auto 0;
+  max-width: 560px;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.focus-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.focus-cat-badge {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.focus-cat-badge.기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text); }
+.focus-cat-badge.디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); }
+.focus-cat-badge.개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text); }
+.focus-cat-badge.마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); }
+.focus-cat-badge.운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text); }
+.focus-cat-badge.cat-empty { background: var(--cat-미분류-bg); color: var(--cat-미분류-text); }
+
+.focus-star { color: #f59e0b; font-size: 1.1rem; }
+.focus-date { font-size: 0.85rem; color: var(--color-text-3); }
+
+.focus-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin-bottom: 40px;
+  word-break: keep-all;
+}
+
+.focus-done-btn {
+  padding: 14px 56px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.focus-done-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.focus-done-btn:active { transform: translateY(0); }
+
+.focus-nav {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.focus-nav-btn {
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.focus-nav-btn:hover:not(:disabled) { border-color: var(--color-text-2); color: var(--color-text); }
+.focus-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.focus-counter {
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  min-width: 40px;
+}
+
+.focus-summary {
+  margin-top: 32px;
+  font-size: 0.82rem;
+  color: var(--color-text-3);
+  line-height: 1.6;
+}
+.focus-hint {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  opacity: 0.7;
+}
+
+/* 집중 모드 빈 상태 */
+.focus-empty {
+  margin: 100px auto 0;
+  text-align: center;
+}
+.focus-empty-icon { font-size: 3rem; margin-bottom: 16px; }
+.focus-empty-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+.focus-empty-sub { font-size: 0.9rem; color: var(--color-text-3); }

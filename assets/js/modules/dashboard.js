@@ -4,7 +4,10 @@
 
 const Dashboard = (() => {
   const CATS = ['기획', '디자인', '개발', '마케팅', '운영'];
-  let showDone = false;
+  const FOCUS_KEY = 'chloeassist:focusMode';
+  let showDone    = false;
+  let focusMode   = localStorage.getItem(FOCUS_KEY) === 'true';
+  let focusOffset = 0;
 
   function todayStr() { return new Date().toDateString(); }
 
@@ -159,6 +162,82 @@ const Dashboard = (() => {
 
   let selectedCat = '기획';
 
+  /* ─ 집중 모드 ─ */
+  function toggleFocusMode() {
+    focusMode = !focusMode;
+    focusOffset = 0;
+    localStorage.setItem(FOCUS_KEY, focusMode);
+    render();
+  }
+
+  function nextFocus() { focusOffset++; render(); }
+  function prevFocus() { focusOffset = Math.max(0, focusOffset - 1); render(); }
+
+  function focusList() {
+    return getTodayTasks()
+      .filter(t => !t.done)
+      .sort((a, b) => {
+        if (!!b.starred !== !!a.starred) return b.starred ? 1 : -1;
+        const aD = a.dueDate ? new Date(a.dueDate) : null;
+        const bD = b.dueDate ? new Date(b.dueDate) : null;
+        if (aD && bD) return aD - bD;
+        if (aD) return -1;
+        if (bD) return 1;
+        return a.createdAt - b.createdAt;
+      });
+  }
+
+  function shortDate(str) {
+    const d = new Date(str);
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  function renderFocusCard() {
+    const list  = focusList();
+    const tasks = getTodayTasks();
+    const done  = tasks.filter(t => t.done).length;
+
+    if (list.length === 0) {
+      const allDone = tasks.length > 0;
+      return `
+        <div class="focus-empty">
+          <div class="focus-empty-icon">${allDone ? '🎉' : '✦'}</div>
+          <div class="focus-empty-title">${allDone ? '오늘 끝!' : '오늘 할 일이 없어요'}</div>
+          <div class="focus-empty-sub">${allDone
+            ? `${done}개 모두 완료했어요`
+            : '전체 보기로 전환해서 추가해보세요'}</div>
+        </div>`;
+    }
+
+    if (focusOffset >= list.length) focusOffset = 0;
+    const t = list[focusOffset];
+    const catCls = t.category && CATS.includes(t.category) ? t.category : 'cat-empty';
+    const catLabel = t.category || '미분류';
+
+    return `
+      <div class="focus-card">
+        <div class="focus-meta">
+          <span class="focus-cat-badge ${catCls}">${catLabel}</span>
+          ${t.starred ? '<span class="focus-star">★</span>' : ''}
+          ${t.dueDate ? `<span class="focus-date">${shortDate(t.dueDate)}</span>` : ''}
+        </div>
+        <div class="focus-title">${escapeHtml(t.title)}</div>
+        <button class="focus-done-btn" onclick="Dashboard.toggleDone('${t.id}')">✓ 완료</button>
+        ${list.length > 1 ? `
+          <div class="focus-nav">
+            <button class="focus-nav-btn" onclick="Dashboard.prevFocus()"
+              ${focusOffset === 0 ? 'disabled' : ''}>← 이전</button>
+            <span class="focus-counter">${focusOffset + 1} / ${list.length}</span>
+            <button class="focus-nav-btn" onclick="Dashboard.nextFocus()"
+              ${focusOffset >= list.length - 1 ? 'disabled' : ''}>다음 →</button>
+          </div>` : ''}
+        <div class="focus-summary">
+          남은 ${list.length}개 · 완료 ${done}개
+          ${!t.starred ? '<br><span class="focus-hint">별표를 추가하면 가장 먼저 표시돼요</span>' : ''}
+        </div>
+      </div>`;
+  }
+
   function selectCat(cat) {
     selectedCat = cat;
     document.querySelectorAll('#quick-cat-pills .cat-pill').forEach(el => {
@@ -166,7 +245,27 @@ const Dashboard = (() => {
     });
   }
 
+  function focusToggleBtn() {
+    return `
+      <button class="focus-toggle ${focusMode ? 'on' : ''}"
+        onclick="Dashboard.toggleFocusMode()"
+        title="${focusMode ? '전체 보기로 전환' : '한 가지에 집중'}">
+        ◉ ${focusMode ? '전체 보기' : '집중 모드'}
+      </button>`;
+  }
+
   function render() {
+    if (focusMode) {
+      document.getElementById('app').innerHTML = `
+        <div class="today-header focus-header">
+          <div class="today-date">${formatDate()}</div>
+          ${focusToggleBtn()}
+        </div>
+        ${renderFocusCard()}
+      `;
+      return;
+    }
+
     const tasks = getTodayTasks();
     const total = tasks.length;
     const done  = tasks.filter(t => t.done).length;
@@ -181,7 +280,10 @@ const Dashboard = (() => {
       ${renderPulse()}
 
       <div class="today-header">
-        <div class="today-date">${formatDate()}</div>
+        <div class="today-header-row">
+          <div class="today-date">${formatDate()}</div>
+          ${focusToggleBtn()}
+        </div>
         <div class="today-progress-row">
           <div class="today-progress-bar">
             <div class="today-progress-fill" style="width:${pct}%"></div>
@@ -233,7 +335,10 @@ const Dashboard = (() => {
     render();
   }
 
-  return { render, toggleDone, toggleStar, deleteTask, toggleShowDone, selectCat };
+  return {
+    render, toggleDone, toggleStar, deleteTask, toggleShowDone, selectCat,
+    toggleFocusMode, nextFocus, prevFocus,
+  };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Dashboard.render());
