@@ -7,6 +7,7 @@ const Roadmap = (() => {
 
   let calYear  = new Date().getFullYear();
   let calMonth = new Date().getMonth();
+  let activeTab = 'schedule';
 
   /* ─ 데이터 ─ */
   function getMilestones() { return Store.get('milestones') || []; }
@@ -171,7 +172,7 @@ const Roadmap = (() => {
         </div>
 
         ${milestones.length === 0
-          ? '<div class="cal-hint">등록된 마일스톤이 없어요.<br>위 입력창에서 추가해보세요.</div>'
+          ? '<div class="cal-hint">등록된 마일스톤이 없어요.<br>마일스톤 탭에서 추가해보세요.</div>'
           : ''}
       </div>
     `;
@@ -215,23 +216,25 @@ const Roadmap = (() => {
         </div>
       </div>
 
-      <!-- 마일스톤 (2컬럼 레이아웃) -->
+      <!-- 스케줄 / 마일스톤 탭 -->
+      <div class="rm-tabs">
+        <button class="rm-tab ${activeTab === 'schedule' ? 'active' : ''}"
+          onclick="Roadmap.setTab('schedule')">스케줄</button>
+        <button class="rm-tab ${activeTab === 'milestone' ? 'active' : ''}"
+          onclick="Roadmap.setTab('milestone')">마일스톤</button>
+      </div>
+
       <div class="milestone-section">
         <div class="ms-section-hd">
-          <div class="section-title" style="margin:0">마일스톤</div>
+          <div class="section-title" style="margin:0">${activeTab === 'schedule' ? '스케줄' : '마일스톤'}</div>
           <span class="ms-section-meta">전체 ${milestones.length}개</span>
         </div>
-        <div class="ms-two-col">
-          <!-- 왼쪽: 달력 -->
-          <div class="ms-col-cal">
-            ${renderCalendarView(milestones)}
-          </div>
-          <!-- 오른쪽: 추가 + 목록 -->
-          <div class="ms-col-list">
-            ${renderAddInput()}
-            ${renderMilestoneList(milestones)}
-          </div>
-        </div>
+        ${activeTab === 'schedule'
+          ? renderCalendarView(milestones)
+          : `<div class="ms-col-list">
+               ${renderAddInput()}
+               ${renderMilestoneList(milestones)}
+             </div>`}
       </div>
     `;
 
@@ -284,6 +287,11 @@ const Roadmap = (() => {
     render();
   }
 
+  function setTab(tab) {
+    activeTab = tab;
+    render();
+  }
+
   function prevMonth() {
     calMonth--;
     if (calMonth < 0) { calMonth = 11; calYear--; }
@@ -296,7 +304,7 @@ const Roadmap = (() => {
     render();
   }
 
-  return { render, toggleDone, deleteMilestone, prevMonth, nextMonth };
+  return { render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Roadmap.render());

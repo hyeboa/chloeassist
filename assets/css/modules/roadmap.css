@@ -125,16 +125,34 @@
   margin-bottom: 32px;
 }
 
-/* ─ 2컬럼 레이아웃 ─ */
-.ms-two-col {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 28px;
-  align-items: start;
+/* ─ 스케줄 / 마일스톤 탭 ─ */
+.rm-tabs {
+  display: inline-flex;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  margin-bottom: 20px;
+  gap: 2px;
 }
 
-.ms-col-cal {
-  min-width: 0;
+.rm-tab {
+  padding: 10px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-3);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.rm-tab:hover { color: var(--color-text); }
+
+.rm-tab.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 
 .ms-col-list {
@@ -142,12 +160,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-}
-
-@media (max-width: 1100px) {
-  .ms-two-col {
-    grid-template-columns: 1fr;
-  }
+  max-width: 720px;
 }
 
 .milestone-section-header {
