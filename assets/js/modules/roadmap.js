@@ -5,7 +5,6 @@
 const Roadmap = (() => {
   const STATUSES = ['아이디어', '기획중', '디자인중', '개발중', '완료'];
 
-  let viewMode = 'list';
   let calYear  = new Date().getFullYear();
   let calMonth = new Date().getMonth();
 
@@ -63,8 +62,8 @@ const Roadmap = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  /* ─ 마일스톤 리스트 뷰 ─ */
-  function renderMilestoneList(milestones) {
+  /* ─ 마일스톤 추가 입력 ─ */
+  function renderAddInput() {
     return `
       <div class="inline-nl-wrap">
         <div class="inline-nl-label">새 마일스톤 추가</div>
@@ -77,12 +76,16 @@ const Roadmap = (() => {
           <span class="nl-rule-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
         </div>
         <div class="inline-nl-status" id="ms-status"></div>
-      </div>
+      </div>`;
+  }
 
+  /* ─ 마일스톤 리스트 ─ */
+  function renderMilestoneList(milestones) {
+    if (milestones.length === 0) return '';
+    return `
+      <div class="ms-sub-label" style="margin-top:24px">목록</div>
       <div class="milestone-list">
-        ${milestones.length === 0
-          ? '<div class="empty-state"><div class="empty-state-text">첫 마일스톤을 입력해보세요</div></div>'
-          : milestones.map(m => {
+        ${milestones.map(m => {
               const dd = dday(m.date, m.done);
               return `
                 <div class="milestone-item ${milestoneClass(m)}">
@@ -140,6 +143,7 @@ const Roadmap = (() => {
 
     return `
       <div class="cal-wrap">
+        <div class="ms-sub-label">달력</div>
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="Roadmap.prevMonth()">← 이전</button>
           <div class="cal-month-label">
@@ -176,7 +180,7 @@ const Roadmap = (() => {
         </div>
 
         ${milestones.length === 0
-          ? '<div class="cal-hint">등록된 마일스톤이 없어요.<br>리스트 뷰에서 추가해보세요.</div>'
+          ? '<div class="cal-hint">등록된 마일스톤이 없어요.<br>위 입력창에서 추가해보세요.</div>'
           : ''}
       </div>
     `;
@@ -240,19 +244,16 @@ const Roadmap = (() => {
       <!-- 마일스톤 -->
       <div class="milestone-section">
         <div class="ms-section-hd">
-          <div class="section-title">마일스톤</div>
-          <div class="ms-view-tabs">
-            <button class="ms-view-tab ${viewMode === 'list' ? 'active' : ''}"
-              onclick="Roadmap.setView('list')">≡ 리스트</button>
-            <button class="ms-view-tab ${viewMode === 'calendar' ? 'active' : ''}"
-              onclick="Roadmap.setView('calendar')">☷ 캘린더</button>
-          </div>
+          <div class="section-title" style="margin:0">마일스톤</div>
+          <span class="ms-section-meta">전체 ${milestones.length}개 · 달력에서 일정, 아래에서 관리</span>
         </div>
-        ${viewMode === 'list' ? renderMilestoneList(milestones) : renderCalendarView(milestones)}
+        ${renderAddInput()}
+        ${renderCalendarView(milestones)}
+        ${renderMilestoneList(milestones)}
       </div>
     `;
 
-    if (viewMode === 'list') bindMsInput();
+    bindMsInput();
   }
 
   function bindMsInput() {
@@ -301,11 +302,6 @@ const Roadmap = (() => {
     render();
   }
 
-  function setView(mode) {
-    viewMode = mode;
-    render();
-  }
-
   function prevMonth() {
     calMonth--;
     if (calMonth < 0) { calMonth = 11; calYear--; }
@@ -318,7 +314,7 @@ const Roadmap = (() => {
     render();
   }
 
-  return { render, toggleDone, deleteMilestone, setView, prevMonth, nextMonth };
+  return { render, toggleDone, deleteMilestone, prevMonth, nextMonth };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Roadmap.render());

@@ -1,25 +1,33 @@
 /* ===== 사이트맵 ===== */
 
-/* ─ 뷰 탭 ─ */
+/* ─ 뷰 탭 (세그먼트 컨트롤) ─ */
 .sitemap-view-tabs {
-  display: flex;
+  display: inline-flex;
   gap: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding: 5px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .sitemap-view-tab {
-  padding: 6px 14px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--color-text-2);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-full);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition);
 }
-.sitemap-view-tab:hover { opacity: 0.8; }
-.sitemap-view-tab.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.sitemap-view-tab:hover { color: var(--color-text); }
+.sitemap-view-tab.active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
 
 /* ─ 범례 ─ */
 .sitemap-legend {
@@ -34,9 +42,9 @@
   border-radius: var(--radius-md);
 }
 
-.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--color-text-2); }
-.legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.legend-hint { margin-left: auto; font-size: 0.72rem; color: var(--color-text-3); }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--color-text-2); }
+.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-hint { margin-left: auto; font-size: 0.85rem; color: var(--color-text-3); }
 
 .legend-dot.st-none   { background: var(--color-border); }
 .legend-dot.st-plan   { background: #a78bfa; }
