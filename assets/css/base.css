@@ -196,12 +196,9 @@ img { max-width: 100%; display: block; }
 
 .inline-nl-footer {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
   margin-top: 10px;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0;
   flex-wrap: wrap;
 }
 
@@ -284,7 +281,6 @@ img { max-width: 100%; display: block; }
 .nl-rule-hint {
   font-size: 0.72rem;
   color: var(--color-text-3);
-  padding-bottom: 7px;
 }
 
 .nl-status {
@@ -304,29 +300,28 @@ img { max-width: 100%; display: block; }
 }
 .cat-pills {
   display: flex;
-  gap: 0;
+  gap: 6px;
   flex-wrap: wrap;
   align-items: center;
 }
 
 .cat-pill {
-  padding: 5px 14px 6px;
-  border-radius: 0;
-  font-size: 0.9rem;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.88rem;
   font-weight: 500;
-  border: none;
-  border-bottom: 2.5px solid transparent;
+  border: 1.5px solid var(--color-border);
   background: transparent;
   color: var(--color-text-3);
   cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
+  transition: all var(--transition);
   white-space: nowrap;
 }
 
-.cat-pill:hover { color: var(--color-text); }
+.cat-pill:hover { border-color: var(--color-text-2); color: var(--color-text); }
 
-.cat-pill.selected-기획  { color: var(--cat-기획-text);  border-bottom-color: var(--cat-기획-text);  font-weight: 600; }
-.cat-pill.selected-디자인 { color: var(--cat-디자인-text); border-bottom-color: var(--cat-디자인-text); font-weight: 600; }
-.cat-pill.selected-개발  { color: var(--cat-개발-text);  border-bottom-color: var(--cat-개발-text);  font-weight: 600; }
-.cat-pill.selected-마케팅 { color: var(--cat-마케팅-text); border-bottom-color: var(--cat-마케팅-text); font-weight: 600; }
-.cat-pill.selected-운영  { color: var(--cat-운영-text);  border-bottom-color: var(--cat-운영-text);  font-weight: 600; }
+.cat-pill.selected-기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text);  border-color: var(--cat-기획-text);  font-weight: 600; }
+.cat-pill.selected-디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); border-color: var(--cat-디자인-text); font-weight: 600; }
+.cat-pill.selected-개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text);  border-color: var(--cat-개발-text);  font-weight: 600; }
+.cat-pill.selected-마케팅 { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); border-color: var(--cat-마케팅-text); font-weight: 600; }
+.cat-pill.selected-운영  { background: var(--cat-운영-bg);  color: var(--cat-운영-text);  border-color: var(--cat-운영-text);  font-weight: 600; }
