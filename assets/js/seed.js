@@ -7,33 +7,43 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v9 */
+  /* v4 → v10 */
   if (version === 'v4') {
     injectSitemapData();
     injectProjectTasks();
-    localStorage.setItem('chloeassist:seeded', 'v9');
+    injectGoals();
+    localStorage.setItem('chloeassist:seeded', 'v10');
     return;
   }
 
-  /* v5 / v6 / v7 → v9 */
+  /* v5 / v6 / v7 → v10 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
     localStorage.removeItem('chloeassist:sitemapComponents');
     injectSitemapData();
     injectProjectTasks();
-    localStorage.setItem('chloeassist:seeded', 'v9');
+    injectGoals();
+    localStorage.setItem('chloeassist:seeded', 'v10');
     return;
   }
 
-  /* v8 → v9: projectTasks만 추가 */
+  /* v8 → v10: projectTasks + goals 추가 */
   if (version === 'v8') {
     injectProjectTasks();
-    localStorage.setItem('chloeassist:seeded', 'v9');
+    injectGoals();
+    localStorage.setItem('chloeassist:seeded', 'v10');
     return;
   }
 
-  if (version === 'v9') return;
+  /* v9 → v10: goals만 추가 */
+  if (version === 'v9') {
+    injectGoals();
+    localStorage.setItem('chloeassist:seeded', 'v10');
+    return;
+  }
+
+  if (version === 'v10') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -106,7 +116,8 @@
 
   injectSitemapData();
   injectProjectTasks();
-  localStorage.setItem('chloeassist:seeded', 'v9');
+  injectGoals();
+  localStorage.setItem('chloeassist:seeded', 'v10');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -425,5 +436,56 @@
     ];
 
     localStorage.setItem('chloeassist:projectTasks', JSON.stringify(projectTasks));
+  }
+
+  /* ══════════════════════════════════════════════
+     단계별 목표 샘플 데이터 — v10
+  ══════════════════════════════════════════════ */
+  function injectGoals() {
+    if (localStorage.getItem('chloeassist:goals')) return;
+
+    const t    = Date.now();
+    const item = (text, done = false) => ({ id: crypto.randomUUID(), text, done });
+
+    const g1 = crypto.randomUUID();
+    const g2 = crypto.randomUUID();
+    const g3 = crypto.randomUUID();
+
+    const goals = [
+      { id: g1, title: 'MVP 완성', createdAt: t - 3000, items: [
+        item('핵심 매칭 플로우 구현', true),
+        item('반려견 프로필 등록 화면', true),
+        item('온보딩 플로우 완성'),
+        item('내부 알파 테스트'),
+      ] },
+      { id: g2, title: '베타 출시', createdAt: t - 2000, items: [
+        item('베타 테스터 100명 모집'),
+        item('푸시 알림 연동'),
+        item('피드백 수집 채널 마련'),
+      ] },
+      { id: g3, title: '정식 출시', createdAt: t - 1000, items: [
+        item('앱스토어 심사 통과'),
+        item('결제·정산 시스템 연동'),
+        item('런칭 마케팅 캠페인'),
+      ] },
+    ];
+
+    localStorage.setItem('chloeassist:goals', JSON.stringify(goals));
+
+    /* 샘플 마일스톤을 제목으로 매칭해 목표에 연결 */
+    const linkByTitle = {
+      '내부 알파 테스트 완료': g1,
+      '외부 베타 출시': g2,
+      '앱스토어 심사 제출': g3,
+      '정식 출시 (v1.0)': g3,
+    };
+    try {
+      const milestones = JSON.parse(localStorage.getItem('chloeassist:milestones') || '[]');
+      let changed = false;
+      milestones.forEach(m => {
+        if (linkByTitle[m.title] && !m.goalId) { m.goalId = linkByTitle[m.title]; changed = true; }
+      });
+      if (changed) localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
+    } catch (e) {}
   }
 })();

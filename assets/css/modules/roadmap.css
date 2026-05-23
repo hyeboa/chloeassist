@@ -515,3 +515,256 @@
 .feat-sc-디자인중 .feat-sc-dot { background: var(--cat-디자인-text); }
 .feat-sc-개발중   .feat-sc-dot { background: var(--cat-개발-text); }
 .feat-sc-완료     .feat-sc-dot { background: var(--color-success); }
+
+/* ═══════════════════════════════════════
+   단계별 목표 (Phased Goals)
+═══════════════════════════════════════ */
+.goals-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  margin-bottom: 28px;
+}
+
+.goal-empty {
+  padding: 28px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-3);
+}
+
+.goal-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  background: var(--color-bg);
+}
+
+.goal-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.goal-phase-badge {
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+}
+
+.goal-title-edit {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--color-text);
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  outline: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+.goal-title-edit:hover { background: var(--color-surface-2); }
+.goal-title-edit:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.goal-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.goal-act-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.goal-act-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.goal-act-btn:disabled { opacity: 0.35; cursor: default; }
+.goal-act-btn.del:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background: #fee2e2;
+}
+
+.goal-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 6px;
+}
+.goal-progress .summary-bar { flex: 1; margin: 0; }
+.goal-progress-label {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+}
+
+.goal-checklist {
+  margin-top: 6px;
+}
+
+.goal-checklist-empty {
+  margin-top: 8px;
+  padding: 12px 8px;
+  font-size: 0.82rem;
+  color: var(--color-text-3);
+}
+
+.goal-ms-tag {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6366f1;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+
+.goal-item-add-row,
+.goal-add-row { margin-top: 8px; }
+.goal-add-row { margin-top: 14px; }
+
+/* 마일스톤 행 목표 연결 드롭다운 */
+.ms-goal-select {
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  cursor: pointer;
+  max-width: 160px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.ms-goal-select:focus { border-color: var(--color-primary); }
+
+/* ─ myprojects.css 패턴 복사 (roadmap은 해당 시트를 로드하지 않음) ─ */
+.mp-task-item {
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.mp-task-item:hover { background: var(--color-surface-2); }
+
+.mp-task-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px;
+}
+
+.mp-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all var(--transition);
+}
+.mp-check:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light, rgba(108,99,255,0.07));
+}
+.mp-check.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.mp-task-title {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.mp-task-item.done .mp-task-title {
+  text-decoration: line-through;
+  color: var(--color-text-3);
+}
+.mp-task-item.done { opacity: 0.55; }
+
+.mp-delete {
+  opacity: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.mp-task-item:hover .mp-delete { opacity: 1; }
+.mp-delete:hover { background: #fee2e2; color: var(--color-danger); }
+
+.mp-add-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.mp-add-row:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.mp-add-input {
+  flex: 1;
+  padding: 0;
+  font-size: 0.9rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  outline: none;
+}
+.mp-add-input::placeholder { color: var(--color-text-3); }
+
+.mp-add-hint {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}

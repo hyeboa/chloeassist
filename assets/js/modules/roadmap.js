@@ -3,32 +3,13 @@
  */
 
 const Roadmap = (() => {
-  const STATUSES = ['아이디어', '기획중', '디자인중', '개발중', '완료'];
-
   let calYear  = new Date().getFullYear();
   let calMonth = new Date().getMonth();
   let activeTab = 'schedule';
 
   /* ─ 데이터 ─ */
   function getMilestones() { return Store.get('milestones') || []; }
-  function getFeatures()   { return Store.get('features')   || []; }
-  function getTasks()      { return Store.get('tasks')      || []; }
-
-  /* ─ 계산 ─ */
-  function featureStats() {
-    const list = getFeatures();
-    const total = list.length;
-    const done  = list.filter(f => f.status === '완료').length;
-    const pct   = total ? Math.round(done / total * 100) : 0;
-    const bySt  = {};
-    STATUSES.forEach(s => { bySt[s] = list.filter(f => f.status === s).length; });
-    return { total, done, pct, bySt };
-  }
-
-  function nextMilestone() {
-    const ms = getMilestones().filter(m => !m.done).sort((a, b) => new Date(a.date) - new Date(b.date));
-    return ms[0] || null;
-  }
+  function getGoals()      { return Store.get('goals')      || []; }
 
   /* ─ D-day ─ */
   function dday(dateStr, done) {
@@ -45,10 +26,6 @@ const Roadmap = (() => {
     const diff = Math.ceil((new Date(m.date) - new Date().setHours(0,0,0,0)) / 86400000);
     if (diff < 0) return 'overdue';
     return 'upcoming';
-  }
-
-  function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   function escapeHtml(str) {
@@ -80,6 +57,7 @@ const Roadmap = (() => {
         <div style="font-size:0.95rem;color:var(--color-text-2);font-weight:500">마일스톤이 없어요</div>
         <div style="font-size:0.85rem;color:var(--color-text-3);margin-top:4px">위 입력창에서 추가해보세요</div>
       </div>`;
+    const goals = getGoals();
     return `
       <div class="milestone-list">
         ${milestones.map(m => {
@@ -91,6 +69,14 @@ const Roadmap = (() => {
                   <div class="milestone-title">${escapeHtml(m.title)}</div>
                   <span class="milestone-dday ${dd.cls}">${dd.label}</span>
                   <div class="milestone-actions">
+                    <select class="ms-goal-select"
+                      onchange="Roadmap.assignMilestoneGoal('${m.id}', this.value || null)"
+                      title="목표에 연결">
+                      <option value="">목표 연결 안함</option>
+                      ${goals.map((g, i) => `
+                        <option value="${g.id}" ${m.goalId === g.id ? 'selected' : ''}>${i + 1}차 · ${escapeHtml(g.title)}</option>
+                      `).join('')}
+                    </select>
                     <button class="ms-del-btn" onclick="Roadmap.deleteMilestone('${m.id}')">삭제</button>
                   </div>
                 </div>
@@ -178,43 +164,123 @@ const Roadmap = (() => {
     `;
   }
 
+  /* ═══ 단계별 목표 ═══ */
+  function checkSvg() {
+    return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  function goalProgress(goal) {
+    const items  = goal.items || [];
+    const linked = getMilestones().filter(m => m.goalId === goal.id);
+    const total  = items.length + linked.length;
+    const done   = items.filter(i => i.done).length + linked.filter(m => m.done).length;
+    const pct    = total ? Math.round(done / total * 100) : 0;
+    return { total, done, pct };
+  }
+
+  function renderGoalsSection() {
+    const goals = getGoals();
+    return `
+      <div class="goals-section">
+        <div class="ms-section-hd">
+          <div class="section-title" style="margin:0">단계별 목표</div>
+          <span class="ms-section-meta">전체 ${goals.length}개</span>
+        </div>
+        ${goals.length === 0
+          ? '<div class="goal-empty">아직 목표가 없어요. 1차 목표부터 추가해보세요.</div>'
+          : goals.map((g, i) => renderGoalCard(g, i, goals.length)).join('')}
+        ${renderAddGoalInput()}
+      </div>`;
+  }
+
+  function renderGoalCard(goal, index, total) {
+    const { done, total: t, pct } = goalProgress(goal);
+    return `
+      <div class="goal-card">
+        <div class="goal-card-head">
+          <span class="goal-phase-badge">${index + 1}차 목표</span>
+          <input class="goal-title-edit" value="${escapeHtml(goal.title)}"
+            onblur="Roadmap.editGoalTitle('${goal.id}', this.value)"
+            onkeydown="if(event.key==='Enter')this.blur()">
+          <div class="goal-card-actions">
+            <button class="goal-act-btn" onclick="Roadmap.moveGoalUp('${goal.id}')" ${index === 0 ? 'disabled' : ''} title="위로">↑</button>
+            <button class="goal-act-btn" onclick="Roadmap.moveGoalDown('${goal.id}')" ${index === total - 1 ? 'disabled' : ''} title="아래로">↓</button>
+            <button class="goal-act-btn del" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
+          </div>
+        </div>
+        <div class="goal-progress">
+          <div class="summary-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
+          <span class="goal-progress-label">${done}/${t} · ${pct}%</span>
+        </div>
+        ${renderChecklist(goal)}
+        ${renderAddItemInput(goal.id)}
+      </div>`;
+  }
+
+  function renderChecklist(goal) {
+    const items  = goal.items || [];
+    const linked = getMilestones().filter(m => m.goalId === goal.id)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (items.length === 0 && linked.length === 0) {
+      return '<div class="goal-checklist-empty">항목을 추가하거나 마일스톤을 연결하세요</div>';
+    }
+
+    const itemRows = items.map(it => `
+      <div class="mp-task-item${it.done ? ' done' : ''}">
+        <div class="mp-task-main">
+          <button class="mp-check${it.done ? ' checked' : ''}"
+            onclick="Roadmap.toggleItem('${goal.id}','${it.id}')" title="${it.done ? '완료 해제' : '완료'}">
+            ${it.done ? checkSvg() : ''}
+          </button>
+          <span class="mp-task-title">${escapeHtml(it.text)}</span>
+          <button class="mp-delete" onclick="Roadmap.deleteItem('${goal.id}','${it.id}')" title="삭제">✕</button>
+        </div>
+      </div>`).join('');
+
+    const msRows = linked.map(m => {
+      const d = dday(m.date, m.done);
+      return `
+        <div class="mp-task-item${m.done ? ' done' : ''}">
+          <div class="mp-task-main">
+            <button class="mp-check${m.done ? ' checked' : ''}"
+              onclick="Roadmap.toggleDone('${m.id}')" title="${m.done ? '완료 해제' : '완료'}">
+              ${m.done ? checkSvg() : ''}
+            </button>
+            <span class="goal-ms-tag">마일스톤</span>
+            <span class="mp-task-title">${escapeHtml(m.title)}</span>
+            <span class="milestone-dday ${d.cls}">${d.label}</span>
+            <button class="mp-delete" onclick="Roadmap.assignMilestoneGoal('${m.id}', null)" title="연결 해제">✕</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `<div class="goal-checklist">${itemRows}${msRows}</div>`;
+  }
+
+  function renderAddGoalInput() {
+    return `
+      <div class="mp-add-row goal-add-row">
+        <input id="goal-add-input" class="mp-add-input" type="text" placeholder="새 단계 목표 추가">
+        <span class="mp-add-hint">Enter</span>
+      </div>`;
+  }
+
+  function renderAddItemInput(goalId) {
+    return `
+      <div class="mp-add-row goal-item-add-row">
+        <input class="mp-add-input goal-item-add-input" type="text" data-goal="${goalId}" placeholder="세부 항목 추가">
+        <span class="mp-add-hint">Enter</span>
+      </div>`;
+  }
+
   /* ─ 렌더 ─ */
   function render() {
-    const feat   = featureStats();
-    const next   = nextMilestone();
-    const dd     = next ? dday(next.date, next.done) : null;
     const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     document.getElementById('app').innerHTML = `
-      <!-- 수행도 요약 -->
-      <div class="roadmap-summary">
-        <div class="summary-card">
-          <div class="summary-label">기능 개발 수행도</div>
-          <div class="summary-value">${feat.pct}<span>%</span></div>
-          <div class="summary-sub">${feat.done} / ${feat.total}개 완료</div>
-          <div class="summary-bar"><div class="summary-bar-fill green" style="width:${feat.pct}%"></div></div>
-        </div>
-        <div class="summary-card">
-          <div class="summary-label">다음 마일스톤</div>
-          ${next
-            ? `<div class="summary-value" style="font-size:1.3rem">${escapeHtml(next.title)}</div>
-               <div class="summary-sub">${formatDate(next.date)}</div>
-               <div style="margin-top:10px"><span class="milestone-dday ${dd.cls}">${dd.label}</span></div>`
-            : `<div class="summary-value" style="font-size:1rem;color:var(--color-text-3)">없음</div>
-               <div class="summary-sub">마일스톤을 추가해보세요</div>`
-          }
-        </div>
-        <div class="summary-card">
-          <div class="summary-label">기능 상태</div>
-          <div class="feat-status-chips">
-            ${STATUSES.map(s => feat.bySt[s] > 0 ? `
-              <span class="feat-status-chip feat-sc-${s}">
-                <span class="feat-sc-dot"></span>${s}<span class="feat-sc-num">${feat.bySt[s]}</span>
-              </span>` : '').join('')}
-          </div>
-          ${feat.total === 0 ? '<div class="summary-sub">기능이 없어요</div>' : ''}
-        </div>
-      </div>
+      <!-- 단계별 목표 -->
+      ${renderGoalsSection()}
 
       <!-- 스케줄 / 마일스톤 탭 -->
       <div class="rm-tabs">
@@ -239,6 +305,26 @@ const Roadmap = (() => {
     `;
 
     bindMsInput();
+    bindGoalInputs();
+  }
+
+  function bindGoalInputs() {
+    const goalInput = document.getElementById('goal-add-input');
+    goalInput?.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const v = goalInput.value.trim();
+      if (!v) return;
+      addGoal(v);
+    });
+
+    document.querySelectorAll('.goal-item-add-input').forEach(inp => {
+      inp.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || e.isComposing) return;
+        const v = inp.value.trim();
+        if (!v) return;
+        addItem(inp.dataset.goal, v);
+      });
+    });
   }
 
   function bindMsInput() {
@@ -287,6 +373,74 @@ const Roadmap = (() => {
     render();
   }
 
+  /* ─ 목표 동작 ─ */
+  function addGoal(title) {
+    Store.push('goals', { title: title.trim(), items: [] });
+    render();
+  }
+
+  function editGoalTitle(id, text) {
+    const t = text.trim();
+    if (!t) { render(); return; }
+    Store.update('goals', id, { title: t });
+  }
+
+  function deleteGoal(id) {
+    if (!confirm('이 목표를 삭제할까요? 연결된 마일스톤은 삭제되지 않고 연결만 해제됩니다.')) return;
+    getMilestones()
+      .filter(m => m.goalId === id)
+      .forEach(m => Store.update('milestones', m.id, { goalId: null }));
+    Store.remove('goals', id);
+    render();
+  }
+
+  function moveGoalUp(id) {
+    const goals = getGoals();
+    const i = goals.findIndex(g => g.id === id);
+    if (i <= 0) return;
+    [goals[i - 1], goals[i]] = [goals[i], goals[i - 1]];
+    Store.set('goals', goals);
+    render();
+  }
+
+  function moveGoalDown(id) {
+    const goals = getGoals();
+    const i = goals.findIndex(g => g.id === id);
+    if (i < 0 || i >= goals.length - 1) return;
+    [goals[i + 1], goals[i]] = [goals[i], goals[i + 1]];
+    Store.set('goals', goals);
+    render();
+  }
+
+  function addItem(goalId, text) {
+    const goal = getGoals().find(g => g.id === goalId);
+    if (!goal) return;
+    const items = [...(goal.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
+    Store.update('goals', goalId, { items });
+    render();
+  }
+
+  function toggleItem(goalId, itemId) {
+    const goal = getGoals().find(g => g.id === goalId);
+    if (!goal) return;
+    const items = (goal.items || []).map(it => it.id === itemId ? { ...it, done: !it.done } : it);
+    Store.update('goals', goalId, { items });
+    render();
+  }
+
+  function deleteItem(goalId, itemId) {
+    const goal = getGoals().find(g => g.id === goalId);
+    if (!goal) return;
+    const items = (goal.items || []).filter(it => it.id !== itemId);
+    Store.update('goals', goalId, { items });
+    render();
+  }
+
+  function assignMilestoneGoal(milestoneId, goalId) {
+    Store.update('milestones', milestoneId, { goalId: goalId || null });
+    render();
+  }
+
   function setTab(tab) {
     activeTab = tab;
     render();
@@ -304,7 +458,11 @@ const Roadmap = (() => {
     render();
   }
 
-  return { render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab };
+  return {
+    render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab,
+    addGoal, editGoalTitle, deleteGoal, moveGoalUp, moveGoalDown,
+    addItem, toggleItem, deleteItem, assignMilestoneGoal,
+  };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Roadmap.render());
