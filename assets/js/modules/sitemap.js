@@ -225,22 +225,15 @@ const Sitemap = (() => {
     }).join('');
 
     return `
-      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''}" data-section-id="${section.id}"
-        draggable="true"
-        ondragstart="Sitemap.sectionDragStart(event,'${section.id}')"
-        ondragover="Sitemap.sectionDragOver(event)"
-        ondragleave="Sitemap.sectionDragLeave(event)"
-        ondrop="Sitemap.sectionDrop(event,'${section.id}')"
-        ondragend="Sitemap.sectionDragEnd(event)">
+      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''}" data-section-id="${section.id}">
         <div class="sitemap-section-hd">
           <div class="section-name-wrap">
-            <button class="section-drag-handle" title="드래그로 순서 변경">&#8942;</button>
             <input type="number" class="section-order" min="1" value="${order}"
               onchange="Sitemap.setOrder('${section.id}', this.value)"
               onclick="event.stopPropagation()"
               title="표시 순서 (작을수록 위/앞)">
             <button class="section-toggle" onclick="Sitemap.toggleCollapse('${section.id}')"
-              title="${collapsed ? '펼치기' : '접기'}">${collapsed ? '&#9656;' : '&#9662;'}</button>
+              title="${collapsed ? '펼치기' : '접기'}">${collapsed ? '▶' : '▼'}</button>
             <span class="section-icon">&#9703;</span>
             <span class="section-name" data-id="${section.id}"
               contenteditable="true"
