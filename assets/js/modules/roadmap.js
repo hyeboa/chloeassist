@@ -3,10 +3,10 @@
  */
 
 const Roadmap = (() => {
-  let calYear      = new Date().getFullYear();
-  let calMonth     = new Date().getMonth();
-  let activeTab    = 'schedule';
-  let pageMode     = 'schedule'; // 'goals' | 'schedule' | 'milestones'
+  let calYear       = new Date().getFullYear();
+  let calMonth      = new Date().getMonth();
+  let activeTab     = 'schedule';
+  let pageMode      = 'schedule'; // 'goals' | 'schedule' | 'milestones'
   let expandedGoals = new Set();
 
   /* ─ 데이터 ─ */
@@ -37,17 +37,18 @@ const Roadmap = (() => {
   /* ─ 마일스톤 추가 입력 ─ */
   function renderAddInput() {
     return `
-      <div class="inline-nl-wrap">
-        <div class="inline-nl-label">새 마일스톤 추가</div>
-        <input id="ms-input" class="inline-nl-input" type="text"
-          placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
-        <div class="inline-nl-footer">
-          <span class="nl-rule-chip">이름</span>
-          <span class="nl-rule-chip">날짜</span>
-          <span class="nl-rule-sep">·</span>
-          <span class="nl-rule-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
+      <div class="quick-add-wrap">
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="ms-input" class="quick-add-input" type="text"
+              placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
+            <span class="ai-badge">✦ AI</span>
+          </div>
+          <div class="quick-add-footer">
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
+          <div class="quick-add-status" id="ms-status"></div>
         </div>
-        <div class="inline-nl-status" id="ms-status"></div>
       </div>`;
   }
 
@@ -180,6 +181,49 @@ const Roadmap = (() => {
     return { total, done, pct };
   }
 
+  function renderGoalStrip(goals) {
+    if (goals.length === 0) return '';
+
+    const firstIncompleteIdx = goals.findIndex(g => goalProgress(g).pct < 100);
+
+    const segs = goals.map((g, i) => {
+      const { pct } = goalProgress(g);
+      const isDone   = pct === 100;
+      const isActive = i === firstIncompleteIdx;
+      const dd       = g.targetDate ? dday(g.targetDate, isDone) : null;
+      let state, flexVal;
+      if (isDone)        { state = 'done';     flexVal = 0.6; }
+      else if (isActive) { state = 'active';   flexVal = 3;   }
+      else if (pct > 0)  { state = 'progress'; flexVal = 1.5; }
+      else               { state = 'waiting';  flexVal = 1;   }
+      return { g, i, pct, isDone, isActive, dd, state, flexVal };
+    });
+
+    const trackSegs = segs.map(({ pct, state, flexVal }) => `
+      <div class="pipeline-seg ${state}" style="flex:${flexVal}">
+        <div class="pipeline-fill" style="width:${pct}%"></div>
+      </div>`).join('');
+
+    const labelSegs = segs.map(({ g, i, pct, isDone, isActive, dd, state, flexVal }) => `
+      <a href="goals.html" class="pipeline-label ${state}" style="flex:${flexVal}">
+        <span class="pl-badge">${i + 1}차</span>
+        <span class="pl-title">${escapeHtml(g.title)}</span>
+        ${isDone
+          ? '<span class="pl-chip done">완료</span>'
+          : isActive
+            ? `<div class="pl-meta">${dd ? `<span class="pl-dday ${dd.cls}">${dd.label}</span>` : ''}<span class="pl-pct">${pct}%</span></div>`
+            : pct > 0
+              ? `<span class="pl-pct">${pct}%</span>`
+              : '<span class="pl-chip waiting">대기</span>'}
+      </a>`).join('');
+
+    return `
+      <div class="goal-pipeline">
+        <div class="pipeline-track">${trackSegs}</div>
+        <div class="pipeline-labels">${labelSegs}</div>
+      </div>`;
+  }
+
   function renderGoalsSection() {
     const goals = getGoals();
     return `
@@ -190,33 +234,41 @@ const Roadmap = (() => {
         </div>
         ${goals.length === 0
           ? '<div class="goal-empty">아직 목표가 없어요. 1차 목표부터 추가해보세요.</div>'
-          : goals.map((g, i) => renderGoalCard(g, i, goals.length)).join('')}
+          : goals.map((g, i) => renderGoalCard(g, i)).join('')}
         ${renderAddGoalInput()}
       </div>`;
   }
 
-  function renderGoalCard(goal, index, total) {
+  function chevronSvg() {
+    return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  function renderGoalCard(goal, index) {
     const { done, total: t, pct } = goalProgress(goal);
-    const expanded = expandedGoals.has(goal.id);
-    const dd = goal.targetDate ? dday(goal.targetDate, pct === 100) : null;
-    const urgent = dd && (dd.cls === 'dday-today' || dd.cls === 'dday-overdue' || dd.cls === 'dday-soon');
+    const expanded  = expandedGoals.has(goal.id);
+    const isDone    = pct === 100;
+    const dd        = goal.targetDate ? dday(goal.targetDate, isDone) : null;
+    const urgent    = dd && (dd.cls === 'dday-today' || dd.cls === 'dday-overdue' || dd.cls === 'dday-soon');
+    const fillCls   = isDone ? 'goal-fill-done' : urgent ? 'goal-fill-urgent' : 'goal-fill-normal';
+    const cardState = isDone ? ' done' : urgent ? ' urgent' : '';
     return `
-      <div class="goal-card${expanded ? ' expanded' : ''}${urgent ? ' urgent' : ''}">
+      <div class="goal-card${cardState}${expanded ? ' expanded' : ''}">
         <div class="goal-card-head">
+          <button class="goal-expand-btn${expanded ? ' expanded' : ''}"
+            onclick="Roadmap.toggleExpand('${goal.id}')"
+            title="${expanded ? '접기' : '펼치기'}">${chevronSvg()}</button>
           <span class="goal-phase-badge">${index + 1}차 목표</span>
           <input class="goal-title-edit" value="${escapeHtml(goal.title)}"
             onblur="Roadmap.editGoalTitle('${goal.id}', this.value)"
             onkeydown="if(event.key==='Enter')this.blur()">
           ${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}
-          <span class="goal-progress-compact">${pct}%</span>
-          <div class="goal-card-actions">
-            <button class="goal-act-btn" onclick="Roadmap.moveGoalUp('${goal.id}')" ${index === 0 ? 'disabled' : ''} title="위로">↑</button>
-            <button class="goal-act-btn" onclick="Roadmap.moveGoalDown('${goal.id}')" ${index === total - 1 ? 'disabled' : ''} title="아래로">↓</button>
-            <button class="goal-act-btn del" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
-          </div>
-          <button class="goal-expand-btn" onclick="Roadmap.toggleExpand('${goal.id}')" title="${expanded ? '접기' : '펼치기'}">${expanded ? '▾' : '▸'}</button>
+          <span class="goal-progress-compact">${done}/${t}</span>
+          <button class="goal-del-btn" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
         </div>
-        <div class="summary-bar goal-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
+        <div class="goal-bar-wrap">
+          <div class="summary-bar goal-bar"><div class="summary-bar-fill ${fillCls}" style="width:${pct}%"></div></div>
+          <span class="goal-bar-pct">${pct}%</span>
+        </div>
         ${expanded ? `
           <div class="goal-detail">
             <div class="goal-date-row">
@@ -226,7 +278,7 @@ const Roadmap = (() => {
               ${goal.targetDate ? `<button class="goal-date-clear" onclick="Roadmap.setGoalDate('${goal.id}', '')">지우기</button>` : ''}
             </div>
             ${renderChecklist(goal)}
-            ${renderAddItemInput(goal.id)}
+            ${isDone ? '' : renderAddItemInput(goal.id)}
           </div>` : ''}
       </div>`;
   }
@@ -295,16 +347,36 @@ const Roadmap = (() => {
     const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     if (pageMode === 'goals') {
-      app.innerHTML = renderGoalsSection();
+      app.innerHTML = `
+        <div class="goals-page-layout">
+          <div class="goals-page-left">
+            ${renderGoalsSection()}
+          </div>
+          <div class="goals-page-right">
+            <div class="milestone-section">
+              <div class="ms-section-hd">
+                <div class="section-title" style="margin:0">마일스톤</div>
+                <span class="ms-section-meta">전체 ${milestones.length}개</span>
+              </div>
+              <div class="ms-col-list">
+                ${renderAddInput()}
+                ${renderMilestoneList(milestones)}
+              </div>
+            </div>
+          </div>
+        </div>`;
       bindGoalInputs();
+      bindMsInput();
       return;
     }
 
     if (pageMode === 'schedule') {
+      const goals = getGoals();
       app.innerHTML = `
+        ${renderGoalStrip(goals)}
         <div class="milestone-section">
           <div class="ms-section-hd">
-            <div class="section-title" style="margin:0">스케줄</div>
+            <div class="section-title" style="margin:0">캘린더</div>
             <span class="ms-section-meta">마일스톤 ${milestones.length}개</span>
           </div>
           ${renderCalendarView(milestones)}
@@ -365,7 +437,7 @@ const Roadmap = (() => {
 
       input.disabled = true;
       status.textContent = '✦ AI가 분석 중...';
-      status.className = 'inline-nl-status';
+      status.className = 'quick-add-status';
 
       try {
         const result = await NLInput.parse('milestone', text);
@@ -375,7 +447,7 @@ const Roadmap = (() => {
         render();
       } catch (err) {
         status.textContent = '⚠ ' + err.message;
-        status.className = 'inline-nl-status error';
+        status.className = 'quick-add-status error';
         input.disabled = false;
         input.focus();
       }

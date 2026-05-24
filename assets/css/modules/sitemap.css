@@ -1,10 +1,38 @@
 /* ===== 사이트맵 ===== */
 
+/* ─ 통합 툴바 ─ */
+.sitemap-toolbar {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 5px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.sitemap-page-tab {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.sitemap-page-tab:hover { color: var(--color-text); }
+.sitemap-page-tab.active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
 /* ─ 뷰 탭 (세그먼트 컨트롤) ─ */
 .sitemap-view-tabs {
   display: inline-flex;
   gap: 4px;
-  margin-bottom: 20px;
   padding: 5px;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
@@ -30,21 +58,11 @@
 }
 
 /* ─ 범례 ─ */
-.sitemap-legend {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding: 10px 14px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
+.sitemap-legend { display: none; } /* diag-status-legend로 통일 */
 
-.legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--color-text-2); }
-.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.legend-hint { margin-left: auto; font-size: 0.85rem; color: var(--color-text-3); }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--color-text-2); }
+.legend-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.legend-hint { display: none; }
 
 .legend-dot.st-none   { background: var(--color-border); }
 .legend-dot.st-plan   { background: #a78bfa; }
@@ -288,6 +306,10 @@
 }
 .screen-links-row {
   display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  margin-bottom: 4px;
+}
+.screen-links-btn-row {
+  display: flex; align-items: center;
 }
 .screen-link-chip {
   display: inline-flex; align-items: center; gap: 4px;
@@ -393,8 +415,8 @@
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 28px;
-  padding: 8px 14px;
+  margin-bottom: 20px;
+  padding: 7px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -599,12 +621,16 @@
 
 /* ─ 트리 행 ─ */
 .sitemap-tree-row.depth-3 {
-  border-top: 1px dashed var(--color-border);
-  background: rgba(0,0,0,0.012);
+  border-top: 1px solid var(--color-border);
+  background: rgba(108,99,255,0.03);
+  border-left: 3px solid rgba(108,99,255,0.18);
+  padding-left: 4px;
 }
 .sitemap-tree-row.depth-4 {
-  border-top: 1px dashed var(--color-border);
-  background: rgba(0,0,0,0.022);
+  border-top: 1px solid var(--color-border);
+  background: rgba(108,99,255,0.065);
+  border-left: 3px solid rgba(108,99,255,0.3);
+  padding-left: 4px;
 }
 
 /* ─ 하위 행 레이블 ─ */

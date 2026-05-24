@@ -60,14 +60,54 @@
 .today-banner-ms {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  color: var(--color-text-2);
-  padding: 8px 14px;
-  background: var(--color-surface-2);
+  gap: 9px;
+  padding: 7px 9px 7px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   align-self: flex-start;
+  text-decoration: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
+.today-banner-ms:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.08);
+}
+
+.today-ms-icon {
+  display: inline-flex;
+  color: var(--color-primary);
+}
+.today-ms-icon svg { width: 16px; height: 16px; }
+
+.today-ms-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  letter-spacing: 0.02em;
+}
+
+.today-ms-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-ms-dday {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  color: var(--color-text-2);
+}
+.today-ms-dday.soon { background: #fee2e2; color: #dc2626; }
+.today-ms-dday.near { background: #fef3c7; color: #b45309; }
+.today-ms-dday.far  { background: var(--color-primary-light); color: var(--color-primary); }
 
 .today-banner-actions {
   flex-shrink: 0;
@@ -192,45 +232,7 @@
 }
 
 /* ===== 빠른 추가 ===== */
-.quick-add-wrap {
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 18px 22px;
-  margin-bottom: 32px;
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.quick-add-wrap:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
-}
-
-.quick-add-input {
-  width: 100%;
-  padding: 6px 0;
-  font-size: 1.1rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-  outline: none;
-  margin-bottom: 14px;
-}
-
-.quick-add-input::placeholder { color: var(--color-text-3); }
-
-.quick-add-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.quick-add-hint {
-  font-size: 0.85rem;
-  color: var(--color-text-3);
-}
+/* quick-add-wrap styles live in base.css (shared across pages) */
 
 /* ===== 카테고리 그룹 ===== */
 .cat-group {
@@ -610,3 +612,4 @@
 }
 .proj-due.today   { background: #ffedd5; color: #c2410c; border-color: #fdba74; }
 .proj-due.overdue { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+

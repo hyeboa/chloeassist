@@ -178,8 +178,8 @@ const MyProjects = (() => {
           </button>
           ${priority !== 'normal' ? `<span class="mp-prio-dot ${priority}" title="우선순위 ${priority === 'high' ? '높음' : '낮음'}"></span>` : ''}
           <span class="mp-task-title" onclick="MyProjects.toggleExpand('${t.id}')">${escapeHtml(t.title)}</span>
+          ${hasMemo ? `<span class="mp-memo-preview" onclick="MyProjects.toggleExpand('${t.id}')">${escapeHtml(t.memo.length > 22 ? t.memo.slice(0, 22) + '…' : t.memo)}</span>` : ''}
           ${dueBadge(t)}
-          ${hasMemo ? `<span class="mp-memo-icon" title="메모 있음">✎</span>` : ''}
           <button class="mp-delete" onclick="MyProjects.deleteTask('${t.id}')" title="삭제">✕</button>
         </div>
 
@@ -296,6 +296,7 @@ const MyProjects = (() => {
       .join('');
 
     document.getElementById('app').innerHTML = `
+      <div class="mp-braindump-hint">새 프로젝트와 할 일 추가는 <a href="braindump.html">브레인 덤프</a>에서 — 생각을 적고 프로젝트 태그를 달면 여기로 모여요.</div>
       <div id="mp-dashboard"></div>
       ${projects.length > 1 ? `<div class="mp-filter-bar" style="margin-top:20px">${filterBtns}</div>` : ''}
       <div id="mp-list" style="margin-top:24px"></div>

@@ -62,23 +62,21 @@ const Sitemap = (() => {
     return depth;
   }
 
-  /* ─ 페이지 탭 (화면 / 기능) ─ */
-  function renderPageTabs() {
+  /* ─ 통합 탭 (기능 / 보드 / 구조도) ─ */
+  function renderToolbar() {
+    const isFeatures = pageTab === 'features';
+    const isBoard    = !isFeatures && viewMode === 'board';
+    const isDiagram  = !isFeatures && viewMode === 'diagram';
     return `
-      <div class="review-tabs" style="margin-bottom:20px">
-        <button class="review-tab ${pageTab === 'screens'  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens')">화면</button>
-        <button class="review-tab ${pageTab === 'features' ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">기능</button>
+      <div class="sitemap-toolbar">
+        <button class="sitemap-page-tab ${isFeatures ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">&#10022; 기능</button>
+        <button class="sitemap-page-tab ${isBoard    ? 'active' : ''}" onclick="Sitemap.setPageTab('screens');Sitemap.setView('board')">&#9776; 보드</button>
+        <button class="sitemap-page-tab ${isDiagram  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens');Sitemap.setView('diagram')">&#9671; 구조도</button>
       </div>`;
   }
 
-  /* ─ 뷰 탭 ─ */
-  function renderViewTabs() {
-    return `
-      <div class="sitemap-view-tabs">
-        <button class="sitemap-view-tab ${viewMode === 'board'   ? 'active' : ''}" onclick="Sitemap.setView('board')">&#9776; 보드</button>
-        <button class="sitemap-view-tab ${viewMode === 'diagram' ? 'active' : ''}" onclick="Sitemap.setView('diagram')">&#9671; 구조도</button>
-      </div>`;
-  }
+  function renderPageTabs() { return renderToolbar(); }
+  function renderViewTabs()  { return ''; }
 
   /* ════════════════════════════════
      보드 뷰
@@ -103,7 +101,7 @@ const Sitemap = (() => {
 
     return `
       <div class="screen-links">
-        <div class="screen-links-row">
+        ${linked.length ? `<div class="screen-links-row">
           ${linked.map(f => `
             <span class="screen-link-chip cat-${f.category || ''}"
               onclick="event.stopPropagation();Sitemap.setPageTab('features')" title="기능 탭으로 이동" style="cursor:pointer">
@@ -113,6 +111,8 @@ const Sitemap = (() => {
                 title="연결 해제">&#10005;</button>
             </span>
           `).join('')}
+        </div>` : ''}
+        <div class="screen-links-btn-row">
           <button class="screen-link-add ${isPickerOpen ? 'is-open' : ''}"
             onclick="event.stopPropagation();Sitemap.toggleLinkPicker('${screen.id}')">
             ${isPickerOpen ? '닫기' : '+ 관련 기능'}
@@ -202,7 +202,7 @@ const Sitemap = (() => {
 
     const rowsHTML = rows.map(({ screens, parentId, depth }) => {
       const parentScreen = parentId ? sectionScreens.find(s => s.id === parentId) : null;
-      const indent = (depth - 2) * 20;
+      const indent = (depth - 2) * 36;
       return `
         <div class="sitemap-tree-row depth-${depth}">
           ${depth > 2 ? `
@@ -237,7 +237,6 @@ const Sitemap = (() => {
                 <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <span class="section-icon">&#9703;</span>
             <span class="section-name" data-id="${section.id}"
               contenteditable="true"
               title="${escapeHtml(section.name)}"
@@ -345,9 +344,8 @@ const Sitemap = (() => {
   function renderLegend() {
     if (viewMode === 'diagram') return '';
     return `
-      <div class="sitemap-legend">
+      <div class="diag-status-legend">
         ${STATUSES.map(s => `<span class="legend-item"><span class="legend-dot ${STATUS_CLS[s]}"></span>${s}</span>`).join('')}
-        <span class="legend-hint">이름 더블클릭 &#8594; 편집 &nbsp;&#183;&nbsp; 뱃지 클릭 &#8594; 상태 변경</span>
       </div>`;
   }
 

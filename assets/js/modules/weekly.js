@@ -4,7 +4,6 @@
 
 const Weekly = (() => {
   let currentWeekStart = getWeekStart(new Date());
-  let reviewTab = 'weekly';
 
   /* ─ 날짜 유틸 ─ */
   function getWeekStart(date) {
@@ -96,26 +95,7 @@ const Weekly = (() => {
       </div>`;
   }
 
-  /* ─ 탭 바 ─ */
-  function renderTabBar() {
-    return `
-      <div class="review-tabs">
-        <button class="review-tab ${reviewTab === 'weekly' ? 'active' : ''}"
-          onclick="Weekly.setReviewTab('weekly')">주간</button>
-        <button class="review-tab ${reviewTab === 'monthly' ? 'active' : ''}"
-          onclick="Weekly.setReviewTab('monthly')">월간</button>
-      </div>`;
-  }
-
-  function setReviewTab(tab) {
-    reviewTab = tab;
-    if (tab === 'monthly') {
-      document.getElementById('app').innerHTML = renderTabBar() + Monthly.renderHTML();
-      Monthly.bindMemo();
-    } else {
-      render();
-    }
-  }
+  function setReviewTab() { render(); }
 
   /* ─ 렌더 ─ */
   function render() {
@@ -166,7 +146,7 @@ const Weekly = (() => {
 
     const memo = getMemo(currentWeekStart);
 
-    document.getElementById('app').innerHTML = renderTabBar() + `
+    document.getElementById('app').innerHTML = `
       <!-- 주 네비게이션 -->
       <div class="wk-nav">
         <button class="wk-nav-btn" onclick="Weekly.prevWeek()">← 이전 주</button>
@@ -289,55 +269,10 @@ const Weekly = (() => {
             </button>
           </div>
 
-          <div class="wk-section">
-            <div class="wk-section-header">
-              <span class="wk-section-dot memo"></span>
-              회고
-            </div>
-            <div class="wk-reflect-group">
-              <label class="wk-reflect-label">✅ 이번 주 잘한 점</label>
-              <textarea class="wk-reflect-input" id="wk-reflect-good"
-                placeholder="작게라도 해낸 것을 적어보세요">${escapeHtml(memo.reflectGood || '')}</textarea>
-            </div>
-            <div class="wk-reflect-group">
-              <label class="wk-reflect-label">⚠️ 아쉬운 점</label>
-              <textarea class="wk-reflect-input" id="wk-reflect-bad"
-                placeholder="잘 안 풀렸던 일, 막힌 부분">${escapeHtml(memo.reflectBad || '')}</textarea>
-            </div>
-            <div class="wk-reflect-group">
-              <label class="wk-reflect-label">🎯 다음 주 집중할 것</label>
-              <textarea class="wk-reflect-input" id="wk-reflect-next"
-                placeholder="딱 1~2개만 골라보세요">${escapeHtml(memo.reflectNext || '')}</textarea>
-            </div>
-            ${memo.memo ? `
-              <details class="wk-reflect-legacy">
-                <summary>이전 메모 보기</summary>
-                <div class="wk-reflect-legacy-body">${escapeHtml(memo.memo).replace(/\n/g, '<br>')}</div>
-              </details>` : ''}
-          </div>
         </div>
       </div>
     `;
 
-    bindMemo();
-  }
-
-  /* ─ 메모 자동 저장 ─ */
-  function bindMemo() {
-    const FIELDS = [
-      ['wk-reflect-good', 'reflectGood'],
-      ['wk-reflect-bad',  'reflectBad'],
-      ['wk-reflect-next', 'reflectNext'],
-    ];
-    let timer;
-    FIELDS.forEach(([id, key]) => {
-      const ta = document.getElementById(id);
-      if (!ta) return;
-      ta.addEventListener('input', () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => saveMemo(currentWeekStart, { [key]: ta.value }), 600);
-      });
-    });
   }
 
   /* ─ AI 주간 요약 생성 ─ */

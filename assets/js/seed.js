@@ -7,16 +7,18 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v11 */
+  /* v4 → v14 */
   if (version === 'v4') {
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v5 / v6 / v7 → v11 */
+  /* v5 / v6 / v7 → v14 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
@@ -24,34 +26,64 @@
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v8 → v11: projectTasks + goals 추가 */
+  /* v8 → v14 */
   if (version === 'v8') {
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v9 → v11: goals만 추가 */
+  /* v9 → v14 */
   if (version === 'v9') {
     injectGoals();
     backfillGoalDates();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v10 → v11: 목표 targetDate 백필 */
+  /* v10 → v14 */
   if (version === 'v10') {
     backfillGoalDates();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  if (version === 'v11') return;
+  /* v11 → v14 */
+  if (version === 'v11') {
+    injectRoutines();
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
+    return;
+  }
+
+  /* v12 → v14 */
+  if (version === 'v12') {
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
+    return;
+  }
+
+  /* v13 → v14: 60일 히스토리로 확장 */
+  if (version === 'v13') {
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
+    return;
+  }
+
+  if (version === 'v14') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -125,7 +157,9 @@
   injectSitemapData();
   injectProjectTasks();
   injectGoals();
-  localStorage.setItem('chloeassist:seeded', 'v11');
+  injectRoutines();
+  injectRoutineLogs();
+  localStorage.setItem('chloeassist:seeded', 'v14');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -494,6 +528,69 @@
         if (linkByTitle[m.title] && !m.goalId) { m.goalId = linkByTitle[m.title]; changed = true; }
       });
       if (changed) localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
+    } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════
+     하루 루틴 샘플 데이터 — v12 (6개 기본 루틴)
+  ══════════════════════════════════════════════ */
+  function injectRoutines() {
+    if (localStorage.getItem('chloeassist:routines')) return;
+    const t = Date.now();
+    const routines = [
+      { id: crypto.randomUUID(), name: '물 2잔 이상 마시기',   createdAt: t - 7000 },
+      { id: crypto.randomUUID(), name: '오늘 핵심 할 일 확인', createdAt: t - 6000 },
+      { id: crypto.randomUUID(), name: '10분 스트레칭',        createdAt: t - 5000 },
+      { id: crypto.randomUUID(), name: '감사한 일 한 줄 적기', createdAt: t - 4000 },
+      { id: crypto.randomUUID(), name: '소셜미디어 30분 제한', createdAt: t - 3000 },
+      { id: crypto.randomUUID(), name: '취침 전 내일 준비',    createdAt: t - 2000 },
+    ];
+    localStorage.setItem('chloeassist:routines', JSON.stringify(routines));
+  }
+
+  /* ══════════════════════════════════════════════
+     하루 루틴 히스토리 샘플 데이터 — v14 (60일)
+  ══════════════════════════════════════════════ */
+  function injectRoutineLogs() {
+    try {
+      const routines = JSON.parse(localStorage.getItem('chloeassist:routines') || '[]');
+      if (routines.length === 0) return;
+      const ids = routines.map(r => r.id);
+
+      /* 60일 달성 패턴: 습관 형성 곡선 (주말 약간 낮음, 중반 peak, 소폭 기복) */
+      const patterns = [
+        /* 9주 전 ~ 8주 전: 초반 시작 */
+        0.33, 0.5,  0.5,  0.33, 0.5,  0.5,  0.17,
+        0.5,  0.67, 0.5,  0.67, 0.5,  0.5,  0.33,
+        /* 7주 전 ~ 6주 전: 성장 */
+        0.5,  0.67, 0.83, 0.67, 0.83, 0.67, 0.5,
+        0.67, 0.83, 0.67, 1.0,  0.83, 0.67, 0.5,
+        /* 5주 전 ~ 4주 전: 피크 */
+        0.67, 1.0,  0.83, 1.0,  1.0,  0.83, 0.67,
+        0.83, 0.83, 1.0,  0.83, 1.0,  0.83, 0.67,
+        /* 3주 전 ~ 2주 전: 약간 피로 후 회복 */
+        0.67, 0.5,  0.83, 0.67, 0.83, 0.5,  0.5,
+        0.5,  0.83, 0.83, 0.83, 0.83, 0.67, 0.5,
+        /* 1주 전 ~ 어제: 다시 상승 */
+        0.67, 0.83, 1.0,  0.83, 1.0,  0.83, 0.83,
+        /* 어제까지 포함해 총 60일 (마지막 4일) */
+        0.67, 1.0,  0.83, 1.0,
+      ]; /* 7*8 + 4 = 60 */
+
+      patterns.forEach((ratio, i) => {
+        const offset = i - 60; /* -60 ~ -1 */
+        const d = new Date();
+        d.setDate(d.getDate() + offset);
+        const dateKey = 'chloeassist:routine-log:' + d.toISOString().slice(0, 10);
+        if (localStorage.getItem(dateKey)) return; /* 이미 있으면 skip */
+        const count = Math.round(ids.length * ratio);
+        const log = {};
+        /* 날짜마다 다른 루틴이 완료되도록 순환 선택 */
+        for (let j = 0; j < count; j++) {
+          log[ids[(i + j) % ids.length]] = true;
+        }
+        localStorage.setItem(dateKey, JSON.stringify(log));
+      });
     } catch (e) {}
   }
 

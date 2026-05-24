@@ -90,7 +90,15 @@ const Dashboard = (() => {
     const msRow = ms
       ? (() => {
           const dd = ddayInfo(ms.date);
-          return `<div class="today-banner-ms">◈ 다음 마일스톤: ${escapeHtml(ms.title)} &nbsp; ${dd.label}</div>`;
+          return `
+            <a class="today-banner-ms" href="roadmap.html" title="마일스톤 페이지로 이동">
+              <span class="today-ms-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4.5h11l-1.6 3.2L16 11H5"/></svg>
+              </span>
+              <span class="today-ms-label">다음 마일스톤</span>
+              <span class="today-ms-title">${escapeHtml(ms.title)}</span>
+              <span class="today-ms-dday ${dd.cls}">${dd.label}</span>
+            </a>`;
         })()
       : '';
 
@@ -112,9 +120,9 @@ const Dashboard = (() => {
       </div>`;
   }
 
-  function addTask(title, category) {
+  function addTask(title, category, dueDate) {
     if (!title.trim()) return;
-    Store.push('tasks', { title: title.trim(), category, done: false, isToday: true });
+    Store.push('tasks', { title: title.trim(), category, done: false, isToday: true, dueDate: dueDate || null });
     render();
   }
 
@@ -358,16 +366,21 @@ const Dashboard = (() => {
       ${renderBanner(done, total, pct)}
 
       <div class="quick-add-wrap">
-        <input id="quick-input" class="quick-add-input" type="text"
-          placeholder="오늘 할 일을 입력하세요" autofocus>
-        <div class="quick-add-footer">
-          <div class="cat-pills" id="quick-cat-pills">
-            ${CATS.map(c => `
-              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
-                data-cat="${c}" onclick="Dashboard.selectCat('${c}')">${c}</button>
-            `).join('')}
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="quick-input" class="quick-add-input" type="text"
+              placeholder="오늘 할 일을 입력하세요" autofocus>
+            <span class="ai-badge">✦ AI</span>
           </div>
-          <span class="quick-add-hint">Enter로 추가</span>
+          <div class="quick-add-footer">
+            <div class="cat-pills" id="quick-cat-pills">
+              ${CATS.map(c => `
+                <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
+                  data-cat="${c}" onclick="Dashboard.selectCat('${c}')">${c}</button>
+              `).join('')}
+            </div>
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
         </div>
       </div>
 
@@ -393,10 +406,30 @@ const Dashboard = (() => {
     `;
 
     const input = document.getElementById('quick-input');
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.isComposing) {
-        addTask(input.value, selectedCat);
+    input?.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!AI.getApiKey()) {
+        addTask(text, selectedCat);
         input.value = '';
+        input.focus();
+        return;
+      }
+
+      input.disabled = true;
+      input.placeholder = '✦ AI가 분석 중...';
+      try {
+        const result = await NLInput.parse('task', text);
+        addTask(result.title || text, result.category || selectedCat, result.date || null);
+        input.value = '';
+      } catch {
+        addTask(text, selectedCat);
+        input.value = '';
+      } finally {
+        input.disabled = false;
+        input.placeholder = '오늘 할 일을 입력하세요';
         input.focus();
       }
     });
