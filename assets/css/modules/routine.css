@@ -1,112 +1,183 @@
 /* ===== 하루 루틴 ===== */
 
-/* ─ 2컬럼 전체화면 레이아웃 ─ */
-.routine-layout {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 28px;
-  height: calc(100vh - var(--header-height) - 48px);
-  min-height: 500px;
-}
-
-/* ─ 왼쪽: 오늘 루틴 패널 ─ */
-.routine-left {
+/* ─ 날짜 네비게이션 바 ─ */
+.routine-date-nav {
   display: flex;
-  flex-direction: column;
-  gap: 0;
-  overflow-y: auto;
-}
-
-.routine-today-header {
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
   margin-bottom: 20px;
 }
 
+.rdn-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  font-size: 1.3rem;
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+.rdn-arrow:hover { background: var(--color-surface-2); color: var(--color-text); }
+
+.rdn-week {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.rdn-day-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px 5px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+  cursor: pointer;
+  border: none;
+}
+.rdn-day-pill:hover:not(.future) { background: var(--color-surface-2); }
+.rdn-day-pill.selected {
+  background: var(--color-primary);
+}
+.rdn-day-pill.selected .rdn-dayname,
+.rdn-day-pill.selected .rdn-daynum { color: #fff; }
+.rdn-day-pill.future { opacity: 0.35; cursor: default; }
+
+.rdn-dayname {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--color-text-3);
+}
+.rdn-daynum {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+/* 완료 점 표시 */
+.rdn-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+.rdn-dot.full    { background: var(--color-primary); }
+.rdn-dot.partial { background: #a78bfa; }
+.rdn-dot.empty   { background: var(--color-border); }
+.rdn-dot.none    { background: transparent; }
+
+.rdn-day-pill.is-today .rdn-daynum { color: var(--color-primary); }
+.rdn-day-pill.selected .rdn-daynum { color: #fff; }
+.rdn-day-pill.selected .rdn-dot.full,
+.rdn-day-pill.selected .rdn-dot.partial { background: rgba(255,255,255,0.8); }
+.rdn-day-pill.selected .rdn-dot.empty   { background: rgba(255,255,255,0.3); }
+
+.rdn-today-btn {
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  border: 1.5px solid #c4b5fd;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-light);
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.rdn-today-btn:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+/* ─ 2컬럼 레이아웃 ─ */
+.routine-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  height: calc(100vh - var(--header-height) - 130px);
+  min-height: 420px;
+}
+
+/* ─ 왼쪽 패널 ─ */
+.routine-left {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.routine-today-header { margin-bottom: 16px; }
+
 .routine-date {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--color-text-3);
   margin-bottom: 4px;
 }
 
 .routine-pct-big {
-  font-size: 3.2rem;
+  font-size: 3rem;
   font-weight: 800;
   color: var(--color-primary);
   line-height: 1;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   letter-spacing: -0.02em;
 }
-
-.routine-pct-unit {
-  font-size: 1.6rem;
-  font-weight: 700;
-}
+.routine-pct-unit { font-size: 1.5rem; font-weight: 700; }
 
 .routine-progress-bar {
-  height: 6px;
+  height: 5px;
   background: var(--color-surface-2);
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
-
 .routine-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), #a78bfa);
   border-radius: var(--radius-full);
   transition: width 0.4s ease;
 }
-
-.routine-done-label {
-  font-size: 0.78rem;
-  color: var(--color-text-3);
-}
+.routine-done-label { font-size: 0.75rem; color: var(--color-text-3); }
 
 /* ─ 루틴 목록 ─ */
 .routine-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   flex: 1;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .routine-empty {
   padding: 40px 0;
   text-align: center;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--color-text-3);
 }
 
 .routine-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 13px 14px;
+  gap: 11px;
+  padding: 11px 13px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   transition: background var(--transition), box-shadow var(--transition);
-  cursor: default;
 }
+.routine-item:hover { box-shadow: var(--shadow-sm); }
+.routine-item.done { opacity: 0.45; }
+.routine-item.done .routine-name { text-decoration: line-through; color: var(--color-text-3); }
 
-.routine-item:hover {
-  box-shadow: var(--shadow-sm);
-}
-
-.routine-item.done {
-  opacity: 0.45;
-}
-
-.routine-item.done .routine-name {
-  text-decoration: line-through;
-  color: var(--color-text-3);
-}
-
-/* ─ 체크 버튼 ─ */
 .routine-check {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 1.5px solid var(--color-border);
   background: transparent;
@@ -115,62 +186,57 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: transparent;
   transition: all var(--transition);
 }
-
-.routine-check:hover {
+.routine-check:hover:not(.disabled) {
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: var(--color-primary-light);
 }
-
 .routine-check.checked {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #fff;
 }
+.routine-check.disabled { cursor: not-allowed; opacity: 0.4; }
 
-/* ─ 루틴 이름 ─ */
-.routine-name {
-  flex: 1;
-  font-size: 0.92rem;
-  color: var(--color-text);
-  word-break: break-word;
+.routine-name { flex: 1; font-size: 0.9rem; color: var(--color-text); word-break: break-word; }
+
+/* ─ 스트릭 배지 ─ */
+.routine-streak {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
+.routine-streak.fire { color: #f97316; }
 
-/* ─ 삭제 버튼 ─ */
 .routine-delete {
   opacity: 0;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--color-text-3);
   flex-shrink: 0;
   transition: opacity var(--transition), background var(--transition), color var(--transition);
 }
-
 .routine-item:hover .routine-delete { opacity: 1; }
-
-.routine-delete:hover {
-  background: #fee2e2;
-  color: var(--color-danger);
-}
+.routine-delete:hover { background: #fee2e2; color: var(--color-danger); }
 
 /* ─ 추가 입력 ─ */
-.routine-add-form {
-  margin-top: auto;
-}
+.routine-add-form { margin-top: auto; }
 
 .routine-input {
   width: 100%;
-  padding: 11px 14px;
-  font-size: 0.9rem;
+  padding: 10px 13px;
+  font-size: 0.88rem;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -178,71 +244,139 @@
   outline: none;
   transition: border-color var(--transition);
 }
-
-.routine-input:focus {
-  border-color: var(--color-primary);
-}
-
+.routine-input:focus { border-color: var(--color-primary); }
 .routine-input::placeholder { color: var(--color-text-3); }
 
-/* ─ 오른쪽: 히스토리 차트 패널 ─ */
+/* ─ 오른쪽 패널 ─ */
 .routine-right {
   display: flex;
   flex-direction: column;
-}
-
-.rchart-panel {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 28px 28px 24px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
-.rchart-header {
+/* ─ 탭 바 ─ */
+.routine-tab-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-  gap: 10px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 20px;
+  flex-shrink: 0;
 }
 
-.rchart-title {
+.routine-tab {
+  padding: 14px 16px 12px;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--color-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--transition), border-color var(--transition);
 }
+.routine-tab:hover { color: var(--color-text); }
+.routine-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 
-.rchart-stats {
+.routine-tab-content {
+  flex: 1;
+  overflow: hidden;
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  padding: 20px;
 }
 
-.rchart-stat {
+/* ─ 주간 매트릭스 ─ */
+.rmatrix-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.rmatrix-table {
+  display: grid;
+  gap: 3px;
+  align-items: center;
+}
+
+.rmatrix-head-blank { }
+
+.rmatrix-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: var(--radius-sm);
+}
+.rmatrix-head.today { background: var(--color-primary-light); border-radius: var(--radius-sm); }
+.rmatrix-head.future { opacity: 0.4; }
+
+.rmatrix-head-day {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+}
+.rmatrix-head.today .rmatrix-head-day { color: var(--color-primary); }
+
+.rmatrix-head-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+.rmatrix-head.today .rmatrix-head-num { color: var(--color-primary); }
+
+.rmatrix-name {
   font-size: 0.82rem;
+  color: var(--color-text);
+  padding: 9px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid var(--color-border);
+}
+
+.rmatrix-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-top: 1px solid var(--color-border);
+}
+.rmatrix-cell.done { color: var(--color-primary); background: var(--color-primary-light); }
+.rmatrix-cell.miss { color: #fca5a5; background: #fef2f2; }
+.rmatrix-cell.future { color: var(--color-text-3); background: transparent; opacity: 0.35; font-size: 0.65rem; }
+
+.rchart-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
   color: var(--color-text-3);
 }
 
-.rchart-stat em {
-  font-style: normal;
-  font-weight: 700;
-  color: var(--color-text);
+/* ─ 30일 바 차트 ─ */
+.rchart-header {
+  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
-.rchart-stat.streak em {
-  color: var(--color-primary);
-}
+.rchart-stats { display: flex; gap: 16px; }
 
-/* ─ 막대 차트 그리드 ─ */
+.rchart-stat {
+  font-size: 0.8rem;
+  color: var(--color-text-3);
+}
+.rchart-stat em { font-style: normal; font-weight: 700; color: var(--color-text); }
+.rchart-stat.streak em { color: var(--color-primary); }
+
 .rchart-grid {
   display: grid;
-  grid-template-columns: repeat(14, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(30, 1fr);
+  gap: 3px;
   align-items: end;
   flex: 1;
 }
@@ -251,82 +385,65 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   height: 100%;
 }
 
 .rchart-pct {
-  font-size: 0.62rem;
+  font-size: 0;
+  min-height: 14px;
+}
+
+.rchart-col:hover .rchart-pct {
+  font-size: 0.55rem;
   font-weight: 700;
   color: var(--color-primary);
-  min-height: 16px;
-  text-align: center;
   line-height: 1.2;
-  opacity: 0.9;
 }
 
 .rchart-bar-wrap {
   width: 100%;
   flex: 1;
   background: var(--color-surface-2);
-  border-radius: 6px;
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
   align-items: flex-end;
-  min-height: 60px;
+  min-height: 40px;
 }
 
 .rchart-bar-fill {
   width: 100%;
-  background: linear-gradient(180deg, #a78bfa 0%, var(--color-primary) 100%);
-  border-radius: 6px;
-  transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  min-height: 0;
+  background: linear-gradient(180deg, #a78bfa, var(--color-primary));
+  border-radius: 4px;
+  transition: height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .rchart-col.today .rchart-bar-wrap {
   background: var(--color-primary-light);
-  border: 1.5px solid #c4b5fd;
-  box-sizing: border-box;
+  outline: 1.5px solid #c4b5fd;
 }
-
 .rchart-col.today .rchart-bar-fill {
-  background: linear-gradient(180deg, #7c3aed 0%, var(--color-primary) 100%);
-}
-
-.rchart-col.today .rchart-day-label {
-  color: var(--color-primary);
-  font-weight: 700;
-}
-
-.rchart-col.today .rchart-pct {
-  color: #7c3aed;
+  background: linear-gradient(180deg, #7c3aed, var(--color-primary));
 }
 
 .rchart-day-label {
-  font-size: 0.72rem;
-  font-weight: 500;
+  font-size: 0.58rem;
   color: var(--color-text-3);
+  font-weight: 500;
 }
-
 .rchart-date-label {
-  font-size: 0.6rem;
+  font-size: 0.52rem;
   color: var(--color-text-3);
   opacity: 0.6;
 }
+.rchart-col.today .rchart-day-label { color: var(--color-primary); font-weight: 700; }
 
-/* ─ 반응형: 좁은 화면 ─ */
-@media (max-width: 820px) {
+/* ─ 반응형 ─ */
+@media (max-width: 860px) {
   .routine-layout {
     grid-template-columns: 1fr;
     height: auto;
   }
-
-  .routine-right {
-    min-height: 320px;
-  }
-
-  .rchart-panel {
-    height: 320px;
-  }
+  .routine-right { min-height: 400px; }
 }
