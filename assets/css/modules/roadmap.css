@@ -630,20 +630,25 @@
   margin-top: 1px;
 }
 
-/* pipeline 전용 소형 D-day 배지 */
+/* pipeline D-day 배지 — active 목표는 더 크게 강조 */
 .pl-dday {
-  font-size: 0.64rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 2px 8px;
   border-radius: 999px;
   white-space: nowrap;
   line-height: 1.6;
 }
-.pl-dday.dday-done    { background: #e2e8f0;           color: #64748b; }
-.pl-dday.dday-today   { background: var(--color-primary-light, rgba(108,99,255,0.1)); color: var(--color-primary); }
-.pl-dday.dday-soon    { background: #fef3c7;           color: #b45309; }
+.pipeline-label.active .pl-dday {
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.pl-dday.dday-done    { background: #e2e8f0; color: #64748b; }
+.pl-dday.dday-today   { background: #ede9fe; color: #6d28d9; font-weight: 800; }
+.pl-dday.dday-soon    { background: #fef3c7; color: #b45309; }
 .pl-dday.dday-future  { background: var(--color-surface-2); color: var(--color-text-3); }
-.pl-dday.dday-overdue { background: #fee2e2;           color: var(--color-danger); }
+.pl-dday.dday-overdue { background: #fee2e2; color: var(--color-danger); font-weight: 800; }
 
 /* ═══════════════════════════════════════
    단계별 목표 (Phased Goals)
@@ -663,144 +668,153 @@
   color: var(--color-text-3);
 }
 
+/* ── 목표 카드 ── */
 .goal-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  background: var(--color-bg);
+  padding: 0;
+  margin-bottom: 8px;
+  background: var(--color-surface);
   transition: border-color var(--transition), box-shadow var(--transition);
+  overflow: hidden;
 }
-.goal-card.urgent {
-  border-color: #fca5a5;
-  background: #fff9f9;
-}
+.goal-card:hover { box-shadow: var(--shadow-sm); }
+.goal-card.urgent { border-color: #fca5a5; }
+.goal-card.expanded { border-color: var(--color-primary); border-opacity: 0.4; }
 
 .goal-card-head {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 13px 14px 13px 10px;
+  cursor: pointer;
 }
+
+/* ── 펼치기/접기 chevron — 맨 앞, sitemap과 동일 패턴 ── */
+.goal-expand-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+.goal-expand-btn svg {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotate(0deg);
+}
+.goal-expand-btn.expanded svg { transform: rotate(90deg); }
+.goal-expand-btn:hover { color: var(--color-text); background: var(--color-surface-2); }
 
 .goal-phase-badge {
   flex-shrink: 0;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #fff;
-  background: var(--color-primary);
-  padding: 4px 12px;
+  color: var(--color-primary);
+  background: rgba(108,99,255,0.1);
+  padding: 3px 10px;
   border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 .goal-title-edit {
   flex: 1;
   min-width: 0;
-  font-size: 1.02rem;
+  font-size: 0.97rem;
   font-weight: 600;
   color: var(--color-text);
   border: 1px solid transparent;
   background: transparent;
   border-radius: var(--radius-sm);
-  padding: 5px 8px;
+  padding: 4px 6px;
   outline: none;
   transition: border-color var(--transition), background var(--transition);
 }
-.goal-title-edit:hover { background: var(--color-surface-2); }
+.goal-title-edit:hover { background: var(--color-bg); }
 .goal-title-edit:focus {
   border-color: var(--color-primary);
   background: var(--color-surface);
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
 }
 
-.goal-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.goal-act-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-2);
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-.goal-act-btn:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-.goal-act-btn:disabled { opacity: 0.35; cursor: default; }
-.goal-act-btn.del:hover:not(:disabled) {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-  background: #fee2e2;
-}
-
-/* compact progress — always visible thin bar under head */
-.goal-bar {
-  margin: 8px 0 0;
-  height: 4px;
-}
-.goal-bar .summary-bar-fill { height: 4px; }
-
-/* compact % label in head */
-.goal-progress-compact {
-  flex-shrink: 0;
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--color-text-3);
-}
-
-/* D-day badge on goal */
+/* D-day badge on goal card */
 .goal-dday {
   flex-shrink: 0;
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: var(--radius-full);
   white-space: nowrap;
 }
 
-/* expand toggle caret */
-.goal-expand-btn {
+.goal-progress-compact {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+}
+
+/* 삭제 버튼 — hover 시만 노출 */
+.goal-del-btn {
+  flex-shrink: 0;
+  opacity: 0;
+  width: 26px;
+  height: 26px;
   border: none;
   background: transparent;
   color: var(--color-text-3);
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition);
-  margin-left: 2px;
 }
-.goal-expand-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
+.goal-card:hover .goal-del-btn { opacity: 1; }
+.goal-del-btn:hover { background: #fee2e2; color: var(--color-danger); }
 
-/* expanded detail panel */
+/* 진행 바 + % */
+.goal-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 12px 50px;
+}
+.goal-bar {
+  flex: 1;
+  margin: 0;
+  height: 5px;
+}
+.goal-bar .summary-bar-fill { height: 5px; }
+.goal-bar-pct {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* 펼쳐진 상세 */
 .goal-detail {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--color-border);
+  padding: 14px 16px 16px 50px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
 }
 
-/* date row inside expanded */
+/* 날짜 행 */
 .goal-date-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 .goal-date-label {
   font-size: 0.8rem;

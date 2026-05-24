@@ -233,12 +233,16 @@ const Roadmap = (() => {
         </div>
         ${goals.length === 0
           ? '<div class="goal-empty">아직 목표가 없어요. 1차 목표부터 추가해보세요.</div>'
-          : goals.map((g, i) => renderGoalCard(g, i, goals.length)).join('')}
+          : goals.map((g, i) => renderGoalCard(g, i)).join('')}
         ${renderAddGoalInput()}
       </div>`;
   }
 
-  function renderGoalCard(goal, index, total) {
+  function chevronSvg() {
+    return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  function renderGoalCard(goal, index) {
     const { done, total: t, pct } = goalProgress(goal);
     const expanded = expandedGoals.has(goal.id);
     const dd = goal.targetDate ? dday(goal.targetDate, pct === 100) : null;
@@ -246,20 +250,21 @@ const Roadmap = (() => {
     return `
       <div class="goal-card${expanded ? ' expanded' : ''}${urgent ? ' urgent' : ''}">
         <div class="goal-card-head">
+          <button class="goal-expand-btn${expanded ? ' expanded' : ''}"
+            onclick="Roadmap.toggleExpand('${goal.id}')"
+            title="${expanded ? '접기' : '펼치기'}">${chevronSvg()}</button>
           <span class="goal-phase-badge">${index + 1}차 목표</span>
           <input class="goal-title-edit" value="${escapeHtml(goal.title)}"
             onblur="Roadmap.editGoalTitle('${goal.id}', this.value)"
             onkeydown="if(event.key==='Enter')this.blur()">
           ${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}
-          <span class="goal-progress-compact">${pct}%</span>
-          <div class="goal-card-actions">
-            <button class="goal-act-btn" onclick="Roadmap.moveGoalUp('${goal.id}')" ${index === 0 ? 'disabled' : ''} title="위로">↑</button>
-            <button class="goal-act-btn" onclick="Roadmap.moveGoalDown('${goal.id}')" ${index === total - 1 ? 'disabled' : ''} title="아래로">↓</button>
-            <button class="goal-act-btn del" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
-          </div>
-          <button class="goal-expand-btn" onclick="Roadmap.toggleExpand('${goal.id}')" title="${expanded ? '접기' : '펼치기'}">${expanded ? '▾' : '▸'}</button>
+          <span class="goal-progress-compact">${done}/${t}</span>
+          <button class="goal-del-btn" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
         </div>
-        <div class="summary-bar goal-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
+        <div class="goal-bar-wrap">
+          <div class="summary-bar goal-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
+          <span class="goal-bar-pct">${pct}%</span>
+        </div>
         ${expanded ? `
           <div class="goal-detail">
             <div class="goal-date-row">
