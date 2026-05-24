@@ -206,16 +206,16 @@
 
 .feature-progress-fill {
   height: 100%;
-  background: var(--st-idea-line);
+  background: #94a3b8;
   border-radius: var(--radius-full);
   transition: width var(--transition);
 }
 
-.feature-card[data-status="아이디어"] .feature-progress-fill { background: var(--st-idea-line); }
-.feature-card[data-status="기획중"]   .feature-progress-fill { background: var(--st-plan-line); }
-.feature-card[data-status="디자인중"] .feature-progress-fill { background: var(--st-design-line); }
-.feature-card[data-status="개발중"]   .feature-progress-fill { background: var(--st-dev-line); }
-.feature-card[data-status="완료"]     .feature-progress-fill { background: var(--st-done-line); }
+.feature-card[data-status="아이디어"] .feature-progress-fill { background: #94a3b8; }
+.feature-card[data-status="기획중"]   .feature-progress-fill { background: #a78bfa; }
+.feature-card[data-status="디자인중"] .feature-progress-fill { background: #f472b6; }
+.feature-card[data-status="개발중"]   .feature-progress-fill { background: #60a5fa; }
+.feature-card[data-status="완료"]     .feature-progress-fill { background: #34d399; }
 
 .feature-progress-text {
   font-size: 0.82rem;
