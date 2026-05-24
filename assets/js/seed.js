@@ -7,17 +7,18 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v12 */
+  /* v4 → v13 */
   if (version === 'v4') {
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
     injectRoutines();
-    localStorage.setItem('chloeassist:seeded', 'v12');
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
     return;
   }
 
-  /* v5 / v6 / v7 → v12 */
+  /* v5 / v6 / v7 → v13 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
@@ -26,44 +27,56 @@
     injectProjectTasks();
     injectGoals();
     injectRoutines();
-    localStorage.setItem('chloeassist:seeded', 'v12');
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
     return;
   }
 
-  /* v8 → v12: projectTasks + goals + routines 추가 */
+  /* v8 → v13 */
   if (version === 'v8') {
     injectProjectTasks();
     injectGoals();
     injectRoutines();
-    localStorage.setItem('chloeassist:seeded', 'v12');
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
     return;
   }
 
-  /* v9 → v12: goals + routines 추가 */
+  /* v9 → v13 */
   if (version === 'v9') {
     injectGoals();
     backfillGoalDates();
     injectRoutines();
-    localStorage.setItem('chloeassist:seeded', 'v12');
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
     return;
   }
 
-  /* v10 → v12: 목표 targetDate 백필 + routines */
+  /* v10 → v13 */
   if (version === 'v10') {
     backfillGoalDates();
     injectRoutines();
-    localStorage.setItem('chloeassist:seeded', 'v12');
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
     return;
   }
 
-  /* v11 → v12: routines 추가 */
+  /* v11 → v13 */
   if (version === 'v11') {
     injectRoutines();
-    localStorage.setItem('chloeassist:seeded', 'v12');
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
     return;
   }
 
-  if (version === 'v12') return;
+  /* v12 → v13: 루틴 히스토리 샘플 추가 */
+  if (version === 'v12') {
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v13');
+    return;
+  }
+
+  if (version === 'v13') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -138,7 +151,8 @@
   injectProjectTasks();
   injectGoals();
   injectRoutines();
-  localStorage.setItem('chloeassist:seeded', 'v12');
+  injectRoutineLogs();
+  localStorage.setItem('chloeassist:seeded', 'v13');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -515,13 +529,43 @@
   ══════════════════════════════════════════════ */
   function injectRoutines() {
     if (localStorage.getItem('chloeassist:routines')) return;
+    const r1 = crypto.randomUUID();
+    const r2 = crypto.randomUUID();
+    const r3 = crypto.randomUUID();
+    const r4 = crypto.randomUUID();
     const routines = [
-      { id: crypto.randomUUID(), name: '물 한 잔 마시기', createdAt: Date.now() - 6000 },
-      { id: crypto.randomUUID(), name: '오늘 할 일 확인', createdAt: Date.now() - 5000 },
-      { id: crypto.randomUUID(), name: '10분 스트레칭',   createdAt: Date.now() - 4000 },
-      { id: crypto.randomUUID(), name: '하루 일기 쓰기',  createdAt: Date.now() - 3000 },
+      { id: r1, name: '물 한 잔 마시기', createdAt: Date.now() - 6000 },
+      { id: r2, name: '오늘 할 일 확인', createdAt: Date.now() - 5000 },
+      { id: r3, name: '10분 스트레칭',   createdAt: Date.now() - 4000 },
+      { id: r4, name: '하루 일기 쓰기',  createdAt: Date.now() - 3000 },
     ];
     localStorage.setItem('chloeassist:routines', JSON.stringify(routines));
+  }
+
+  /* ══════════════════════════════════════════════
+     하루 루틴 히스토리 샘플 데이터 — v13
+  ══════════════════════════════════════════════ */
+  function injectRoutineLogs() {
+    try {
+      const routines = JSON.parse(localStorage.getItem('chloeassist:routines') || '[]');
+      if (routines.length === 0) return;
+
+      const ids = routines.map(r => r.id);
+      /* 오늘 기준 -13일 ~ -1일: 달성률 패턴 (0~1 비율) */
+      const patterns = [0.25, 0.75, 1, 0.5, 0, 0.75, 1, 0.5, 0.75, 1, 0.25, 0.75, 1];
+
+      patterns.forEach((ratio, i) => {
+        const offset = i - 13; /* -13 ~ -1 */
+        const d = new Date();
+        d.setDate(d.getDate() + offset);
+        const dateKey = 'chloeassist:routine-log:' + d.toISOString().slice(0, 10);
+        if (localStorage.getItem(dateKey)) return; /* 이미 있으면 skip */
+        const count = Math.round(ids.length * ratio);
+        const log = {};
+        ids.slice(0, count).forEach(id => { log[id] = true; });
+        localStorage.setItem(dateKey, JSON.stringify(log));
+      });
+    } catch (e) {}
   }
 
   /* ══════════════════════════════════════════════
