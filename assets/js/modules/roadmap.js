@@ -182,20 +182,44 @@ const Roadmap = (() => {
 
   function renderGoalStrip(goals) {
     if (goals.length === 0) return '';
+
+    const firstIncompleteIdx = goals.findIndex(g => goalProgress(g).pct < 100);
+
+    const segs = goals.map((g, i) => {
+      const { pct } = goalProgress(g);
+      const isDone   = pct === 100;
+      const isActive = i === firstIncompleteIdx;
+      const dd       = g.targetDate ? dday(g.targetDate, isDone) : null;
+      let state, flexVal;
+      if (isDone)        { state = 'done';     flexVal = 0.6; }
+      else if (isActive) { state = 'active';   flexVal = 3;   }
+      else if (pct > 0)  { state = 'progress'; flexVal = 1.5; }
+      else               { state = 'waiting';  flexVal = 1;   }
+      return { g, i, pct, isDone, isActive, dd, state, flexVal };
+    });
+
+    const trackSegs = segs.map(({ pct, state, flexVal }) => `
+      <div class="pipeline-seg ${state}" style="flex:${flexVal}">
+        <div class="pipeline-fill" style="width:${pct}%"></div>
+      </div>`).join('');
+
+    const labelSegs = segs.map(({ g, i, pct, isDone, isActive, dd, state, flexVal }) => `
+      <a href="goals.html" class="pipeline-label ${state}" style="flex:${flexVal}">
+        <span class="pl-badge">${i + 1}차</span>
+        <span class="pl-title">${escapeHtml(g.title)}</span>
+        ${isDone
+          ? '<span class="pl-chip done">완료</span>'
+          : isActive
+            ? `${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}<span class="pl-pct active">${pct}%</span>`
+            : pct > 0
+              ? `<span class="pl-pct">${pct}%</span>`
+              : '<span class="pl-chip waiting">대기</span>'}
+      </a>`).join('');
+
     return `
-      <div class="goal-strip">
-        ${goals.map((g, i) => {
-          const { pct } = goalProgress(g);
-          const dd = g.targetDate ? dday(g.targetDate, pct === 100) : null;
-          const urgent = dd && (dd.cls === 'dday-soon' || dd.cls === 'dday-today' || dd.cls === 'dday-overdue');
-          return `
-            <a href="goals.html" class="goal-strip-item${urgent ? ' urgent' : ''}">
-              <span class="goal-strip-badge">${i + 1}차</span>
-              <span class="goal-strip-title">${escapeHtml(g.title)}</span>
-              ${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}
-              <span class="goal-strip-pct">${pct}%</span>
-            </a>`;
-        }).join('')}
+      <div class="goal-pipeline">
+        <div class="pipeline-track">${trackSegs}</div>
+        <div class="pipeline-labels">${labelSegs}</div>
       </div>`;
   }
 
