@@ -62,19 +62,16 @@ const Sitemap = (() => {
     return depth;
   }
 
-  /* ─ 통합 툴바 (화면·기능 탭 + 보드·구조도 뷰) ─ */
+  /* ─ 통합 탭 (기능 / 보드 / 구조도) ─ */
   function renderToolbar() {
+    const isFeatures = pageTab === 'features';
+    const isBoard    = !isFeatures && viewMode === 'board';
+    const isDiagram  = !isFeatures && viewMode === 'diagram';
     return `
       <div class="sitemap-toolbar">
-        <div class="sitemap-page-tabs">
-          <button class="sitemap-page-tab ${pageTab === 'screens'  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens')">화면</button>
-          <button class="sitemap-page-tab ${pageTab === 'features' ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">기능</button>
-        </div>
-        ${pageTab === 'screens' ? `
-        <div class="sitemap-view-tabs">
-          <button class="sitemap-view-tab ${viewMode === 'board'   ? 'active' : ''}" onclick="Sitemap.setView('board')">&#9776; 보드</button>
-          <button class="sitemap-view-tab ${viewMode === 'diagram' ? 'active' : ''}" onclick="Sitemap.setView('diagram')">&#9671; 구조도</button>
-        </div>` : ''}
+        <button class="sitemap-page-tab ${isFeatures ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">기능</button>
+        <button class="sitemap-page-tab ${isBoard    ? 'active' : ''}" onclick="Sitemap.setPageTab('screens');Sitemap.setView('board')">&#9776; 보드</button>
+        <button class="sitemap-page-tab ${isDiagram  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens');Sitemap.setView('diagram')">&#9671; 구조도</button>
       </div>`;
   }
 

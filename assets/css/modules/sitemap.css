@@ -2,17 +2,9 @@
 
 /* ─ 통합 툴바 ─ */
 .sitemap-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-/* ─ 화면/기능 페이지 탭 ─ */
-.sitemap-page-tabs {
   display: inline-flex;
   gap: 4px;
+  margin-bottom: 20px;
   padding: 5px;
   background: var(--color-surface-2);
   border: 1px solid var(--color-border);
