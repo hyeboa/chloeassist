@@ -26,7 +26,6 @@ const Nav = (() => {
       label: '돌아보기',
       items: [
         { href: 'weekly.html',   label: '리뷰',        icon: '◫' },
-        { href: 'reflect.html',  label: '회고 모음',   icon: '❀' },
       ]
     },
   ];
