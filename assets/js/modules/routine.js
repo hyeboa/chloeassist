@@ -216,15 +216,11 @@ const Routine = (() => {
     const maxPct = Math.max(...days.map(d => d.pct), 1);
     const bars = days.map(d => {
       const h         = Math.round(d.pct / maxPct * 100);
-      const barClass  = d.pct === 100 ? 'bar-perfect'
-                      : d.pct >= 70   ? 'bar-good'
-                      : d.pct > 0     ? 'bar-low'
-                      : '';
       return `
         <div class="rchart-col${d.isToday ? ' today' : ''}">
           <div class="rchart-pct-label">${d.pct > 0 ? d.pct + '%' : ''}</div>
           <div class="rchart-bar-track">
-            <div class="rchart-bar-fill ${barClass}" style="height:${h}%"></div>
+            <div class="rchart-bar-fill" style="height:${h}%"></div>
           </div>
           <div class="rchart-day-label">${d.day}</div>
           <div class="rchart-date-label">${d.num}</div>
