@@ -97,8 +97,6 @@ const Projects = (() => {
     return `
       <div class="feature-card ${isOpen ? 'expanded' : ''}" data-status="${f.status}" onclick="Projects.toggleExpand('${f.id}')">
         <div class="feature-card-head">
-          ${cat ? `<span class="feat-status-chip" style="background:${sc(f.status).bg};color:${sc(f.status).text};border-color:${sc(f.status).border}">${cat}</span>`
-                : `<span class="feat-status-chip" style="background:${sc('미정').bg};color:${sc('미정').text};border-color:${sc('미정').border}">미분류</span>`}
           ${nextStatus
             ? `<button class="feature-quick-next" title="다음 단계: ${nextStatus}"
                 style="background:${nextSc.bg};color:${nextSc.text};border-color:${nextSc.border}"
@@ -154,7 +152,7 @@ const Projects = (() => {
                 onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">
                 ${nextStatus} ${chevronRightSvg()}
               </button>` : ''}
-            <button class="feature-action-btn del" title="기능 삭제" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">✕</button>
+            <button class="feature-action-btn del" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">삭제</button>
           </div>` : ''}
       </div>
     `;

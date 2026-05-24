@@ -4,7 +4,6 @@
 
 const Weekly = (() => {
   let currentWeekStart = getWeekStart(new Date());
-  let reviewTab = 'weekly';
 
   /* ─ 날짜 유틸 ─ */
   function getWeekStart(date) {
@@ -96,26 +95,7 @@ const Weekly = (() => {
       </div>`;
   }
 
-  /* ─ 탭 바 ─ */
-  function renderTabBar() {
-    return `
-      <div class="review-tabs">
-        <button class="review-tab ${reviewTab === 'weekly' ? 'active' : ''}"
-          onclick="Weekly.setReviewTab('weekly')">주간</button>
-        <button class="review-tab ${reviewTab === 'monthly' ? 'active' : ''}"
-          onclick="Weekly.setReviewTab('monthly')">월간</button>
-      </div>`;
-  }
-
-  function setReviewTab(tab) {
-    reviewTab = tab;
-    if (tab === 'monthly') {
-      document.getElementById('app').innerHTML = renderTabBar() + Monthly.renderHTML();
-      Monthly.bindMemo();
-    } else {
-      render();
-    }
-  }
+  function setReviewTab() { render(); }
 
   /* ─ 렌더 ─ */
   function render() {
@@ -166,7 +146,7 @@ const Weekly = (() => {
 
     const memo = getMemo(currentWeekStart);
 
-    document.getElementById('app').innerHTML = renderTabBar() + `
+    document.getElementById('app').innerHTML = `
       <!-- 주 네비게이션 -->
       <div class="wk-nav">
         <button class="wk-nav-btn" onclick="Weekly.prevWeek()">← 이전 주</button>

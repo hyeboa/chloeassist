@@ -240,10 +240,10 @@
 .feature-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
+  gap: 4px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 600;
   border: 1.5px solid transparent;
   transition: filter var(--transition), transform var(--transition);
@@ -254,15 +254,16 @@
 
 .feature-action-btn.del {
   margin-left: auto;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  font-size: 0.9rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-3);
-  border-radius: 50%;
-  display: flex;
+  padding: 4px 10px;
+  width: auto;
+  height: auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid #fca5a5;
+  background: #fff1f2;
+  color: var(--color-danger);
+  border-radius: var(--radius-full);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   filter: none;
@@ -270,7 +271,7 @@
 }
 .feature-action-btn.del:hover {
   background: #fee2e2;
-  color: var(--color-danger);
+  border-color: var(--color-danger);
   filter: none;
   transform: none;
 }
