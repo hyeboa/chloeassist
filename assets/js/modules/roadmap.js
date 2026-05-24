@@ -3,10 +3,11 @@
  */
 
 const Roadmap = (() => {
-  let calYear  = new Date().getFullYear();
-  let calMonth = new Date().getMonth();
-  let activeTab = 'schedule';
-  let pageMode  = 'schedule'; // 'goals' | 'schedule' | 'milestones'
+  let calYear      = new Date().getFullYear();
+  let calMonth     = new Date().getMonth();
+  let activeTab    = 'schedule';
+  let pageMode     = 'schedule'; // 'goals' | 'schedule' | 'milestones'
+  let expandedGoals = new Set();
 
   /* ─ 데이터 ─ */
   function getMilestones() { return Store.get('milestones') || []; }
@@ -196,25 +197,37 @@ const Roadmap = (() => {
 
   function renderGoalCard(goal, index, total) {
     const { done, total: t, pct } = goalProgress(goal);
+    const expanded = expandedGoals.has(goal.id);
+    const dd = goal.targetDate ? dday(goal.targetDate, pct === 100) : null;
+    const urgent = dd && (dd.cls === 'dday-today' || dd.cls === 'dday-overdue' || dd.cls === 'dday-soon');
     return `
-      <div class="goal-card">
+      <div class="goal-card${expanded ? ' expanded' : ''}${urgent ? ' urgent' : ''}">
         <div class="goal-card-head">
           <span class="goal-phase-badge">${index + 1}차 목표</span>
           <input class="goal-title-edit" value="${escapeHtml(goal.title)}"
             onblur="Roadmap.editGoalTitle('${goal.id}', this.value)"
             onkeydown="if(event.key==='Enter')this.blur()">
+          ${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}
+          <span class="goal-progress-compact">${pct}%</span>
           <div class="goal-card-actions">
             <button class="goal-act-btn" onclick="Roadmap.moveGoalUp('${goal.id}')" ${index === 0 ? 'disabled' : ''} title="위로">↑</button>
             <button class="goal-act-btn" onclick="Roadmap.moveGoalDown('${goal.id}')" ${index === total - 1 ? 'disabled' : ''} title="아래로">↓</button>
             <button class="goal-act-btn del" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
           </div>
+          <button class="goal-expand-btn" onclick="Roadmap.toggleExpand('${goal.id}')" title="${expanded ? '접기' : '펼치기'}">${expanded ? '▾' : '▸'}</button>
         </div>
-        <div class="goal-progress">
-          <div class="summary-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
-          <span class="goal-progress-label">${done}/${t} · ${pct}%</span>
-        </div>
-        ${renderChecklist(goal)}
-        ${renderAddItemInput(goal.id)}
+        <div class="summary-bar goal-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
+        ${expanded ? `
+          <div class="goal-detail">
+            <div class="goal-date-row">
+              <label class="goal-date-label">목표 날짜</label>
+              <input type="date" class="goal-date-input" value="${goal.targetDate || ''}"
+                onchange="Roadmap.setGoalDate('${goal.id}', this.value)">
+              ${goal.targetDate ? `<button class="goal-date-clear" onclick="Roadmap.setGoalDate('${goal.id}', '')">지우기</button>` : ''}
+            </div>
+            ${renderChecklist(goal)}
+            ${renderAddItemInput(goal.id)}
+          </div>` : ''}
       </div>`;
   }
 
@@ -444,6 +457,17 @@ const Roadmap = (() => {
     render();
   }
 
+  function toggleExpand(id) {
+    if (expandedGoals.has(id)) expandedGoals.delete(id);
+    else expandedGoals.add(id);
+    render();
+  }
+
+  function setGoalDate(id, date) {
+    Store.update('goals', id, { targetDate: date || null });
+    render();
+  }
+
   function assignMilestoneGoal(milestoneId, goalId) {
     Store.update('milestones', milestoneId, { goalId: goalId || null });
     render();
@@ -472,6 +496,7 @@ const Roadmap = (() => {
     render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab, setPageMode,
     addGoal, editGoalTitle, deleteGoal, moveGoalUp, moveGoalDown,
     addItem, toggleItem, deleteItem, assignMilestoneGoal,
+    toggleExpand, setGoalDate,
   };
 })();
 
