@@ -7,16 +7,17 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v11 */
+  /* v4 → v12 */
   if (version === 'v4') {
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    localStorage.setItem('chloeassist:seeded', 'v12');
     return;
   }
 
-  /* v5 / v6 / v7 → v11 */
+  /* v5 / v6 / v7 → v12 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
@@ -24,34 +25,45 @@
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    localStorage.setItem('chloeassist:seeded', 'v12');
     return;
   }
 
-  /* v8 → v11: projectTasks + goals 추가 */
+  /* v8 → v12: projectTasks + goals + routines 추가 */
   if (version === 'v8') {
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    localStorage.setItem('chloeassist:seeded', 'v12');
     return;
   }
 
-  /* v9 → v11: goals만 추가 */
+  /* v9 → v12: goals + routines 추가 */
   if (version === 'v9') {
     injectGoals();
     backfillGoalDates();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    localStorage.setItem('chloeassist:seeded', 'v12');
     return;
   }
 
-  /* v10 → v11: 목표 targetDate 백필 */
+  /* v10 → v12: 목표 targetDate 백필 + routines */
   if (version === 'v10') {
     backfillGoalDates();
-    localStorage.setItem('chloeassist:seeded', 'v11');
+    injectRoutines();
+    localStorage.setItem('chloeassist:seeded', 'v12');
     return;
   }
 
-  if (version === 'v11') return;
+  /* v11 → v12: routines 추가 */
+  if (version === 'v11') {
+    injectRoutines();
+    localStorage.setItem('chloeassist:seeded', 'v12');
+    return;
+  }
+
+  if (version === 'v12') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -125,7 +137,8 @@
   injectSitemapData();
   injectProjectTasks();
   injectGoals();
-  localStorage.setItem('chloeassist:seeded', 'v11');
+  injectRoutines();
+  localStorage.setItem('chloeassist:seeded', 'v12');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -495,6 +508,20 @@
       });
       if (changed) localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
     } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════
+     하루 루틴 샘플 데이터 — v12
+  ══════════════════════════════════════════════ */
+  function injectRoutines() {
+    if (localStorage.getItem('chloeassist:routines')) return;
+    const routines = [
+      { id: crypto.randomUUID(), name: '물 한 잔 마시기', createdAt: Date.now() - 6000 },
+      { id: crypto.randomUUID(), name: '오늘 할 일 확인', createdAt: Date.now() - 5000 },
+      { id: crypto.randomUUID(), name: '10분 스트레칭',   createdAt: Date.now() - 4000 },
+      { id: crypto.randomUUID(), name: '하루 일기 쓰기',  createdAt: Date.now() - 3000 },
+    ];
+    localStorage.setItem('chloeassist:routines', JSON.stringify(routines));
   }
 
   /* ══════════════════════════════════════════════

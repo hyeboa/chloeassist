@@ -11,6 +11,7 @@ const Nav = (() => {
         { href: 'index.html',    label: '오늘',       icon: '◎' },
         { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
         { href: 'braindump.html',  label: '브레인 덤프', icon: '✦' },
+        { href: 'routine.html',    label: '하루 루틴',   icon: '○' },
       { href: 'myprojects.html', label: '내 프로젝트', icon: '◉' },
       ]
     },

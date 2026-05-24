@@ -1,0 +1,158 @@
+/* ===== 하루 루틴 ===== */
+
+.routine-wrap {
+  max-width: 560px;
+}
+
+/* ─ 헤더 (날짜 + 진행률) ─ */
+.routine-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.routine-date {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.routine-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.routine-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.routine-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #a78bfa);
+  border-radius: var(--radius-full);
+  transition: width 0.35s ease;
+}
+
+.routine-progress-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  flex-shrink: 0;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* ─ 루틴 목록 ─ */
+.routine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.routine-empty {
+  padding: 32px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-3);
+}
+
+.routine-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), box-shadow var(--transition);
+}
+
+.routine-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.routine-item.done {
+  opacity: 0.55;
+}
+
+.routine-item.done .routine-name {
+  text-decoration: line-through;
+  color: var(--color-text-3);
+}
+
+/* ─ 체크 버튼 ─ */
+.routine-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: transparent;
+  transition: all var(--transition);
+}
+
+.routine-check:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.routine-check.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+/* ─ 루틴 이름 ─ */
+.routine-name {
+  flex: 1;
+  font-size: 1rem;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+/* ─ 삭제 버튼 ─ */
+.routine-delete {
+  opacity: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+
+.routine-item:hover .routine-delete {
+  opacity: 1;
+}
+
+.routine-delete:hover {
+  background: #fee2e2;
+  color: var(--color-danger);
+}
+
+/* ─ 추가 입력 ─ */
+.routine-add-wrap {
+  max-width: 100%;
+}
