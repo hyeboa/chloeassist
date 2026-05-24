@@ -980,65 +980,7 @@
 .mp-task-item:hover .mp-delete { opacity: 1; }
 .mp-delete:hover { background: #fee2e2; color: var(--color-danger); }
 
-.mp-add-row {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--color-surface);
-  border: 1.5px dashed var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 9px 13px;
-  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-}
-.mp-add-row:hover {
-  border-color: var(--color-primary);
-  border-style: solid;
-  background: var(--color-surface);
-}
-.mp-add-row:focus-within {
-  border-color: var(--color-primary);
-  border-style: solid;
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.08);
-  background: var(--color-surface);
-}
-
-.mp-add-row::before {
-  content: '+';
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-text-3);
-  flex-shrink: 0;
-  line-height: 1;
-  transition: color var(--transition);
-}
-.mp-add-row:hover::before,
-.mp-add-row:focus-within::before {
-  color: var(--color-primary);
-}
-
-.mp-add-input {
-  flex: 1;
-  padding: 0;
-  font-size: 0.88rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-  outline: none;
-}
-.mp-add-input::placeholder { color: var(--color-text-3); font-style: italic; }
-
-.mp-add-hint {
-  font-size: 0.7rem;
-  color: var(--color-text-3);
-  background: var(--color-surface-2);
-  padding: 2px 6px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-.mp-add-row:focus-within .mp-add-hint { opacity: 1; }
+/* mp-add-row / mp-add-input / mp-add-hint → base.css 공통 정의 사용 */
 
 
 /* ── 단계별 목표 페이지 2컬럼 ── */

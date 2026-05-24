@@ -264,13 +264,20 @@ const Braindump = (() => {
       .join('');
 
     document.getElementById('app').innerHTML = `
-      <div class="dump-input-wrap">
-        <input id="dump-input" class="dump-input" type="text"
-          placeholder="생각이 떠오르면 입력하고 Enter"
-          ${convertingId ? '' : 'autofocus'}>
-        <input id="dump-tag-input" class="dump-tag-input" type="text"
-          placeholder="프로젝트 태그 (선택)"
-          value="${escapeHtml(lastProject)}">
+      <div class="quick-add-wrap">
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="dump-input" class="quick-add-input" type="text"
+              placeholder="생각이 떠오르면 입력하고 Enter"
+              ${convertingId ? '' : 'autofocus'}>
+          </div>
+          <div class="quick-add-footer">
+            <input id="dump-tag-input" class="dump-tag-input" type="text"
+              placeholder="프로젝트 태그 (선택)"
+              value="${escapeHtml(lastProject)}">
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
+        </div>
       </div>
 
       <div class="dump-list-header">

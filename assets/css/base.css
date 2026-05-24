@@ -289,6 +289,63 @@ img { max-width: 100%; display: block; }
 .quick-add-status:not(:empty) { margin-top: 6px; }
 .quick-add-status.error { color: var(--color-danger); }
 
+/* ===== 공통 인라인 항목 추가 행 (mp-add-row) ===== */
+/* roadmap, myprojects, 기타 리스트 내 "할 일/항목 추가" 행에 공통 사용 */
+.mp-add-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+  cursor: text;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.mp-add-row:hover {
+  border-color: var(--color-primary);
+  background: rgba(108, 99, 255, 0.02);
+}
+.mp-add-row:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.08);
+}
+.mp-add-row::before {
+  content: '+';
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color var(--transition);
+}
+.mp-add-row:hover::before,
+.mp-add-row:focus-within::before {
+  color: var(--color-primary);
+}
+.mp-add-input {
+  flex: 1;
+  padding: 0;
+  font-size: 0.88rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  outline: none;
+}
+.mp-add-input::placeholder { color: var(--color-text-3); }
+.mp-add-hint {
+  font-size: 0.7rem;
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.mp-add-row:focus-within .mp-add-hint { opacity: 1; }
+
 /* ===== 자연어 입력 오버레이 (NL Input) ===== */
 .nl-overlay {
   position: fixed;

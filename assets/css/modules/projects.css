@@ -413,34 +413,37 @@
 
 .feat-task-input {
   width: 100%;
-  padding: 9px 14px;
-  font-size: 0.92rem;
+  padding: 9px 13px;
+  font-size: 0.88rem;
   color: var(--color-text);
-  background: transparent;
-  border: 1px dashed var(--color-border);
-  border-radius: 4px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
   outline: none;
-  transition: border-color var(--transition), background var(--transition);
-  margin-top: 4px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  margin-top: 6px;
+}
+.feat-task-input::placeholder { color: var(--color-text-3); }
+.feat-task-input:hover { border-color: var(--color-primary); background: rgba(108, 99, 255, 0.02); }
+.feat-task-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.08);
 }
 
-.feat-task-input::placeholder { color: var(--color-text-3); }
-.feat-task-input:hover { border-color: var(--color-primary); }
-.feat-task-input:focus { border-color: var(--color-primary); background: var(--color-surface); border-style: solid; }
-
-/* ===== 빈 컬럼 (선택) ===== */
+/* ===== 빈 컬럼 추가 버튼 ===== */
 .kanban-add-btn {
   width: 100%;
-  padding: 8px;
+  padding: 9px 13px;
   border-radius: var(--radius-sm);
-  border: 1px dashed var(--color-border);
-  font-size: 0.8rem;
+  border: 1.5px solid var(--color-border);
+  font-size: 0.82rem;
   color: var(--color-text-3);
   text-align: center;
+  background: var(--color-surface);
+  cursor: pointer;
   transition: all var(--transition);
   margin-top: 6px;
 }
-
 .kanban-add-btn:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
