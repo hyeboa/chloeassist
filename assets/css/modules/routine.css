@@ -360,73 +360,102 @@
 .rchart-grid {
   display: grid;
   grid-template-columns: repeat(30, 1fr);
-  gap: 3px;
-  align-items: end;
-  height: 200px;
+  gap: 4px;
+  height: 220px;
   flex-shrink: 0;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  align-items: end;
 }
 
 .rchart-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   height: 100%;
 }
 
-.rchart-bar-wrap {
+/* % 레이블 — 막대 위 고정 공간 (항상 같은 위치) */
+.rchart-pct-label {
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--color-text-2);
+  white-space: nowrap;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+
+.rchart-col.today .rchart-pct-label { color: var(--color-primary); }
+
+/* 막대 트랙 (배경) */
+.rchart-bar-track {
   width: 100%;
   flex: 1;
   background: var(--color-surface-2);
   border-radius: 3px;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   align-items: flex-end;
+  margin-bottom: 4px;
 }
 
+/* 막대 fill — 3단계 컬러 */
 .rchart-bar-fill {
-  position: relative;
   width: 100%;
-  background: linear-gradient(180deg, #a78bfa, var(--color-primary));
   border-radius: 3px;
   transition: height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* % 텍스트 — 막대 맨 위에 수평 고정 */
-.rchart-bar-pct {
-  position: absolute;
-  top: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.58rem;
-  font-weight: 700;
-  color: var(--color-text-2);
-  white-space: nowrap;
-  pointer-events: none;
-  line-height: 1;
+/* 70% 미만: 하늘색 계열 */
+.rchart-bar-fill.bar-low {
+  background: linear-gradient(180deg, #7dd3fc, #3b82f6);
 }
 
-.rchart-col.today .rchart-bar-wrap {
+/* 70% 이상: 초록 계열 */
+.rchart-bar-fill.bar-good {
+  background: linear-gradient(180deg, #6ee7b7, #10b981);
+}
+
+/* 100%: 무지개 🌈 */
+.rchart-bar-fill.bar-perfect {
+  background: linear-gradient(
+    180deg,
+    #f472b6 0%,
+    #fb923c 20%,
+    #facc15 40%,
+    #4ade80 60%,
+    #60a5fa 80%,
+    #a78bfa 100%
+  );
+}
+
+/* 오늘 컬럼 강조 */
+.rchart-col.today .rchart-bar-track {
   background: var(--color-primary-light);
   outline: 1.5px solid #c4b5fd;
   border-radius: 3px;
 }
-.rchart-col.today .rchart-bar-fill {
-  background: linear-gradient(180deg, #7c3aed, var(--color-primary));
-}
 
+/* 요일 레이블 */
 .rchart-day-label {
-  font-size: 0.58rem;
-  color: var(--color-text-3);
-  font-weight: 500;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  line-height: 1;
 }
 .rchart-date-label {
-  font-size: 0.5rem;
+  font-size: 0.6rem;
+  font-weight: 500;
   color: var(--color-text-3);
-  opacity: 0.55;
+  margin-top: 1px;
 }
-.rchart-col.today .rchart-day-label { color: var(--color-primary); font-weight: 700; }
+.rchart-col.today .rchart-day-label  { color: var(--color-primary); }
+.rchart-col.today .rchart-date-label { color: var(--color-primary); opacity: 0.75; }
 
 /* ─ 통계 푸터 ─ */
 .rchart-stats-footer {

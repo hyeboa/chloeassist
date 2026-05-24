@@ -215,13 +215,16 @@ const Routine = (() => {
     /* ── 막대 렌더 ── */
     const maxPct = Math.max(...days.map(d => d.pct), 1);
     const bars = days.map(d => {
-      const h = Math.round(d.pct / maxPct * 100);
+      const h         = Math.round(d.pct / maxPct * 100);
+      const barClass  = d.pct === 100 ? 'bar-perfect'
+                      : d.pct >= 70   ? 'bar-good'
+                      : d.pct > 0     ? 'bar-low'
+                      : '';
       return `
         <div class="rchart-col${d.isToday ? ' today' : ''}">
-          <div class="rchart-bar-wrap">
-            <div class="rchart-bar-fill" style="height:${h}%">
-              ${d.pct > 0 ? `<span class="rchart-bar-pct">${d.pct}%</span>` : ''}
-            </div>
+          <div class="rchart-pct-label">${d.pct > 0 ? d.pct + '%' : ''}</div>
+          <div class="rchart-bar-track">
+            <div class="rchart-bar-fill ${barClass}" style="height:${h}%"></div>
           </div>
           <div class="rchart-day-label">${d.day}</div>
           <div class="rchart-date-label">${d.num}</div>
