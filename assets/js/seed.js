@@ -7,18 +7,18 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v13 */
+  /* v4 → v14 */
   if (version === 'v4') {
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
     injectRoutines();
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v5 / v6 / v7 → v13 */
+  /* v5 / v6 / v7 → v14 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
@@ -28,55 +28,62 @@
     injectGoals();
     injectRoutines();
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v8 → v13 */
+  /* v8 → v14 */
   if (version === 'v8') {
     injectProjectTasks();
     injectGoals();
     injectRoutines();
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v9 → v13 */
+  /* v9 → v14 */
   if (version === 'v9') {
     injectGoals();
     backfillGoalDates();
     injectRoutines();
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v10 → v13 */
+  /* v10 → v14 */
   if (version === 'v10') {
     backfillGoalDates();
     injectRoutines();
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v11 → v13 */
+  /* v11 → v14 */
   if (version === 'v11') {
     injectRoutines();
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  /* v12 → v13: 루틴 히스토리 샘플 추가 */
+  /* v12 → v14 */
   if (version === 'v12') {
     injectRoutineLogs();
-    localStorage.setItem('chloeassist:seeded', 'v13');
+    localStorage.setItem('chloeassist:seeded', 'v14');
     return;
   }
 
-  if (version === 'v13') return;
+  /* v13 → v14: 60일 히스토리로 확장 */
+  if (version === 'v13') {
+    injectRoutineLogs();
+    localStorage.setItem('chloeassist:seeded', 'v14');
+    return;
+  }
+
+  if (version === 'v14') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -152,7 +159,7 @@
   injectGoals();
   injectRoutines();
   injectRoutineLogs();
-  localStorage.setItem('chloeassist:seeded', 'v13');
+  localStorage.setItem('chloeassist:seeded', 'v14');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -525,44 +532,63 @@
   }
 
   /* ══════════════════════════════════════════════
-     하루 루틴 샘플 데이터 — v12
+     하루 루틴 샘플 데이터 — v12 (6개 기본 루틴)
   ══════════════════════════════════════════════ */
   function injectRoutines() {
     if (localStorage.getItem('chloeassist:routines')) return;
-    const r1 = crypto.randomUUID();
-    const r2 = crypto.randomUUID();
-    const r3 = crypto.randomUUID();
-    const r4 = crypto.randomUUID();
+    const t = Date.now();
     const routines = [
-      { id: r1, name: '물 한 잔 마시기', createdAt: Date.now() - 6000 },
-      { id: r2, name: '오늘 할 일 확인', createdAt: Date.now() - 5000 },
-      { id: r3, name: '10분 스트레칭',   createdAt: Date.now() - 4000 },
-      { id: r4, name: '하루 일기 쓰기',  createdAt: Date.now() - 3000 },
+      { id: crypto.randomUUID(), name: '물 2잔 이상 마시기',   createdAt: t - 7000 },
+      { id: crypto.randomUUID(), name: '오늘 핵심 할 일 확인', createdAt: t - 6000 },
+      { id: crypto.randomUUID(), name: '10분 스트레칭',        createdAt: t - 5000 },
+      { id: crypto.randomUUID(), name: '감사한 일 한 줄 적기', createdAt: t - 4000 },
+      { id: crypto.randomUUID(), name: '소셜미디어 30분 제한', createdAt: t - 3000 },
+      { id: crypto.randomUUID(), name: '취침 전 내일 준비',    createdAt: t - 2000 },
     ];
     localStorage.setItem('chloeassist:routines', JSON.stringify(routines));
   }
 
   /* ══════════════════════════════════════════════
-     하루 루틴 히스토리 샘플 데이터 — v13
+     하루 루틴 히스토리 샘플 데이터 — v14 (60일)
   ══════════════════════════════════════════════ */
   function injectRoutineLogs() {
     try {
       const routines = JSON.parse(localStorage.getItem('chloeassist:routines') || '[]');
       if (routines.length === 0) return;
-
       const ids = routines.map(r => r.id);
-      /* 오늘 기준 -13일 ~ -1일: 달성률 패턴 (0~1 비율) */
-      const patterns = [0.25, 0.75, 1, 0.5, 0, 0.75, 1, 0.5, 0.75, 1, 0.25, 0.75, 1];
+
+      /* 60일 달성 패턴: 습관 형성 곡선 (주말 약간 낮음, 중반 peak, 소폭 기복) */
+      const patterns = [
+        /* 9주 전 ~ 8주 전: 초반 시작 */
+        0.33, 0.5,  0.5,  0.33, 0.5,  0.5,  0.17,
+        0.5,  0.67, 0.5,  0.67, 0.5,  0.5,  0.33,
+        /* 7주 전 ~ 6주 전: 성장 */
+        0.5,  0.67, 0.83, 0.67, 0.83, 0.67, 0.5,
+        0.67, 0.83, 0.67, 1.0,  0.83, 0.67, 0.5,
+        /* 5주 전 ~ 4주 전: 피크 */
+        0.67, 1.0,  0.83, 1.0,  1.0,  0.83, 0.67,
+        0.83, 0.83, 1.0,  0.83, 1.0,  0.83, 0.67,
+        /* 3주 전 ~ 2주 전: 약간 피로 후 회복 */
+        0.67, 0.5,  0.83, 0.67, 0.83, 0.5,  0.5,
+        0.5,  0.83, 0.83, 0.83, 0.83, 0.67, 0.5,
+        /* 1주 전 ~ 어제: 다시 상승 */
+        0.67, 0.83, 1.0,  0.83, 1.0,  0.83, 0.83,
+        /* 어제까지 포함해 총 60일 (마지막 4일) */
+        0.67, 1.0,  0.83, 1.0,
+      ]; /* 7*8 + 4 = 60 */
 
       patterns.forEach((ratio, i) => {
-        const offset = i - 13; /* -13 ~ -1 */
+        const offset = i - 60; /* -60 ~ -1 */
         const d = new Date();
         d.setDate(d.getDate() + offset);
         const dateKey = 'chloeassist:routine-log:' + d.toISOString().slice(0, 10);
         if (localStorage.getItem(dateKey)) return; /* 이미 있으면 skip */
         const count = Math.round(ids.length * ratio);
         const log = {};
-        ids.slice(0, count).forEach(id => { log[id] = true; });
+        /* 날짜마다 다른 루틴이 완료되도록 순환 선택 */
+        for (let j = 0; j < count; j++) {
+          log[ids[(i + j) % ids.length]] = true;
+        }
         localStorage.setItem(dateKey, JSON.stringify(log));
       });
     } catch (e) {}
