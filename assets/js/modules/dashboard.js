@@ -90,7 +90,15 @@ const Dashboard = (() => {
     const msRow = ms
       ? (() => {
           const dd = ddayInfo(ms.date);
-          return `<div class="today-banner-ms">◈ 다음 마일스톤: ${escapeHtml(ms.title)} &nbsp; ${dd.label}</div>`;
+          return `
+            <a class="today-banner-ms" href="roadmap.html" title="마일스톤 페이지로 이동">
+              <span class="today-ms-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4.5h11l-1.6 3.2L16 11H5"/></svg>
+              </span>
+              <span class="today-ms-label">다음 마일스톤</span>
+              <span class="today-ms-title">${escapeHtml(ms.title)}</span>
+              <span class="today-ms-dday ${dd.cls}">${dd.label}</span>
+            </a>`;
         })()
       : '';
 
