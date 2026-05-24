@@ -411,19 +411,19 @@
   transition: height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 70% 미만: 연한 슬레이트 */
+/* 70% 미만: 뮤트 슬레이트 */
 .rchart-bar-fill.bar-low {
-  background: linear-gradient(to top, #64748b, #cbd5e1);
+  background: linear-gradient(to top, #475569, #94a3b8);
 }
 
-/* 70% 이상: 에메랄드 그린 */
+/* 70% 이상: 스카이 블루 */
 .rchart-bar-fill.bar-good {
-  background: linear-gradient(to top, #059669, #6ee7b7);
+  background: linear-gradient(to top, #0284c7, #38bdf8);
 }
 
-/* 100%: 앱 브랜드 퍼플 */
+/* 100%: 딥 네이비 블루 */
 .rchart-bar-fill.bar-perfect {
-  background: linear-gradient(to top, #4338ca, #a78bfa);
+  background: linear-gradient(to top, #1e3a8a, #3b82f6);
 }
 
 /* ─ 오늘 컬럼 강조 ─ */
