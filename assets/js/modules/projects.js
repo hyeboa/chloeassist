@@ -172,14 +172,18 @@ const Projects = (() => {
   function buildHTML() {
     const features = getFeatures();
     return `
-      <div class="inline-nl-wrap">
-        <div class="inline-nl-label">새 기능 추가 <span class="ai-badge">✦ AI</span></div>
-        <input id="feat-input" class="inline-nl-input" type="text"
-          placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
-        <div class="inline-nl-footer">
-          <span class="nl-rule-chip">기능명</span>
-          <span class="nl-rule-sep">·</span>
-          <span class="nl-rule-hint">필수 · 분야·설명은 선택 · Enter로 추가</span>
+      <div class="quick-add-wrap">
+        <div class="quick-add-top">
+          <input id="feat-input" class="quick-add-input" type="text"
+            placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
+          <span class="ai-badge">✦ AI</span>
+        </div>
+        <div class="quick-add-footer">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span class="nl-rule-chip">기능명</span>
+            <span class="nl-rule-sep">·</span>
+            <span class="quick-add-hint">필수 · 분야·설명은 선택 · Enter로 추가</span>
+          </div>
         </div>
       </div>
 

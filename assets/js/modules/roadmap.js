@@ -37,17 +37,21 @@ const Roadmap = (() => {
   /* ─ 마일스톤 추가 입력 ─ */
   function renderAddInput() {
     return `
-      <div class="inline-nl-wrap">
-        <div class="inline-nl-label">새 마일스톤 추가 <span class="ai-badge">✦ AI</span></div>
-        <input id="ms-input" class="inline-nl-input" type="text"
-          placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
-        <div class="inline-nl-footer">
-          <span class="nl-rule-chip">이름</span>
-          <span class="nl-rule-chip">날짜</span>
-          <span class="nl-rule-sep">·</span>
-          <span class="nl-rule-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
+      <div class="quick-add-wrap">
+        <div class="quick-add-top">
+          <input id="ms-input" class="quick-add-input" type="text"
+            placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
+          <span class="ai-badge">✦ AI</span>
         </div>
-        <div class="inline-nl-status" id="ms-status"></div>
+        <div class="quick-add-footer">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span class="nl-rule-chip">이름</span>
+            <span class="nl-rule-chip">날짜</span>
+            <span class="nl-rule-sep">·</span>
+            <span class="quick-add-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
+          </div>
+        </div>
+        <div class="quick-add-status" id="ms-status"></div>
       </div>`;
   }
 
@@ -436,7 +440,7 @@ const Roadmap = (() => {
 
       input.disabled = true;
       status.textContent = '✦ AI가 분석 중...';
-      status.className = 'inline-nl-status';
+      status.className = 'quick-add-status';
 
       try {
         const result = await NLInput.parse('milestone', text);
@@ -446,7 +450,7 @@ const Roadmap = (() => {
         render();
       } catch (err) {
         status.textContent = '⚠ ' + err.message;
-        status.className = 'inline-nl-status error';
+        status.className = 'quick-add-status error';
         input.disabled = false;
         input.focus();
       }

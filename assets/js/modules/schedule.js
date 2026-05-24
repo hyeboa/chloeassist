@@ -192,20 +192,22 @@ const Schedule = (() => {
         </div>
       </div>
 
-      <div class="inline-nl-wrap">
-        <div class="inline-nl-label">새 할 일 추가 <span class="ai-badge">✦ AI</span></div>
-        <input id="bl-input" class="inline-nl-input" type="text"
-          placeholder="유저 인터뷰 섭외 다음주 화요일 기획...">
-        <div class="inline-nl-footer">
+      <div class="quick-add-wrap">
+        <div class="quick-add-top">
+          <input id="bl-input" class="quick-add-input" type="text"
+            placeholder="유저 인터뷰 섭외 다음주 화요일 기획...">
+          <span class="ai-badge">✦ AI</span>
+        </div>
+        <div class="quick-add-footer">
           <div class="cat-pills" id="bl-cat-pills">
             ${CATS.slice(1).map(c => `
               <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
                 data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
             `).join('')}
           </div>
-          <span class="nl-rule-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
+          <span class="quick-add-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
         </div>
-        <div class="inline-nl-status" id="bl-status"></div>
+        <div class="quick-add-status" id="bl-status"></div>
       </div>
 
       <div class="cat-filter-bar">
@@ -253,7 +255,7 @@ const Schedule = (() => {
 
       input.disabled = true;
       status.textContent = '✦ AI가 분석 중...';
-      status.className = 'inline-nl-status';
+      status.className = 'quick-add-status';
 
       try {
         const result = await NLInput.parse('task', text);
@@ -269,7 +271,7 @@ const Schedule = (() => {
         render();
       } catch (err) {
         status.textContent = '⚠ ' + err.message;
-        status.className = 'inline-nl-status error';
+        status.className = 'quick-add-status error';
         input.disabled = false;
         input.focus();
       }

@@ -210,6 +210,61 @@ img { max-width: 100%; display: block; }
 
 .inline-nl-status.error { color: var(--color-danger); }
 
+/* ===== 공통 빠른 입력 폼 (quick-add-wrap) ===== */
+.quick-add-wrap {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px 22px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.quick-add-wrap:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
+}
+
+.quick-add-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.quick-add-input {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 1.1rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  outline: none;
+}
+.quick-add-input::placeholder { color: var(--color-text-3); }
+.quick-add-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.quick-add-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quick-add-hint {
+  font-size: 0.85rem;
+  color: var(--color-text-3);
+}
+
+.quick-add-status {
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  margin-top: 6px;
+  min-height: 18px;
+}
+.quick-add-status.error { color: var(--color-danger); }
+
 /* ===== 자연어 입력 오버레이 (NL Input) ===== */
 .nl-overlay {
   position: fixed;
