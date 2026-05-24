@@ -277,7 +277,7 @@ const Roadmap = (() => {
               ${goal.targetDate ? `<button class="goal-date-clear" onclick="Roadmap.setGoalDate('${goal.id}', '')">지우기</button>` : ''}
             </div>
             ${renderChecklist(goal)}
-            ${renderAddItemInput(goal.id)}
+            ${isDone ? '' : renderAddItemInput(goal.id)}
           </div>` : ''}
       </div>`;
   }
@@ -347,15 +347,21 @@ const Roadmap = (() => {
 
     if (pageMode === 'goals') {
       app.innerHTML = `
-        ${renderGoalsSection()}
-        <div class="milestone-section">
-          <div class="ms-section-hd">
-            <div class="section-title" style="margin:0">마일스톤</div>
-            <span class="ms-section-meta">전체 ${milestones.length}개</span>
+        <div class="goals-page-layout">
+          <div class="goals-page-left">
+            ${renderGoalsSection()}
           </div>
-          <div class="ms-col-list">
-            ${renderAddInput()}
-            ${renderMilestoneList(milestones)}
+          <div class="goals-page-right">
+            <div class="milestone-section">
+              <div class="ms-section-hd">
+                <div class="section-title" style="margin:0">마일스톤</div>
+                <span class="ms-section-meta">전체 ${milestones.length}개</span>
+              </div>
+              <div class="ms-col-list">
+                ${renderAddInput()}
+                ${renderMilestoneList(milestones)}
+              </div>
+            </div>
           </div>
         </div>`;
       bindGoalInputs();
