@@ -193,21 +193,23 @@ const Schedule = (() => {
       </div>
 
       <div class="quick-add-wrap">
-        <div class="quick-add-top">
-          <input id="bl-input" class="quick-add-input" type="text"
-            placeholder="유저 인터뷰 섭외 다음주 화요일 기획...">
-          <span class="ai-badge">✦ AI</span>
-        </div>
-        <div class="quick-add-footer">
-          <div class="cat-pills" id="bl-cat-pills">
-            ${CATS.slice(1).map(c => `
-              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
-                data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
-            `).join('')}
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="bl-input" class="quick-add-input" type="text"
+              placeholder="유저 인터뷰 섭외 다음주 화요일 기획...">
+            <span class="ai-badge">✦ AI</span>
           </div>
-          <span class="quick-add-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
+          <div class="quick-add-footer">
+            <div class="cat-pills" id="bl-cat-pills">
+              ${CATS.slice(1).map(c => `
+                <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
+                  data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
+              `).join('')}
+            </div>
+            <span class="quick-add-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
+          </div>
+          <div class="quick-add-status" id="bl-status"></div>
         </div>
-        <div class="quick-add-status" id="bl-status"></div>
       </div>
 
       <div class="cat-filter-bar">

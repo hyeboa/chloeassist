@@ -358,19 +358,21 @@ const Dashboard = (() => {
       ${renderBanner(done, total, pct)}
 
       <div class="quick-add-wrap">
-        <div class="quick-add-top">
-          <input id="quick-input" class="quick-add-input" type="text"
-            placeholder="오늘 할 일을 입력하세요" autofocus>
-          <span class="ai-badge">✦ AI</span>
-        </div>
-        <div class="quick-add-footer">
-          <div class="cat-pills" id="quick-cat-pills">
-            ${CATS.map(c => `
-              <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
-                data-cat="${c}" onclick="Dashboard.selectCat('${c}')">${c}</button>
-            `).join('')}
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="quick-input" class="quick-add-input" type="text"
+              placeholder="오늘 할 일을 입력하세요" autofocus>
+            <span class="ai-badge">✦ AI</span>
           </div>
-          <span class="quick-add-hint">Enter로 추가</span>
+          <div class="quick-add-footer">
+            <div class="cat-pills" id="quick-cat-pills">
+              ${CATS.map(c => `
+                <button class="cat-pill${selectedCat === c ? ' selected-' + c : ''}"
+                  data-cat="${c}" onclick="Dashboard.selectCat('${c}')">${c}</button>
+              `).join('')}
+            </div>
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
         </div>
       </div>
 

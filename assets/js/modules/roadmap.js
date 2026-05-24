@@ -38,20 +38,22 @@ const Roadmap = (() => {
   function renderAddInput() {
     return `
       <div class="quick-add-wrap">
-        <div class="quick-add-top">
-          <input id="ms-input" class="quick-add-input" type="text"
-            placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
-          <span class="ai-badge">✦ AI</span>
-        </div>
-        <div class="quick-add-footer">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span class="nl-rule-chip">이름</span>
-            <span class="nl-rule-chip">날짜</span>
-            <span class="nl-rule-sep">·</span>
-            <span class="quick-add-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="ms-input" class="quick-add-input" type="text"
+              placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
+            <span class="ai-badge">✦ AI</span>
           </div>
+          <div class="quick-add-footer">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <span class="nl-rule-chip">이름</span>
+              <span class="nl-rule-chip">날짜</span>
+              <span class="nl-rule-sep">·</span>
+              <span class="quick-add-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
+            </div>
+          </div>
+          <div class="quick-add-status" id="ms-status"></div>
         </div>
-        <div class="quick-add-status" id="ms-status"></div>
       </div>`;
   }
 

@@ -212,7 +212,6 @@ img { max-width: 100%; display: block; }
 
 /* ===== 공통 빠른 입력 폼 (quick-add-wrap) ===== */
 
-/* conic-gradient 각도를 CSS 변수로 애니메이션 */
 @property --qa-angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -223,37 +222,33 @@ img { max-width: 100%; display: block; }
   to { --qa-angle: 360deg; }
 }
 
+/* 바깥 래퍼 = 회전하는 무지개 그라디언트 배경 (테두리 역할) */
 .quick-add-wrap {
   --qa-angle: 0deg;
-  position: relative;
-  background: #fff;
   border-radius: var(--radius-md);
-  padding: 20px 24px;
+  padding: 3px;
   margin-bottom: 24px;
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
-  animation: qa-rainbow-spin 5s linear infinite;
-  z-index: 0;
-  transition: box-shadow var(--transition);
-}
-
-/* 회전하는 무지개 테두리 레이어 */
-.quick-add-wrap::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: calc(var(--radius-md) + 3px);
   background: conic-gradient(
     from var(--qa-angle),
     #f87171, #fb923c, #facc15, #4ade80,
     #60a5fa, #a78bfa, #f472b6, #f87171
   );
-  z-index: -1;
+  animation: qa-rainbow-spin 5s linear infinite;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
+  transition: box-shadow var(--transition);
 }
 
-/* 포커스 시 더 빠르게 + 그림자 */
+/* 포커스 시 더 빠르게 + 그림자 강조 */
 .quick-add-wrap:focus-within {
   animation-duration: 2s;
-  box-shadow: 0 4px 28px rgba(108, 99, 255, 0.18);
+  box-shadow: 0 4px 28px rgba(108, 99, 255, 0.2);
+}
+
+/* 안쪽 흰 배경 패널 — 이 덕에 테두리만 무지개로 보임 */
+.quick-add-inner {
+  background: #fff;
+  border-radius: calc(var(--radius-md) - 1px);
+  padding: 18px 22px;
 }
 
 .quick-add-top {
