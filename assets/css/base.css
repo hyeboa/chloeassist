@@ -285,9 +285,8 @@ img { max-width: 100%; display: block; }
 .quick-add-status {
   font-size: 0.78rem;
   color: var(--color-text-3);
-  margin-top: 6px;
-  min-height: 18px;
 }
+.quick-add-status:not(:empty) { margin-top: 6px; }
 .quick-add-status.error { color: var(--color-danger); }
 
 /* ===== 자연어 입력 오버레이 (NL Input) ===== */
