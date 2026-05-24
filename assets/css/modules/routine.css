@@ -100,15 +100,13 @@
   display: grid;
   grid-template-columns: 340px 1fr;
   gap: 24px;
-  height: calc(100vh - var(--header-height) - 130px);
-  min-height: 420px;
+  align-items: start;
 }
 
 /* ─ 왼쪽 패널 ─ */
 .routine-left {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .routine-today-header { margin-bottom: 16px; }
@@ -150,7 +148,6 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  flex: 1;
   margin-bottom: 14px;
 }
 
@@ -231,7 +228,7 @@
 .routine-delete:hover { background: #fee2e2; color: var(--color-danger); }
 
 /* ─ 추가 입력 ─ */
-.routine-add-form { margin-top: auto; }
+.routine-add-form { margin-top: 8px; }
 
 .routine-input {
   width: 100%;
@@ -255,6 +252,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  max-height: 540px;
 }
 
 /* ─ 탭 바 ─ */
