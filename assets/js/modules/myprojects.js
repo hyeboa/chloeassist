@@ -296,6 +296,7 @@ const MyProjects = (() => {
       .join('');
 
     document.getElementById('app').innerHTML = `
+      <div class="mp-braindump-hint">새 프로젝트와 할 일 추가는 <a href="braindump.html">브레인 덤프</a>에서 — 생각을 적고 프로젝트 태그를 달면 여기로 모여요.</div>
       <div id="mp-dashboard"></div>
       ${projects.length > 1 ? `<div class="mp-filter-bar" style="margin-top:20px">${filterBtns}</div>` : ''}
       <div id="mp-list" style="margin-top:24px"></div>
