@@ -207,15 +207,21 @@
   box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
 }
 
+.quick-add-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
 .quick-add-input {
-  width: 100%;
+  flex: 1;
   padding: 6px 0;
   font-size: 1.1rem;
   border: none;
   background: transparent;
   color: var(--color-text);
   outline: none;
-  margin-bottom: 14px;
 }
 
 .quick-add-input::placeholder { color: var(--color-text-3); }

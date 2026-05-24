@@ -91,17 +91,25 @@
 .dump-toolbar-right { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
 
 .dump-ai-btn {
-  padding: 7px 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   color: var(--color-primary);
-  background: var(--color-primary-light, #ede9fe);
-  border: 1px solid var(--color-primary);
+  background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+  border: 1px solid #c4b5fd;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all var(--transition);
 }
-.dump-ai-btn:hover { background: var(--color-primary); color: #fff; }
+.dump-ai-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
 .dump-ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .dump-hide-done-btn {
   padding: 7px 14px;

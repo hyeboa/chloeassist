@@ -38,7 +38,7 @@ const Roadmap = (() => {
   function renderAddInput() {
     return `
       <div class="inline-nl-wrap">
-        <div class="inline-nl-label">새 마일스톤 추가</div>
+        <div class="inline-nl-label">새 마일스톤 추가 <span class="ai-badge">✦ AI</span></div>
         <input id="ms-input" class="inline-nl-input" type="text"
           placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
         <div class="inline-nl-footer">
