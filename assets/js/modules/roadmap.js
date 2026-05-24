@@ -45,12 +45,7 @@ const Roadmap = (() => {
             <span class="ai-badge">✦ AI</span>
           </div>
           <div class="quick-add-footer">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span class="nl-rule-chip">이름</span>
-              <span class="nl-rule-chip">날짜</span>
-              <span class="nl-rule-sep">·</span>
-              <span class="quick-add-hint">필수 · 나머지는 메모로 저장 · Enter로 추가</span>
-            </div>
+            <span class="quick-add-hint">Enter로 추가</span>
           </div>
           <div class="quick-add-status" id="ms-status"></div>
         </div>

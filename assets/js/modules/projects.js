@@ -49,17 +49,10 @@ const Projects = (() => {
   /* ─ 태스크 패널 (펼침) ─ */
   function renderTaskPanel(f) {
     const tasks = linkedTasks(f.id);
-    const done  = tasks.filter(t => t.done).length;
 
     return `
       <div class="feat-panel">
-        <div class="feat-panel-label">
-          <span>할 일</span>
-          ${tasks.length ? `<span class="feat-panel-count">${done}/${tasks.length}</span>` : ''}
-        </div>
-        ${tasks.length === 0
-          ? '<div class="feat-panel-empty">아래에서 할 일을 추가해보세요</div>'
-          : `<div class="feat-panel-tasks">
+        ${tasks.length ? `<div class="feat-panel-tasks">
               ${tasks.map(t => `
                 <div class="feat-panel-row ${t.done ? 'done' : ''}">
                   <button class="feat-task-check" title="${t.done ? '완료 해제' : '완료'}"
@@ -69,10 +62,9 @@ const Projects = (() => {
                   <button class="feat-task-del" title="삭제" onclick="event.stopPropagation();Projects.deleteTask('${t.id}')">✕</button>
                 </div>
               `).join('')}
-            </div>`
-        }
+            </div>` : ''}
         <input type="text" class="feat-task-input"
-          placeholder="+ 할 일 추가 (Enter)"
+          placeholder="할 일 추가"
           onclick="event.stopPropagation()"
           onkeydown="Projects.handleTaskAdd(event, '${f.id}')">
       </div>
@@ -180,11 +172,7 @@ const Projects = (() => {
             <span class="ai-badge">✦ AI</span>
           </div>
           <div class="quick-add-footer">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <span class="nl-rule-chip">기능명</span>
-              <span class="nl-rule-sep">·</span>
-              <span class="quick-add-hint">필수 · 분야·설명은 선택 · Enter로 추가</span>
-            </div>
+            <span class="quick-add-hint">Enter로 추가</span>
           </div>
         </div>
       </div>

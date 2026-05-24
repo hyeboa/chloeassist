@@ -206,7 +206,7 @@ const Schedule = (() => {
                   data-cat="${c}" onclick="Schedule.selectCat('${c}')">${c}</button>
               `).join('')}
             </div>
-            <span class="quick-add-hint">기본 분야 선택 · 날짜 포함 시 AI 자동 추출 · Enter</span>
+            <span class="quick-add-hint">Enter로 추가</span>
           </div>
           <div class="quick-add-status" id="bl-status"></div>
         </div>
