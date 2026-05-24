@@ -469,3 +469,20 @@
   color: var(--color-primary);
   background: var(--color-primary-light);
 }
+
+/* ─ 브레인덤프 안내 배너 ─ */
+.proj-from-braindump-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-2);
+  background: var(--color-primary-light);
+  border: 1px solid #ddd6fe;
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  margin-bottom: 14px;
+}
+.proj-hint-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.proj-hint-link:hover { text-decoration: underline; }

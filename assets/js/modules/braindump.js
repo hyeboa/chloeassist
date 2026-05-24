@@ -271,6 +271,7 @@ const Braindump = (() => {
         <input id="dump-tag-input" class="dump-tag-input" type="text"
           placeholder="프로젝트 태그 (선택)"
           value="${escapeHtml(lastProject)}">
+        <div class="dump-tag-hint">프로젝트 태그를 입력하면 새 프로젝트가 만들어져요. 내 프로젝트에서 확인할 수 있어요.</div>
       </div>
 
       <div class="dump-list-header">

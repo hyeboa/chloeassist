@@ -126,6 +126,10 @@ const Projects = (() => {
   function buildHTML() {
     const features = getFeatures();
     return `
+      <div class="proj-from-braindump-hint">
+        💡 프로젝트 추가는 <a href="braindump.html" class="proj-hint-link">브레인 덤프</a>에서 — 생각을 덤프하고 프로젝트 태그를 입력하면 자동으로 등록돼요.
+      </div>
+
       <div class="inline-nl-wrap">
         <div class="inline-nl-label">새 기능 추가</div>
         <input id="feat-input" class="inline-nl-input" type="text"

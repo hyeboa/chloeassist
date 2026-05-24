@@ -326,3 +326,11 @@
   font-size: 0.68rem;
   color: var(--color-text-3);
 }
+
+/* ─ 태그 힌트 ─ */
+.dump-tag-hint {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  margin-top: 4px;
+  padding-left: 2px;
+}
