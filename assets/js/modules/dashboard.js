@@ -156,6 +156,77 @@ const Dashboard = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /* ─ 현재 목표 포커스 ─ */
+  function getActiveGoal() {
+    const goals = Store.get('goals') || [];
+    const milestones = Store.get('milestones') || [];
+    return goals.find(g => {
+      const items = g.items || [];
+      const linked = milestones.filter(m => m.goalId === g.id);
+      const total = items.length + linked.length;
+      const done  = items.filter(i => i.done).length + linked.filter(m => m.done).length;
+      return total === 0 || done < total;
+    });
+  }
+
+  function toggleGoalItem(goalId, itemId) {
+    const goals = Store.get('goals') || [];
+    const goal  = goals.find(g => g.id === goalId);
+    if (!goal) return;
+    Store.update('goals', goalId, {
+      items: (goal.items || []).map(i => i.id === itemId ? { ...i, done: !i.done } : i)
+    });
+    render();
+  }
+
+  function renderGoalFocus() {
+    const goal = getActiveGoal();
+    if (!goal) return '';
+
+    const milestones = Store.get('milestones') || [];
+    const goals      = Store.get('goals') || [];
+    const items   = goal.items || [];
+    const linked  = milestones.filter(m => m.goalId === goal.id);
+    const total   = items.length + linked.length;
+    const doneCnt = items.filter(i => i.done).length + linked.filter(m => m.done).length;
+    const pct     = total ? Math.round(doneCnt / total * 100) : 0;
+    const index   = goals.findIndex(g => g.id === goal.id);
+    const dd      = goal.targetDate ? ddayInfo(goal.targetDate) : null;
+
+    const nextItems = items.filter(i => !i.done).slice(0, 3);
+    const nextMs    = linked.filter(m => !m.done).slice(0, Math.max(0, 3 - nextItems.length));
+
+    return `
+      <div class="goal-focus-card">
+        <div class="goal-focus-header">
+          <div class="goal-focus-meta">
+            <span class="goal-focus-badge">${index + 1}차 목표</span>
+            <span class="goal-focus-title">${escapeHtml(goal.title)}</span>
+            ${dd ? `<span class="goal-focus-dday ${dd.cls}">${dd.label}</span>` : ''}
+          </div>
+          <a href="goals.html" class="goal-focus-link">목표 보기 →</a>
+        </div>
+        <div class="goal-focus-bar-row">
+          <div class="goal-focus-bar"><div class="goal-focus-bar-fill" style="width:${pct}%"></div></div>
+          <span class="goal-focus-pct">${pct}%</span>
+        </div>
+        ${nextItems.length + nextMs.length > 0 ? `
+          <div class="goal-focus-items">
+            ${nextItems.map(it => `
+              <div class="goal-focus-item" onclick="Dashboard.toggleGoalItem('${goal.id}','${it.id}')">
+                <div class="goal-focus-check"></div>
+                <span>${escapeHtml(it.text)}</span>
+              </div>`).join('')}
+            ${nextMs.map(m => `
+              <div class="goal-focus-item">
+                <div class="goal-focus-check"></div>
+                <span>${escapeHtml(m.title)}</span>
+                <span class="goal-focus-ms-tag">마일스톤</span>
+              </div>`).join('')}
+          </div>` : `<div class="goal-focus-empty">다음 항목을 추가해보세요</div>`}
+      </div>`;
+  }
+
   function renderCatGroup(cat, tasks) {
     const active = tasks.filter(t => !t.done);
     const done   = tasks.filter(t =>  t.done);
@@ -356,6 +427,7 @@ const Dashboard = (() => {
 
     document.getElementById('app').innerHTML = `
       ${renderBanner(done, total, pct)}
+      ${renderGoalFocus()}
 
       <div class="quick-add-wrap">
         <input id="quick-input" class="quick-add-input" type="text"
@@ -409,7 +481,7 @@ const Dashboard = (() => {
 
   return {
     render, toggleDone, toggleStar, deleteTask, toggleShowDone, selectCat,
-    toggleFocusMode, nextFocus, prevFocus, endOfDay, toggleProjectDone,
+    toggleFocusMode, nextFocus, prevFocus, endOfDay, toggleProjectDone, toggleGoalItem,
   };
 })();
 
