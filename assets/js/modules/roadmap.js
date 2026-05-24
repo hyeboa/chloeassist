@@ -8,7 +8,6 @@ const Roadmap = (() => {
   let activeTab     = 'schedule';
   let pageMode      = 'schedule'; // 'goals' | 'schedule' | 'milestones'
   let expandedGoals = new Set();
-  let archiveExpanded = false;
 
   /* ─ 데이터 ─ */
   function getMilestones() { return Store.get('milestones') || []; }
@@ -225,25 +224,16 @@ const Roadmap = (() => {
   }
 
   function renderGoalsSection() {
-    const goals  = getGoals();
-    const active = goals.filter(g => goalProgress(g).pct < 100);
-    const done   = goals.filter(g => goalProgress(g).pct === 100);
+    const goals = getGoals();
     return `
       <div class="goals-section">
         <div class="ms-section-hd">
           <div class="section-title" style="margin:0">단계별 목표</div>
           <span class="ms-section-meta">전체 ${goals.length}개</span>
         </div>
-        ${active.length === 0 && done.length === 0
+        ${goals.length === 0
           ? '<div class="goal-empty">아직 목표가 없어요. 1차 목표부터 추가해보세요.</div>'
-          : active.map((g) => renderGoalCard(g, goals.indexOf(g))).join('')}
-        ${done.length > 0 ? `
-          <div class="goal-archive-row" onclick="Roadmap.toggleArchive()">
-            <span class="goal-archive-chevron${archiveExpanded ? ' open' : ''}">›</span>
-            완료된 목표 ${done.length}개
-          </div>
-          ${archiveExpanded ? done.map((g) => renderGoalCard(g, goals.indexOf(g))).join('') : ''}
-        ` : ''}
+          : goals.map((g, i) => renderGoalCard(g, i)).join('')}
         ${renderAddGoalInput()}
       </div>`;
   }
@@ -567,16 +557,11 @@ const Roadmap = (() => {
 
   function setPageMode(mode) { pageMode = mode; }
 
-  function toggleArchive() {
-    archiveExpanded = !archiveExpanded;
-    render();
-  }
-
   return {
     render, toggleDone, deleteMilestone, prevMonth, nextMonth, setTab, setPageMode,
     addGoal, editGoalTitle, deleteGoal, moveGoalUp, moveGoalDown,
     addItem, toggleItem, deleteItem, assignMilestoneGoal,
-    toggleExpand, setGoalDate, toggleArchive,
+    toggleExpand, setGoalDate,
   };
 })();
 
