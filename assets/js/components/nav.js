@@ -49,7 +49,7 @@ const Nav = (() => {
     const navHTML = NAV_SECTIONS.map(section => `
         <div class="sidebar-section-label">${section.label}</div>
         ${section.items.map(({ href, label, icon }) => `
-            <a href="${href}" class="nav-item ${(current === href || (href === 'weekly.html' && current === 'monthly.html')) ? 'active' : ''}">
+            <a href="${href}" class="nav-item ${current === href ? 'active' : ''}">
                 <span class="nav-icon">${icon}</span>
                 <span>${label}</span>
                 ${href === 'myprojects.html' && dlCount > 0
