@@ -178,34 +178,84 @@ const Routine = (() => {
       days.push({ date, pct, isToday: i === 0, day: dayName(date), num: dayNum(date) });
     }
 
-    const loggedDays = days.slice(0, -1);
-    const avg = loggedDays.length
-      ? Math.round(loggedDays.reduce((s, d) => s + d.pct, 0) / loggedDays.length) : 0;
+    /* ── 통계 계산 ── */
+    const past = days.slice(0, -1); // 오늘 제외
+
+    // 최근 7일 vs 이전 7일 추세
+    const recent7 = past.slice(-7);
+    const prior7  = past.slice(-14, -7);
+    const recentAvg = recent7.length ? Math.round(recent7.reduce((s,d)=>s+d.pct,0)/recent7.length) : 0;
+    const priorAvg  = prior7.length  ? Math.round(prior7.reduce((s,d)=>s+d.pct,0)/prior7.length)  : 0;
+    const trendDiff = recentAvg - priorAvg;
+
+    // 연속 달성 스트릭 (어제 기준)
     let streak = 0;
-    for (let i = days.length - 2; i >= 0; i--) {
-      if (days[i].pct === 100) streak++; else break;
+    for (let i = past.length - 1; i >= 0; i--) {
+      if (past[i].pct === 100) streak++; else break;
     }
 
+    // 최장 연속 달성
+    let bestStreak = 0, cur = 0;
+    for (const d of past) {
+      if (d.pct === 100) { cur++; bestStreak = Math.max(bestStreak, cur); } else cur = 0;
+    }
+
+    // 30일 평균
+    const avg30 = past.length ? Math.round(past.reduce((s,d)=>s+d.pct,0)/past.length) : 0;
+
+    // 추세 레이블
+    const trendClass = trendDiff > 0 ? 'up' : trendDiff < 0 ? 'down' : 'neutral';
+    const trendIcon  = trendDiff > 0 ? '▲' : trendDiff < 0 ? '▼' : '—';
+    const trendMsg   = trendDiff > 5  ? '좋아지고 있어요'
+                     : trendDiff > 0  ? '소폭 상승 중'
+                     : trendDiff === 0 ? '비슷한 수준'
+                     : trendDiff > -5  ? '소폭 하락 중'
+                     : '주춤하고 있어요';
+
+    /* ── 막대 렌더 ── */
     const maxPct = Math.max(...days.map(d => d.pct), 1);
     const bars = days.map(d => {
       const h = Math.round(d.pct / maxPct * 100);
       return `
         <div class="rchart-col${d.isToday ? ' today' : ''}">
-          <div class="rchart-pct">${d.pct > 0 ? d.pct + '%' : ''}</div>
-          <div class="rchart-bar-wrap"><div class="rchart-bar-fill" style="height:${h}%"></div></div>
+          <div class="rchart-bar-wrap">
+            <div class="rchart-bar-fill" style="height:${h}%">
+              ${d.pct > 0 ? `<span class="rchart-bar-pct">${d.pct}%</span>` : ''}
+            </div>
+          </div>
           <div class="rchart-day-label">${d.day}</div>
           <div class="rchart-date-label">${d.num}</div>
         </div>`;
     }).join('');
 
-    return `
-      <div class="rchart-header">
-        <div class="rchart-stats">
-          <span class="rchart-stat"><em>${avg}%</em> 29일 평균</span>
-          ${streak > 0 ? `<span class="rchart-stat streak"><em>${streak}일</em> 연속 100%</span>` : ''}
+    /* ── 통계 푸터 ── */
+    const statsFooter = `
+      <div class="rchart-stats-footer">
+        <div class="rchart-stat-card trend-${trendClass}">
+          <div class="rchart-stat-top">
+            <span class="rchart-trend-icon">${trendIcon}</span>
+            <span class="rchart-stat-val">${trendDiff > 0 ? '+' : ''}${trendDiff}%p</span>
+          </div>
+          <div class="rchart-stat-label">${trendMsg}</div>
+          <div class="rchart-stat-sub">최근 7일 vs 이전 7일</div>
         </div>
-      </div>
-      <div class="rchart-grid">${bars}</div>`;
+        <div class="rchart-stat-card">
+          <div class="rchart-stat-val">${avg30}%</div>
+          <div class="rchart-stat-label">30일 평균</div>
+        </div>
+        <div class="rchart-stat-card">
+          <div class="rchart-stat-val">${streak > 0 ? streak + '일' : '—'}</div>
+          <div class="rchart-stat-label">현재 연속 달성</div>
+          <div class="rchart-stat-sub">어제 기준</div>
+        </div>
+        <div class="rchart-stat-card">
+          <div class="rchart-stat-val">${bestStreak > 0 ? bestStreak + '일' : '—'}</div>
+          <div class="rchart-stat-label">최장 연속 달성</div>
+          <div class="rchart-stat-sub">30일 내 최고</div>
+        </div>
+      </div>`;
+
+    return `<div class="rchart-grid">${bars}</div>${statsFooter}`;
   }
 
   /* ─ 메인 렌더 ─ */
