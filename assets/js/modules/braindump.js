@@ -220,10 +220,10 @@ const Braindump = (() => {
           ${n.done ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
         </button>
         <span class="dump-text">${escapeHtml(n.text)}</span>
-        ${badge}
-        <span class="dump-meta">${formatDate(n.createdAt)}</span>
         <button class="dump-action dump-convert"
           onclick="Braindump.startConvert('${n.id}')" title="할 일로 변환">→ 할 일</button>
+        ${badge}
+        <span class="dump-meta">${formatDate(n.createdAt)}</span>
         <button class="dump-action dump-delete"
           onclick="Braindump.deleteNote('${n.id}')" title="삭제">✕</button>
       </div>`;

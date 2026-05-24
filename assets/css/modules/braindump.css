@@ -159,7 +159,8 @@
 }
 
 .dump-text {
-  flex: 1;
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 1.05rem;
   color: var(--color-text);
   word-break: break-word;
@@ -170,6 +171,7 @@
   font-size: 0.88rem;
   color: var(--color-text-3);
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .dump-action {
@@ -187,16 +189,18 @@
 }
 
 .dump-convert {
+  opacity: 1;
   padding: 0 14px;
-  font-weight: 500;
-  border: 1px solid var(--color-border);
-  background: transparent;
+  font-weight: 600;
+  color: var(--color-primary);
+  border: 1px solid #c4b5fd;
+  background: rgba(108, 99, 255, 0.06);
 }
 
 .dump-convert:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: rgba(108, 99, 255, 0.06);
+  color: #fff;
+  background: var(--color-primary);
 }
 
 .dump-delete {

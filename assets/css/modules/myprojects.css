@@ -219,7 +219,8 @@
 }
 
 .mp-task-title {
-  flex: 1;
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 0.97rem;
   color: var(--color-text);
   word-break: break-word;
@@ -236,6 +237,7 @@
   opacity: 0;
   width: 28px;
   height: 28px;
+  margin-left: auto;
   border-radius: var(--radius-sm);
   border: none;
   background: transparent;
