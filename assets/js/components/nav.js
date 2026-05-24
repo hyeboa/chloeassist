@@ -4,29 +4,47 @@
  */
 
 const Nav = (() => {
+  /* 일관된 라인 아이콘 세트 (stroke=currentColor, 24 viewBox) */
+  const ICONS = {
+    today: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    list: '<path d="M8 6h12M8 12h12M8 18h12"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+    brain: '<path d="M9 18h6M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 2.5z"/>',
+    routine: '<path d="M17 2.5l3 3-3 3"/><path d="M20.5 5.5H8a4 4 0 0 0-4 4"/><path d="M7 21.5l-3-3 3-3"/><path d="M3.5 18.5H16a4 4 0 0 0 4-4"/>',
+    folder: '<path d="M3 7a2 2 0 0 1 2-2h3.5l2 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M9 14l2 2 4-4"/>',
+    map: '<path d="M9 4 3.5 6v13.5L9 17.5l6 2 5.5-2V4l-5.5 2-6-2z"/><path d="M9 4v13.5M15 6v13.5"/>',
+    target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+    layout: '<rect x="3" y="3.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M9.5 20.5V9.5"/>',
+    review: '<path d="M3.5 3.5v17h17"/><path d="M7.5 16v-4M12 16V8.5M16.5 16v-6"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.87 1.2v.1a2 2 0 1 1-4 0v-.06A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1.1H3a2 2 0 1 1 0-4h.06A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.1-1.6V3a2 2 0 1 1 4 0v.06a1.7 1.7 0 0 0 2.87 1.14l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.1a1.7 1.7 0 0 0 1.5 1.4H21a2 2 0 1 1 0 4h-.06a1.7 1.7 0 0 0-1.54.9z"/>',
+  };
+
+  function svgIcon(name) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
+  }
+
   const NAV_SECTIONS = [
     {
       label: '매일',
       items: [
-        { href: 'index.html',    label: '오늘',       icon: '◎' },
-        { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
-        { href: 'braindump.html',  label: '브레인 덤프', icon: '✦' },
-        { href: 'routine.html',    label: '하루 루틴',   icon: '○' },
-      { href: 'myprojects.html', label: '내 프로젝트', icon: '◉' },
+        { href: 'index.html',      label: '오늘',       icon: 'today' },
+        { href: 'schedule.html',   label: '할 일 목록',  icon: 'list' },
+        { href: 'braindump.html',  label: '브레인 덤프', icon: 'brain' },
+        { href: 'routine.html',    label: '하루 루틴',   icon: 'routine' },
+        { href: 'myprojects.html', label: '내 프로젝트', icon: 'folder' },
       ]
     },
     {
       label: '헬로아지',
       items: [
-        { href: 'roadmap.html', label: '마일스톤',  icon: '◈' },
-        { href: 'goals.html',   label: '목표',      icon: '⚑' },
-        { href: 'sitemap.html', label: '제품 설계', icon: '◧' },
+        { href: 'roadmap.html', label: '마일스톤',  icon: 'map' },
+        { href: 'goals.html',   label: '목표',      icon: 'target' },
+        { href: 'sitemap.html', label: '제품 설계', icon: 'layout' },
       ]
     },
     {
       label: '돌아보기',
       items: [
-        { href: 'weekly.html',   label: '리뷰',        icon: '◫' },
+        { href: 'weekly.html',   label: '리뷰',        icon: 'review' },
       ]
     },
   ];
@@ -48,31 +66,40 @@ const Nav = (() => {
     const current = currentPage();
     const dlCount = deadlineCount();
     const navHTML = NAV_SECTIONS.map(section => `
-        <div class="sidebar-section-label">${section.label}</div>
-        ${section.items.map(({ href, label, icon }) => `
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">${section.label}</div>
+          ${section.items.map(({ href, label, icon }) => `
             <a href="${href}" class="nav-item ${current === href ? 'active' : ''}">
-                <span class="nav-icon">${icon}</span>
-                <span>${label}</span>
+                <span class="nav-icon">${svgIcon(icon)}</span>
+                <span class="nav-label">${label}</span>
                 ${href === 'myprojects.html' && dlCount > 0
                   ? `<span class="nav-badge" title="마감 임박 ${dlCount}개">${dlCount}</span>`
                   : ''}
             </a>
-        `).join('')}
+          `).join('')}
+        </div>
     `).join('');
 
     const sidebarHTML = `
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-logo">
-                <div class="sidebar-logo-text">헬로아지</div>
-                <div class="sidebar-logo-sub">작업 관리 by Chloe</div>
+                <div class="sidebar-logo-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4L12 3z"/>
+                    </svg>
+                </div>
+                <div class="sidebar-logo-text-wrap">
+                    <div class="sidebar-logo-text">헬로아지</div>
+                    <div class="sidebar-logo-sub">작업 관리 by Chloe</div>
+                </div>
             </div>
             <nav class="sidebar-nav">
                 ${navHTML}
             </nav>
             <div class="sidebar-footer">
                 <button class="nav-item" id="btn-settings" style="width:100%">
-                    <span class="nav-icon">⚙</span>
-                    <span>설정</span>
+                    <span class="nav-icon">${svgIcon('settings')}</span>
+                    <span class="nav-label">설정</span>
                 </button>
             </div>
         </aside>
