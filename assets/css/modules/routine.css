@@ -1,39 +1,40 @@
 /* ===== 하루 루틴 ===== */
 
 .routine-wrap {
-  max-width: 560px;
+  max-width: 600px;
 }
 
-/* ─ 헤더 (날짜 + 진행률) ─ */
+/* ─ 헤더 ─ */
 .routine-header {
+  margin-bottom: 20px;
+}
+
+.routine-date-row {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .routine-date {
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-text);
-  flex-shrink: 0;
 }
 
-.routine-progress-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 160px;
+.routine-today-pct {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
 }
 
 .routine-progress-bar {
-  flex: 1;
-  height: 8px;
+  height: 6px;
   background: var(--color-surface-2);
   border-radius: var(--radius-full);
   overflow: hidden;
+  margin-bottom: 6px;
 }
 
 .routine-progress-fill {
@@ -44,12 +45,8 @@
 }
 
 .routine-progress-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-text-2);
-  flex-shrink: 0;
-  min-width: 80px;
-  text-align: right;
+  font-size: 0.78rem;
+  color: var(--color-text-3);
 }
 
 /* ─ 루틴 목록 ─ */
@@ -57,7 +54,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .routine-empty {
@@ -71,7 +68,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 13px 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -83,7 +80,7 @@
 }
 
 .routine-item.done {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .routine-item.done .routine-name {
@@ -123,7 +120,7 @@
 /* ─ 루틴 이름 ─ */
 .routine-name {
   flex: 1;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--color-text);
   word-break: break-word;
 }
@@ -131,13 +128,13 @@
 /* ─ 삭제 버튼 ─ */
 .routine-delete {
   opacity: 0;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--color-text-3);
   flex-shrink: 0;
   transition: opacity var(--transition), background var(--transition), color var(--transition);
@@ -153,6 +150,109 @@
 }
 
 /* ─ 추가 입력 ─ */
-.routine-add-wrap {
-  max-width: 100%;
+.routine-add-form {
+  margin-bottom: 32px;
+}
+
+.routine-input {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 0.9rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.routine-input:focus {
+  border-color: var(--color-primary);
+}
+
+.routine-input::placeholder {
+  color: var(--color-text-3);
+}
+
+/* ─ 히스토리 차트 ─ */
+.rchart-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px 20px 16px;
+}
+
+.rchart-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+
+.rchart-grid {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 4px;
+  align-items: end;
+}
+
+.rchart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rchart-pct {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  min-height: 14px;
+  text-align: center;
+  line-height: 1;
+}
+
+.rchart-bar-wrap {
+  width: 100%;
+  height: 80px;
+  background: var(--color-surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.rchart-bar-fill {
+  width: 100%;
+  background: linear-gradient(180deg, #a78bfa, var(--color-primary));
+  border-radius: 4px;
+  transition: height 0.4s ease;
+  min-height: 0;
+}
+
+.rchart-col.today .rchart-bar-wrap {
+  background: var(--color-primary-light);
+}
+
+.rchart-col.today .rchart-bar-fill {
+  background: linear-gradient(180deg, #7c3aed, var(--color-primary));
+}
+
+.rchart-col.today .rchart-label {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.rchart-label {
+  font-size: 0.68rem;
+  color: var(--color-text-3);
+  font-weight: 500;
+}
+
+.rchart-date {
+  font-size: 0.6rem;
+  color: var(--color-text-3);
+  opacity: 0.7;
 }
