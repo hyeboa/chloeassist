@@ -112,9 +112,9 @@ const Dashboard = (() => {
       </div>`;
   }
 
-  function addTask(title, category) {
+  function addTask(title, category, dueDate) {
     if (!title.trim()) return;
-    Store.push('tasks', { title: title.trim(), category, done: false, isToday: true });
+    Store.push('tasks', { title: title.trim(), category, done: false, isToday: true, dueDate: dueDate || null });
     render();
   }
 
@@ -393,10 +393,30 @@ const Dashboard = (() => {
     `;
 
     const input = document.getElementById('quick-input');
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.isComposing) {
-        addTask(input.value, selectedCat);
+    input?.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (!AI.getApiKey()) {
+        addTask(text, selectedCat);
         input.value = '';
+        input.focus();
+        return;
+      }
+
+      input.disabled = true;
+      input.placeholder = '✦ AI가 분석 중...';
+      try {
+        const result = await NLInput.parse('task', text);
+        addTask(result.title || text, result.category || selectedCat, result.date || null);
+        input.value = '';
+      } catch {
+        addTask(text, selectedCat);
+        input.value = '';
+      } finally {
+        input.disabled = false;
+        input.placeholder = '오늘 할 일을 입력하세요';
         input.focus();
       }
     });

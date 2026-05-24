@@ -220,11 +220,35 @@ const Projects = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      Store.push('features', {
-        name: text, desc: '', category: '기획', status: '아이디어',
-      });
-      input.value = '';
-      render();
+      if (!AI.getApiKey()) {
+        Store.push('features', { name: text, desc: '', category: '기획', status: '아이디어' });
+        input.value = '';
+        render();
+        return;
+      }
+
+      input.disabled = true;
+      input.placeholder = '✦ AI가 분석 중...';
+      try {
+        const result = await NLInput.parse('feature', text);
+        Store.push('features', {
+          name: result.name || text,
+          desc: result.desc || '',
+          category: result.category || '기획',
+          status: '아이디어',
+        });
+        input.value = '';
+        render();
+      } catch {
+        Store.push('features', { name: text, desc: '', category: '기획', status: '아이디어' });
+        input.value = '';
+        render();
+      } finally {
+        input.disabled = false;
+        input.placeholder = '산책 기록 기능 디자인 GPS 경로 저장 및 공유...';
+        const nextInput = document.getElementById('feat-input');
+        if (nextInput) nextInput.focus();
+      }
     });
   }
 
