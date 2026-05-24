@@ -543,19 +543,19 @@
   transition: flex 0.4s ease;
 }
 
-.pipeline-seg.done     { background: #d1fae5; }
-.pipeline-seg.active   { background: rgba(108,99,255,0.15); }
+.pipeline-seg.done     { background: #e2e8f0; }
+.pipeline-seg.active   { background: rgba(108,99,255,0.12); }
 .pipeline-seg.progress { background: var(--color-surface-2); }
-.pipeline-seg.waiting  { background: var(--color-surface-2); opacity: 0.5; }
+.pipeline-seg.waiting  { background: var(--color-surface-2); opacity: 0.45; }
 
 .pipeline-fill {
   height: 100%;
   border-radius: 999px;
   transition: width 0.6s ease;
 }
-.pipeline-seg.done     .pipeline-fill { background: var(--color-success); }
+.pipeline-seg.done     .pipeline-fill { background: #94a3b8; }
 .pipeline-seg.active   .pipeline-fill { background: var(--color-primary); }
-.pipeline-seg.progress .pipeline-fill { background: var(--color-primary); opacity: 0.55; }
+.pipeline-seg.progress .pipeline-fill { background: var(--color-primary); opacity: 0.45; }
 
 /* ─ 하단 레이블 ─ */
 .pipeline-labels {
@@ -618,8 +618,32 @@
   line-height: 1.6;
   width: fit-content;
 }
-.pl-chip.done    { background: #d1fae5; color: #065f46; }
+.pl-chip.done    { background: #e2e8f0; color: #64748b; }
 .pl-chip.waiting { background: var(--color-surface-2); color: var(--color-text-3); }
+
+/* D-day + % 메타 줄 */
+.pl-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 1px;
+}
+
+/* pipeline 전용 소형 D-day 배지 */
+.pl-dday {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+.pl-dday.dday-done    { background: #e2e8f0;           color: #64748b; }
+.pl-dday.dday-today   { background: var(--color-primary-light, rgba(108,99,255,0.1)); color: var(--color-primary); }
+.pl-dday.dday-soon    { background: #fef3c7;           color: #b45309; }
+.pl-dday.dday-future  { background: var(--color-surface-2); color: var(--color-text-3); }
+.pl-dday.dday-overdue { background: #fee2e2;           color: var(--color-danger); }
 
 /* ═══════════════════════════════════════
    단계별 목표 (Phased Goals)

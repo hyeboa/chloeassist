@@ -210,7 +210,7 @@ const Roadmap = (() => {
         ${isDone
           ? '<span class="pl-chip done">완료</span>'
           : isActive
-            ? `${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}<span class="pl-pct active">${pct}%</span>`
+            ? `<div class="pl-meta">${dd ? `<span class="pl-dday ${dd.cls}">${dd.label}</span>` : ''}<span class="pl-pct">${pct}%</span></div>`
             : pct > 0
               ? `<span class="pl-pct">${pct}%</span>`
               : '<span class="pl-chip waiting">대기</span>'}
