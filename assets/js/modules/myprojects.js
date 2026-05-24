@@ -178,8 +178,8 @@ const MyProjects = (() => {
           </button>
           ${priority !== 'normal' ? `<span class="mp-prio-dot ${priority}" title="우선순위 ${priority === 'high' ? '높음' : '낮음'}"></span>` : ''}
           <span class="mp-task-title" onclick="MyProjects.toggleExpand('${t.id}')">${escapeHtml(t.title)}</span>
+          ${hasMemo ? `<span class="mp-memo-preview" onclick="MyProjects.toggleExpand('${t.id}')">${escapeHtml(t.memo.length > 22 ? t.memo.slice(0, 22) + '…' : t.memo)}</span>` : ''}
           ${dueBadge(t)}
-          ${hasMemo ? `<span class="mp-memo-icon" title="메모 있음">✎</span>` : ''}
           <button class="mp-delete" onclick="MyProjects.deleteTask('${t.id}')" title="삭제">✕</button>
         </div>
 

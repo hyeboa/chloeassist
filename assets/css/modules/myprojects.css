@@ -181,10 +181,16 @@
 .mp-due.overdue { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
 /* ─ 메모 아이콘 ─ */
-.mp-memo-icon {
-  font-size: 0.8rem;
+.mp-memo-preview {
+  font-size: 0.78rem;
   color: var(--color-text-3);
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  max-width: 160px;
 }
 
 .mp-check {
