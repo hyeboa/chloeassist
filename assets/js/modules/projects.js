@@ -24,35 +24,47 @@ const Projects = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  /* ─ 태스크 패널 ─ */
+  /* ─ 상태별 컬러 ─ */
+  const STATUS_COLOR = {
+    '아이디어': { bg: '#eef0f5', text: '#64748b', border: '#cbd5e1' },
+    '기획중':   { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' },
+    '디자인중': { bg: '#fce7f3', text: '#be185d', border: '#f9a8d4' },
+    '개발중':   { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' },
+    '완료':     { bg: '#dcfce7', text: '#15803d', border: '#6ee7b7' },
+    '미정':     { bg: '#f1f5f9', text: '#94a3b8', border: '#e2e8f0' },
+  };
+  function sc(status) { return STATUS_COLOR[status] || STATUS_COLOR['미정']; }
+
+  /* ─ 아이콘 SVG ─ */
+  function chevronRightSvg() {
+    return `<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M3.5 1.5l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  function chevronLeftSvg() {
+    return `<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M7.5 1.5l-4 4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  function checkSvg() {
+    return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5 3.5-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  /* ─ 태스크 패널 (펼침) ─ */
   function renderTaskPanel(f) {
     const tasks = linkedTasks(f.id);
-    const done  = tasks.filter(t => t.done).length;
 
     return `
       <div class="feat-panel">
-        <div class="feat-panel-label">
-          <span>할 일</span>
-          ${tasks.length ? `<span class="feat-panel-count">${done}/${tasks.length}</span>` : ''}
-        </div>
-        ${tasks.length === 0
-          ? '<div class="feat-panel-empty">아래에서 할 일을 추가해보세요</div>'
-          : `<div class="feat-panel-tasks">
+        ${tasks.length ? `<div class="feat-panel-tasks">
               ${tasks.map(t => `
                 <div class="feat-panel-row ${t.done ? 'done' : ''}">
                   <button class="feat-task-check" title="${t.done ? '완료 해제' : '완료'}"
                     onclick="event.stopPropagation();Projects.toggleTaskDone('${t.id}')">
-                    ${t.done ? '✓' : ''}
-                  </button>
+                    ${t.done ? checkSvg() : ''}</button>
                   <span class="feat-task-title">${escapeHtml(t.title)}</span>
                   <button class="feat-task-del" title="삭제" onclick="event.stopPropagation();Projects.deleteTask('${t.id}')">✕</button>
                 </div>
               `).join('')}
-            </div>`
-        }
-
+            </div>` : ''}
         <input type="text" class="feat-task-input"
-          placeholder="+ 할 일 추가 (Enter)"
+          placeholder="할 일 추가"
           onclick="event.stopPropagation()"
           onkeydown="Projects.handleTaskAdd(event, '${f.id}')">
       </div>
@@ -68,15 +80,30 @@ const Projects = (() => {
     const nextStatus = STATUSES[STATUSES.indexOf(f.status) + 1];
     const prevStatus = STATUSES[STATUSES.indexOf(f.status) - 1];
     const cat        = f.category || '';
+    const nextSc     = nextStatus ? sc(nextStatus) : null;
+    const prevSc     = prevStatus ? sc(prevStatus) : null;
+
+    /* 접힌 상태에서 할 일 미리보기 (최대 3개) */
+    const taskPreview = !isOpen && tasks.length > 0 ? `
+      <div class="feat-task-preview">
+        ${tasks.slice(0, 3).map(t => `
+          <div class="feat-preview-row ${t.done ? 'done' : ''}">
+            <span class="feat-preview-check">${t.done ? checkSvg() : ''}</span>
+            <span class="feat-preview-title">${escapeHtml(t.title)}</span>
+          </div>`).join('')}
+        ${tasks.length > 3 ? `<div class="feat-preview-more">+ ${tasks.length - 3}개 더</div>` : ''}
+      </div>` : '';
 
     return `
       <div class="feature-card ${isOpen ? 'expanded' : ''}" data-status="${f.status}" onclick="Projects.toggleExpand('${f.id}')">
         <div class="feature-card-head">
-          ${cat ? `<span class="cat-badge ${cat}">${cat}</span>` : '<span class="cat-badge cat-empty">미분류</span>'}
-          ${nextStatus ? `
-            <button class="feature-quick-next" title="다음 단계: ${nextStatus}"
-              onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">▶</button>
-          ` : `<span class="feature-quick-done" title="완료">✓</span>`}
+          ${cat ? `<span class="feat-status-chip" style="background:${sc(f.status).bg};color:${sc(f.status).text};border-color:${sc(f.status).border}">${cat}</span>`
+                : `<span class="feat-status-chip" style="background:${sc('미정').bg};color:${sc('미정').text};border-color:${sc('미정').border}">미분류</span>`}
+          ${nextStatus
+            ? `<button class="feature-quick-next" title="다음 단계: ${nextStatus}"
+                style="background:${nextSc.bg};color:${nextSc.text};border-color:${nextSc.border}"
+                onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">${chevronRightSvg()}</button>`
+            : `<span class="feature-quick-done">${checkSvg()}</span>`}
         </div>
 
         <div class="feature-card-name">${escapeHtml(f.name)}</div>
@@ -88,11 +115,9 @@ const Projects = (() => {
               <div class="feature-progress-fill" style="width:${pct}%"></div>
             </div>
             <span class="feature-progress-text">${done}/${tasks.length}</span>
-          </div>` : `
-          <div class="feature-progress empty">
-            <div class="feature-progress-bar"><div class="feature-progress-fill" style="width:0"></div></div>
-            <span class="feature-progress-text">할 일 없음</span>
-          </div>`}
+          </div>` : ''}
+
+        ${taskPreview}
 
         ${isOpen ? `
           ${(() => {
@@ -102,20 +127,33 @@ const Projects = (() => {
               <div class="feat-linked-screens">
                 <div class="feat-linked-label">관련 화면 <span class="feat-linked-count">${screens.length}</span></div>
                 <div class="feat-linked-list">
-                  ${screens.map(s => `
+                  ${screens.map(s => {
+                    const sColor = sc(s.status || '미정');
+                    return `
                     <span class="feat-linked-chip"
-                      onclick="event.stopPropagation();Projects.goToScreens()" title="화면 탭으로 이동">
-                      ${escapeHtml(s.name)}
-                      <span class="feat-linked-status">${s.status || '미정'}</span>
-                    </span>
-                  `).join('')}
+                      onclick="event.stopPropagation();Projects.goToScreens()" title="화면 탭으로 이동"
+                      style="background:${sColor.bg};border-color:${sColor.border}">
+                      <span class="feat-linked-chip-name" style="color:${sColor.text}">${escapeHtml(s.name)}</span>
+                      <span class="feat-linked-status" style="color:${sColor.text};border-color:${sColor.border};opacity:0.7">${s.status || '미정'}</span>
+                    </span>`;
+                  }).join('')}
                 </div>
               </div>`;
           })()}
           ${renderTaskPanel(f)}
           <div class="feature-card-actions-row">
-            ${prevStatus ? `<button class="feature-action-btn prev" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${prevStatus}')">◀ ${prevStatus}</button>` : ''}
-            ${nextStatus ? `<button class="feature-action-btn next" onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">${nextStatus} ▶</button>` : ''}
+            ${prevStatus ? `
+              <button class="feature-action-btn prev"
+                style="background:${prevSc.bg};color:${prevSc.text};border-color:${prevSc.border}"
+                onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${prevStatus}')">
+                ${chevronLeftSvg()} ${prevStatus}
+              </button>` : ''}
+            ${nextStatus ? `
+              <button class="feature-action-btn next"
+                style="background:${nextSc.bg};color:${nextSc.text};border-color:${nextSc.border}"
+                onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">
+                ${nextStatus} ${chevronRightSvg()}
+              </button>` : ''}
             <button class="feature-action-btn del" title="기능 삭제" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">✕</button>
           </div>` : ''}
       </div>
@@ -126,18 +164,16 @@ const Projects = (() => {
   function buildHTML() {
     const features = getFeatures();
     return `
-      <div class="proj-from-braindump-hint">
-        💡 프로젝트 추가는 <a href="braindump.html" class="proj-hint-link">브레인 덤프</a>에서 — 생각을 덤프하고 프로젝트 태그를 입력하면 자동으로 등록돼요.
-      </div>
-
-      <div class="inline-nl-wrap">
-        <div class="inline-nl-label">새 기능 추가</div>
-        <input id="feat-input" class="inline-nl-input" type="text"
-          placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
-        <div class="inline-nl-footer">
-          <span class="nl-rule-chip">기능명</span>
-          <span class="nl-rule-sep">·</span>
-          <span class="nl-rule-hint">필수 · 분야·설명은 선택 · Enter로 추가</span>
+      <div class="quick-add-wrap">
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="feat-input" class="quick-add-input" type="text"
+              placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
+            <span class="ai-badge">✦ AI</span>
+          </div>
+          <div class="quick-add-footer">
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
         </div>
       </div>
 
@@ -178,11 +214,35 @@ const Projects = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      Store.push('features', {
-        name: text, desc: '', category: '기획', status: '아이디어',
-      });
-      input.value = '';
-      render();
+      if (!AI.getApiKey()) {
+        Store.push('features', { name: text, desc: '', category: '기획', status: '아이디어' });
+        input.value = '';
+        render();
+        return;
+      }
+
+      input.disabled = true;
+      input.placeholder = '✦ AI가 분석 중...';
+      try {
+        const result = await NLInput.parse('feature', text);
+        Store.push('features', {
+          name: result.name || text,
+          desc: result.desc || '',
+          category: result.category || '기획',
+          status: '아이디어',
+        });
+        input.value = '';
+        render();
+      } catch {
+        Store.push('features', { name: text, desc: '', category: '기획', status: '아이디어' });
+        input.value = '';
+        render();
+      } finally {
+        input.disabled = false;
+        input.placeholder = '산책 기록 기능 디자인 GPS 경로 저장 및 공유...';
+        const nextInput = document.getElementById('feat-input');
+        if (nextInput) nextInput.focus();
+      }
     });
   }
 

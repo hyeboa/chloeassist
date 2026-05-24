@@ -411,7 +411,7 @@
   transition: height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.rchart-bar-fill.bar-low     { background: linear-gradient(to top, #94a3b8, #e2e8f0); }
+.rchart-bar-fill.bar-low     { background: linear-gradient(to top, #475569, #94a3b8); }
 .rchart-bar-fill.bar-good    { background: linear-gradient(to top, #0284c7, #38bdf8); }
 .rchart-bar-fill.bar-perfect { background: linear-gradient(to top, #1e3a8a, #3b82f6); }
 

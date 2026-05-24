@@ -62,23 +62,21 @@ const Sitemap = (() => {
     return depth;
   }
 
-  /* ─ 페이지 탭 (화면 / 기능) ─ */
-  function renderPageTabs() {
+  /* ─ 통합 탭 (기능 / 보드 / 구조도) ─ */
+  function renderToolbar() {
+    const isFeatures = pageTab === 'features';
+    const isBoard    = !isFeatures && viewMode === 'board';
+    const isDiagram  = !isFeatures && viewMode === 'diagram';
     return `
-      <div class="review-tabs" style="margin-bottom:20px">
-        <button class="review-tab ${pageTab === 'screens'  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens')">화면</button>
-        <button class="review-tab ${pageTab === 'features' ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">기능</button>
+      <div class="sitemap-toolbar">
+        <button class="sitemap-page-tab ${isFeatures ? 'active' : ''}" onclick="Sitemap.setPageTab('features')">기능</button>
+        <button class="sitemap-page-tab ${isBoard    ? 'active' : ''}" onclick="Sitemap.setPageTab('screens');Sitemap.setView('board')">&#9776; 보드</button>
+        <button class="sitemap-page-tab ${isDiagram  ? 'active' : ''}" onclick="Sitemap.setPageTab('screens');Sitemap.setView('diagram')">&#9671; 구조도</button>
       </div>`;
   }
 
-  /* ─ 뷰 탭 ─ */
-  function renderViewTabs() {
-    return `
-      <div class="sitemap-view-tabs">
-        <button class="sitemap-view-tab ${viewMode === 'board'   ? 'active' : ''}" onclick="Sitemap.setView('board')">&#9776; 보드</button>
-        <button class="sitemap-view-tab ${viewMode === 'diagram' ? 'active' : ''}" onclick="Sitemap.setView('diagram')">&#9671; 구조도</button>
-      </div>`;
-  }
+  function renderPageTabs() { return renderToolbar(); }
+  function renderViewTabs()  { return ''; }
 
   /* ════════════════════════════════
      보드 뷰

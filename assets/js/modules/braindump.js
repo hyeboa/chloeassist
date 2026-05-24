@@ -220,10 +220,10 @@ const Braindump = (() => {
           ${n.done ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
         </button>
         <span class="dump-text">${escapeHtml(n.text)}</span>
-        ${badge}
-        <span class="dump-meta">${formatDate(n.createdAt)}</span>
         <button class="dump-action dump-convert"
           onclick="Braindump.startConvert('${n.id}')" title="할 일로 변환">→ 할 일</button>
+        ${badge}
+        <span class="dump-meta">${formatDate(n.createdAt)}</span>
         <button class="dump-action dump-delete"
           onclick="Braindump.deleteNote('${n.id}')" title="삭제">✕</button>
       </div>`;
@@ -264,14 +264,20 @@ const Braindump = (() => {
       .join('');
 
     document.getElementById('app').innerHTML = `
-      <div class="dump-input-wrap">
-        <input id="dump-input" class="dump-input" type="text"
-          placeholder="생각이 떠오르면 입력하고 Enter"
-          ${convertingId ? '' : 'autofocus'}>
-        <input id="dump-tag-input" class="dump-tag-input" type="text"
-          placeholder="프로젝트 태그 (선택)"
-          value="${escapeHtml(lastProject)}">
-        <div class="dump-tag-hint">프로젝트 태그를 입력하면 새 프로젝트가 만들어져요. 내 프로젝트에서 확인할 수 있어요.</div>
+      <div class="quick-add-wrap">
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="dump-input" class="quick-add-input" type="text"
+              placeholder="생각이 떠오르면 입력하고 Enter"
+              ${convertingId ? '' : 'autofocus'}>
+          </div>
+          <div class="quick-add-footer">
+            <input id="dump-tag-input" class="dump-tag-input" type="text"
+              placeholder="프로젝트 태그 (선택)"
+              value="${escapeHtml(lastProject)}">
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
+        </div>
       </div>
 
       <div class="dump-list-header">
@@ -279,6 +285,7 @@ const Braindump = (() => {
         <div class="dump-toolbar-right">
           ${doneCount > 0 ? `<button id="dump-hide-done" class="dump-hide-done-btn"
             onclick="Braindump.toggleHideDone()">${hideDone ? '완료 보기' : '완료 숨기기'}</button>` : ''}
+          <button id="dump-ai-btn" class="dump-ai-btn" onclick="Braindump.aiOrganize()">✦ AI 정리</button>
         </div>
       </div>
 
@@ -331,10 +338,59 @@ const Braindump = (() => {
     return d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
   }
 
+  async function aiOrganize() {
+    if (!AI.getApiKey()) {
+      Toast.show('설정(⚙)에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
+      return;
+    }
+
+    const notes = (Store.get('notes') || []).filter(n => !n.done);
+    if (notes.length === 0) {
+      Toast.show('정리할 덤프 항목이 없어요.', 'warning');
+      return;
+    }
+
+    const btn = document.getElementById('dump-ai-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '✦ 분석 중...'; }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const noteList = notes.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
+
+    const prompt = `오늘 날짜: ${today}.
+아래는 브레인 덤프 메모들입니다. 실행 가능한 할 일(task)로 정리해 JSON 배열만 반환하세요. 설명 없이 JSON만.
+
+규칙:
+- 각 항목: { "title": "할 일 제목", "category": "기획|디자인|개발|마케팅|운영 중 하나", "date": "YYYY-MM-DD 또는 null" }
+- 중복 의미는 하나로 합치고, 실행 불가능한 메모는 제외
+- 최대 10개
+
+메모:
+${noteList}`;
+
+    try {
+      const raw = await AI.chat([{ role: 'user', content: prompt }], '', 'claude-haiku-4-5-20251001');
+      const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/```\s*$/, '');
+      const tasks = JSON.parse(cleaned);
+      if (!Array.isArray(tasks)) throw new Error();
+
+      tasks.forEach(t => {
+        if (!t.title) return;
+        Store.push('tasks', { title: t.title, category: t.category || '', done: false, isToday: false, dueDate: t.date || null });
+      });
+
+      Toast.show(`✦ ${tasks.length}개 할 일로 정리했어요. 할 일 목록에서 확인하세요.`, 'success');
+    } catch {
+      Toast.show('AI 정리에 실패했어요. 다시 시도해 주세요.', 'error');
+    } finally {
+      const b = document.getElementById('dump-ai-btn');
+      if (b) { b.disabled = false; b.textContent = '✦ AI 정리'; }
+    }
+  }
+
   return {
     render, deleteNote,
     startConvert, cancelConvert, selectConvertCat, selectConvertDate, confirmConvert,
-    toggleDone, setProjectFilter, toggleHideDone,
+    toggleDone, setProjectFilter, toggleHideDone, aiOrganize,
   };
 })();
 

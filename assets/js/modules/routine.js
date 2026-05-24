@@ -217,7 +217,7 @@ const Routine = (() => {
     const bars = days.map(d => {
       const h         = Math.round(d.pct / maxPct * 100);
       const barClass = d.pct === 100 ? 'bar-perfect'
-                     : d.pct >= 60  ? 'bar-good'
+                     : d.pct >= 70  ? 'bar-good'
                      : d.pct > 0    ? 'bar-low'
                      : '';
       return `

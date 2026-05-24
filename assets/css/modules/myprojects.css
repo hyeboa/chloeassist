@@ -181,10 +181,16 @@
 .mp-due.overdue { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
 /* ─ 메모 아이콘 ─ */
-.mp-memo-icon {
-  font-size: 0.8rem;
+.mp-memo-preview {
+  font-size: 0.78rem;
   color: var(--color-text-3);
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  max-width: 160px;
 }
 
 .mp-check {
@@ -213,7 +219,8 @@
 }
 
 .mp-task-title {
-  flex: 1;
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 0.97rem;
   color: var(--color-text);
   word-break: break-word;
@@ -230,6 +237,7 @@
   opacity: 0;
   width: 28px;
   height: 28px;
+  margin-left: auto;
   border-radius: var(--radius-sm);
   border: none;
   background: transparent;
@@ -326,36 +334,4 @@
 }
 .mp-show-done-btn:hover { color: var(--color-text); }
 
-/* ─ 할 일 추가 입력 ─ */
-.mp-add-row {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--color-bg);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-.mp-add-row:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
-}
-
-.mp-add-input {
-  flex: 1;
-  padding: 0;
-  font-size: 0.9rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-  outline: none;
-}
-.mp-add-input::placeholder { color: var(--color-text-3); }
-
-.mp-add-hint {
-  font-size: 0.72rem;
-  color: var(--color-text-3);
-  flex-shrink: 0;
-}
+/* mp-add-row / mp-add-input / mp-add-hint → base.css 공통 정의 사용 */

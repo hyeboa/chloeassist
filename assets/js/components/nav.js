@@ -11,23 +11,22 @@ const Nav = (() => {
         { href: 'index.html',    label: '오늘',       icon: '◎' },
         { href: 'schedule.html', label: '할 일 목록',  icon: '☰' },
         { href: 'braindump.html',  label: '브레인 덤프', icon: '✦' },
+        { href: 'routine.html',    label: '하루 루틴',   icon: '○' },
       { href: 'myprojects.html', label: '내 프로젝트', icon: '◉' },
       ]
     },
     {
       label: '헬로아지',
       items: [
-        { href: 'goals.html',      label: '단계별 목표', icon: '◎' },
-        { href: 'roadmap.html',    label: '스케줄',      icon: '◈' },
-        { href: 'milestones.html', label: '마일스톤',    icon: '⊙' },
-        { href: 'sitemap.html',    label: '화면 & 기능', icon: '◧' },
+        { href: 'roadmap.html', label: '마일스톤',  icon: '◈' },
+        { href: 'goals.html',   label: '목표',      icon: '⚑' },
+        { href: 'sitemap.html', label: '제품 설계', icon: '◧' },
       ]
     },
     {
       label: '돌아보기',
       items: [
         { href: 'weekly.html',   label: '리뷰',        icon: '◫' },
-        { href: 'reflect.html',  label: '회고 모음',   icon: '❀' },
       ]
     },
   ];
@@ -51,7 +50,7 @@ const Nav = (() => {
     const navHTML = NAV_SECTIONS.map(section => `
         <div class="sidebar-section-label">${section.label}</div>
         ${section.items.map(({ href, label, icon }) => `
-            <a href="${href}" class="nav-item ${(current === href || (href === 'weekly.html' && current === 'monthly.html')) ? 'active' : ''}">
+            <a href="${href}" class="nav-item ${current === href ? 'active' : ''}">
                 <span class="nav-icon">${icon}</span>
                 <span>${label}</span>
                 ${href === 'myprojects.html' && dlCount > 0
