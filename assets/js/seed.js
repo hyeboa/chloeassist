@@ -7,16 +7,16 @@
 (function seedSampleData() {
   const version = localStorage.getItem('chloeassist:seeded');
 
-  /* v4 → v10 */
+  /* v4 → v11 */
   if (version === 'v4') {
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v10');
+    localStorage.setItem('chloeassist:seeded', 'v11');
     return;
   }
 
-  /* v5 / v6 / v7 → v10 */
+  /* v5 / v6 / v7 → v11 */
   if (version === 'v5' || version === 'v6' || version === 'v7') {
     localStorage.removeItem('chloeassist:sitemapSections');
     localStorage.removeItem('chloeassist:sitemapScreens');
@@ -24,26 +24,34 @@
     injectSitemapData();
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v10');
+    localStorage.setItem('chloeassist:seeded', 'v11');
     return;
   }
 
-  /* v8 → v10: projectTasks + goals 추가 */
+  /* v8 → v11: projectTasks + goals 추가 */
   if (version === 'v8') {
     injectProjectTasks();
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v10');
+    localStorage.setItem('chloeassist:seeded', 'v11');
     return;
   }
 
-  /* v9 → v10: goals만 추가 */
+  /* v9 → v11: goals만 추가 */
   if (version === 'v9') {
     injectGoals();
-    localStorage.setItem('chloeassist:seeded', 'v10');
+    backfillGoalDates();
+    localStorage.setItem('chloeassist:seeded', 'v11');
     return;
   }
 
-  if (version === 'v10') return;
+  /* v10 → v11: 목표 targetDate 백필 */
+  if (version === 'v10') {
+    backfillGoalDates();
+    localStorage.setItem('chloeassist:seeded', 'v11');
+    return;
+  }
+
+  if (version === 'v11') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -117,7 +125,7 @@
   injectSitemapData();
   injectProjectTasks();
   injectGoals();
-  localStorage.setItem('chloeassist:seeded', 'v10');
+  localStorage.setItem('chloeassist:seeded', 'v11');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -452,18 +460,18 @@
     const g3 = crypto.randomUUID();
 
     const goals = [
-      { id: g1, title: 'MVP 완성', createdAt: t - 3000, items: [
+      { id: g1, title: 'MVP 완성', targetDate: '2026-05-31', createdAt: t - 3000, items: [
         item('핵심 매칭 플로우 구현', true),
         item('반려견 프로필 등록 화면', true),
         item('온보딩 플로우 완성'),
         item('내부 알파 테스트'),
       ] },
-      { id: g2, title: '베타 출시', createdAt: t - 2000, items: [
+      { id: g2, title: '베타 출시', targetDate: '2026-06-15', createdAt: t - 2000, items: [
         item('베타 테스터 100명 모집'),
         item('푸시 알림 연동'),
         item('피드백 수집 채널 마련'),
       ] },
-      { id: g3, title: '정식 출시', createdAt: t - 1000, items: [
+      { id: g3, title: '정식 출시', targetDate: '2026-08-01', createdAt: t - 1000, items: [
         item('앱스토어 심사 통과'),
         item('결제·정산 시스템 연동'),
         item('런칭 마케팅 캠페인'),
@@ -486,6 +494,21 @@
         if (linkByTitle[m.title] && !m.goalId) { m.goalId = linkByTitle[m.title]; changed = true; }
       });
       if (changed) localStorage.setItem('chloeassist:milestones', JSON.stringify(milestones));
+    } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════
+     v10 → v11: 기존 샘플 목표에 targetDate 백필
+  ══════════════════════════════════════════════ */
+  function backfillGoalDates() {
+    try {
+      const goals = JSON.parse(localStorage.getItem('chloeassist:goals') || '[]');
+      const dateMap = { 'MVP 완성': '2026-05-31', '베타 출시': '2026-06-15', '정식 출시': '2026-08-01' };
+      let changed = false;
+      goals.forEach(g => {
+        if (!g.targetDate && dateMap[g.title]) { g.targetDate = dateMap[g.title]; changed = true; }
+      });
+      if (changed) localStorage.setItem('chloeassist:goals', JSON.stringify(goals));
     } catch (e) {}
   }
 })();
