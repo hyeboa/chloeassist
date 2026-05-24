@@ -675,15 +675,11 @@
    단계별 목표 (Phased Goals)
 ═══════════════════════════════════════ */
 .goals-section {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 22px 24px;
   margin-bottom: 28px;
 }
 
 .goal-empty {
-  padding: 28px 0;
+  padding: 36px 0;
   text-align: center;
   font-size: 0.9rem;
   color: var(--color-text-3);
@@ -692,6 +688,7 @@
 /* ── 목표 카드 ── */
 .goal-card {
   border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 0;
   margin-bottom: 8px;
@@ -699,9 +696,10 @@
   transition: border-color var(--transition), box-shadow var(--transition);
   overflow: hidden;
 }
-.goal-card:hover { box-shadow: var(--shadow-sm); }
-.goal-card.urgent { border-color: #fca5a5; }
-.goal-card.expanded { border-color: var(--color-primary); border-opacity: 0.4; }
+.goal-card:hover  { box-shadow: var(--shadow-sm); }
+.goal-card.urgent   { border-left-color: #f97316; }
+.goal-card.done     { border-left-color: var(--color-success); opacity: 0.7; }
+.goal-card.expanded { border-left-color: var(--color-primary); }
 
 .goal-card-head {
   display: flex;
@@ -806,14 +804,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 14px 12px 50px;
+  padding: 0 14px 13px 50px;
 }
 .goal-bar {
   flex: 1;
   margin: 0;
   height: 5px;
 }
-.goal-bar .summary-bar-fill { height: 5px; }
+.goal-bar .summary-bar-fill       { height: 5px; background: var(--color-primary); }
+.goal-bar .summary-bar-fill.goal-fill-done   { background: var(--color-success); }
+.goal-bar .summary-bar-fill.goal-fill-urgent { background: #f97316; }
+.goal-bar .summary-bar-fill.goal-fill-normal { background: var(--color-primary); }
 .goal-bar-pct {
   flex-shrink: 0;
   font-size: 0.72rem;
@@ -825,10 +826,12 @@
 
 /* 펼쳐진 상세 */
 .goal-detail {
-  padding: 14px 16px 16px 50px;
+  padding: 14px 18px 18px 50px;
   border-top: 1px solid var(--color-border);
   background: var(--color-bg);
 }
+.goal-card.urgent .goal-detail  { background: #fff8f5; }
+.goal-card.done   .goal-detail  { background: var(--color-bg); }
 
 /* 날짜 행 */
 .goal-date-row {

@@ -244,11 +244,14 @@ const Roadmap = (() => {
 
   function renderGoalCard(goal, index) {
     const { done, total: t, pct } = goalProgress(goal);
-    const expanded = expandedGoals.has(goal.id);
-    const dd = goal.targetDate ? dday(goal.targetDate, pct === 100) : null;
-    const urgent = dd && (dd.cls === 'dday-today' || dd.cls === 'dday-overdue' || dd.cls === 'dday-soon');
+    const expanded  = expandedGoals.has(goal.id);
+    const isDone    = pct === 100;
+    const dd        = goal.targetDate ? dday(goal.targetDate, isDone) : null;
+    const urgent    = dd && (dd.cls === 'dday-today' || dd.cls === 'dday-overdue' || dd.cls === 'dday-soon');
+    const fillCls   = isDone ? 'goal-fill-done' : urgent ? 'goal-fill-urgent' : 'goal-fill-normal';
+    const cardState = isDone ? ' done' : urgent ? ' urgent' : '';
     return `
-      <div class="goal-card${expanded ? ' expanded' : ''}${urgent ? ' urgent' : ''}">
+      <div class="goal-card${cardState}${expanded ? ' expanded' : ''}">
         <div class="goal-card-head">
           <button class="goal-expand-btn${expanded ? ' expanded' : ''}"
             onclick="Roadmap.toggleExpand('${goal.id}')"
@@ -262,7 +265,7 @@ const Roadmap = (() => {
           <button class="goal-del-btn" onclick="Roadmap.deleteGoal('${goal.id}')" title="목표 삭제">✕</button>
         </div>
         <div class="goal-bar-wrap">
-          <div class="summary-bar goal-bar"><div class="summary-bar-fill green" style="width:${pct}%"></div></div>
+          <div class="summary-bar goal-bar"><div class="summary-bar-fill ${fillCls}" style="width:${pct}%"></div></div>
           <span class="goal-bar-pct">${pct}%</span>
         </div>
         ${expanded ? `
