@@ -561,6 +561,7 @@
 .pipeline-labels {
   display: flex;
   gap: 4px;
+  align-items: flex-start;
 }
 
 .pipeline-label {
@@ -568,7 +569,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-  padding: 0 4px;
+  padding: 4px 6px;
   text-decoration: none;
   color: var(--color-text);
   border-radius: var(--radius-sm);
@@ -576,7 +577,15 @@
 }
 .pipeline-label:hover { background: var(--color-surface-2); }
 
-.pipeline-label.done  { opacity: 0.38; pointer-events: none; }
+/* active 목표 — 모든 정보 한 줄로 */
+.pipeline-label.active {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+}
+
+.pipeline-label.done    { opacity: 0.38; pointer-events: none; }
 .pipeline-label.waiting { opacity: 0.55; }
 
 .pl-badge {
@@ -585,8 +594,12 @@
   letter-spacing: 0.04em;
   color: var(--color-text-3);
   line-height: 1;
+  flex-shrink: 0;
 }
-.pipeline-label.active .pl-badge { color: var(--color-primary); }
+.pipeline-label.active .pl-badge {
+  color: var(--color-primary);
+  font-size: 0.72rem;
+}
 
 .pl-title {
   font-size: 0.78rem;
@@ -597,17 +610,22 @@
   white-space: nowrap;
   line-height: 1.2;
 }
-.pipeline-label.done     .pl-title { text-decoration: line-through; color: var(--color-text-3); }
-.pipeline-label.active   .pl-title { font-size: 0.88rem; }
-.pipeline-label.waiting  .pl-title { color: var(--color-text-3); }
+.pipeline-label.done    .pl-title { text-decoration: line-through; color: var(--color-text-3); }
+.pipeline-label.active  .pl-title { font-size: 0.9rem; font-weight: 700; flex-shrink: 0; overflow: visible; }
+.pipeline-label.waiting .pl-title { color: var(--color-text-3); }
 
 .pl-pct {
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--color-text-3);
   line-height: 1;
+  flex-shrink: 0;
 }
-.pl-pct.active { color: var(--color-primary); font-size: 0.76rem; }
+.pipeline-label.active .pl-pct {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
 
 .pl-chip {
   display: inline-block;
@@ -621,7 +639,7 @@
 .pl-chip.done    { background: #e2e8f0; color: #64748b; }
 .pl-chip.waiting { background: var(--color-surface-2); color: var(--color-text-3); }
 
-/* D-day + % 메타 줄 */
+/* D-day + % 메타 줄 (비-active 목표용) */
 .pl-meta {
   display: flex;
   align-items: center;
@@ -629,8 +647,10 @@
   flex-wrap: wrap;
   margin-top: 1px;
 }
+/* active는 한 줄이므로 margin 제거 */
+.pipeline-label.active .pl-meta { margin-top: 0; }
 
-/* pipeline D-day 배지 — active 목표는 더 크게 강조 */
+/* pipeline D-day 배지 */
 .pl-dday {
   font-size: 0.72rem;
   font-weight: 700;
@@ -638,17 +658,18 @@
   border-radius: 999px;
   white-space: nowrap;
   line-height: 1.6;
+  flex-shrink: 0;
 }
+/* active 목표 D-day — box-shadow 없이 컬러로만 강조 */
 .pipeline-label.active .pl-dday {
-  font-size: 0.8rem;
-  padding: 3px 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  font-size: 0.82rem;
+  padding: 3px 11px;
 }
 .pl-dday.dday-done    { background: #e2e8f0; color: #64748b; }
-.pl-dday.dday-today   { background: #ede9fe; color: #6d28d9; font-weight: 800; }
-.pl-dday.dday-soon    { background: #fef3c7; color: #b45309; }
+.pl-dday.dday-today   { background: #ddd6fe; color: #5b21b6; font-weight: 800; }
+.pl-dday.dday-soon    { background: #fde68a; color: #92400e; font-weight: 800; }
 .pl-dday.dday-future  { background: var(--color-surface-2); color: var(--color-text-3); }
-.pl-dday.dday-overdue { background: #fee2e2; color: var(--color-danger); font-weight: 800; }
+.pl-dday.dday-overdue { background: #fecaca; color: #b91c1c; font-weight: 800; }
 
 /* ═══════════════════════════════════════
    단계별 목표 (Phased Goals)
