@@ -113,64 +113,51 @@
   box-shadow: var(--shadow-md);
 }
 
-/* ─ 헤더 행: 카테고리 뱃지 + 빠른 다음단계 ─ */
+/* ─ 헤더 행: 상태 뱃지 + 빠른 다음단계 ─ */
 .feature-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
-  min-height: 22px;
+  margin-bottom: 10px;
+  min-height: 24px;
 }
 
-.cat-badge {
-  padding: 4px 12px;
+.feat-status-chip {
+  padding: 3px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  border: 1px solid transparent;
   flex-shrink: 0;
   letter-spacing: 0.01em;
 }
 
-.cat-badge.기획  { background: var(--cat-기획-bg);  color: var(--cat-기획-text); }
-.cat-badge.디자인 { background: var(--cat-디자인-bg); color: var(--cat-디자인-text); }
-.cat-badge.개발  { background: var(--cat-개발-bg);  color: var(--cat-개발-text); }
-.cat-badge.cat-empty {
-  background: var(--st-idea-bg);
-  color: var(--st-idea-text);
-  font-weight: 500;
-}
-
 /* 빠른 다음 단계 (hover시 노출) */
 .feature-quick-next {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 0.78rem;
+  border: 1.5px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(108,99,255,0.3);
-  transition: opacity var(--transition), transform var(--transition), background var(--transition);
+  transition: opacity var(--transition), transform var(--transition);
 }
 
 .feature-card:hover .feature-quick-next,
 .feature-card.expanded .feature-quick-next { opacity: 1; }
-.feature-quick-next:hover { transform: scale(1.08); background: var(--color-primary-dark); }
+.feature-quick-next:hover { transform: scale(1.1); }
 
 /* 완료 단계 아이콘 */
 .feature-quick-done {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: var(--st-done-bg);
-  color: var(--st-done-text);
-  font-size: 0.88rem;
-  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,57 +230,47 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
 
 .feature-action-btn {
-  padding: 9px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 0.88rem;
-  font-weight: 500;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-2);
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-
-.feature-action-btn:hover {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-}
-
-.feature-action-btn.next {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.84rem;
   font-weight: 600;
+  border: 1.5px solid transparent;
+  transition: filter var(--transition), transform var(--transition);
+  white-space: nowrap;
+  cursor: pointer;
 }
-.feature-action-btn.next:hover {
-  background: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-}
+.feature-action-btn:hover { filter: brightness(0.93); transform: translateY(-1px); }
 
 .feature-action-btn.del {
   margin-left: auto;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  font-size: 0.95rem;
-  border-color: transparent;
+  font-size: 0.9rem;
+  border: none;
   background: transparent;
   color: var(--color-text-3);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: none;
+  transform: none;
 }
 .feature-action-btn.del:hover {
   background: #fee2e2;
   color: var(--color-danger);
-  border-color: transparent;
+  filter: none;
+  transform: none;
 }
 
 /* ═════ 관련 화면 ═════ */
@@ -314,25 +291,24 @@
 }
 .feat-linked-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .feat-linked-chip {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 5px 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border: 1.5px solid transparent;
   border-radius: var(--radius-full);
-  font-size: 0.88rem;
-  text-decoration: none;
-  color: var(--color-text);
-  transition: border-color var(--transition), background var(--transition);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: filter var(--transition);
 }
-.feat-linked-chip:hover {
-  border-color: var(--color-primary);
-  background: rgba(108,99,255,0.04);
-}
+.feat-linked-chip:hover { filter: brightness(0.94); }
+
+.feat-linked-chip-name { font-weight: 600; }
+
 .feat-linked-status {
-  font-size: 0.78rem;
-  color: var(--color-text-3);
-  padding-left: 7px;
-  border-left: 1px solid var(--color-border);
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding-left: 6px;
+  border-left: 1px solid rgba(0,0,0,0.12);
+  opacity: 0.7;
 }
 
 /* ═════ 태스크 패널 ═════ */
@@ -468,4 +444,54 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: var(--color-primary-light);
+}
+
+/* ─ 접힌 상태 할 일 미리보기 ─ */
+.feat-task-preview {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.feat-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.87rem;
+  color: var(--color-text-2);
+  padding: 2px 0;
+}
+.feat-preview-row.done { opacity: 0.5; }
+.feat-preview-row.done .feat-preview-title { text-decoration: line-through; }
+
+.feat-preview-check {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-success);
+}
+.feat-preview-row.done .feat-preview-check {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+
+.feat-preview-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feat-preview-more {
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  padding: 2px 0 0 24px;
 }
