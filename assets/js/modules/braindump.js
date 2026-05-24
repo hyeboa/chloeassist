@@ -279,6 +279,7 @@ const Braindump = (() => {
           </div>
         </div>
       </div>
+      <div class="dump-tag-hint">프로젝트 태그를 입력하면 새 프로젝트가 만들어져요. <a href="myprojects.html">내 프로젝트</a>에서 확인할 수 있어요.</div>
 
       <div class="dump-list-header">
         <div class="dump-filter-bar">${filterBtns}</div>

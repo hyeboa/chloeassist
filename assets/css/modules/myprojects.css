@@ -335,3 +335,19 @@
 .mp-show-done-btn:hover { color: var(--color-text); }
 
 /* mp-add-row / mp-add-input / mp-add-hint → base.css 공통 정의 사용 */
+
+/* ─ 브레인덤프 안내 ─ */
+.mp-braindump-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-2);
+  background: var(--color-primary-light);
+  border: 1px solid #ddd6fe;
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  margin-bottom: 20px;
+}
+.mp-braindump-hint a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.mp-braindump-hint a:hover { text-decoration: underline; }

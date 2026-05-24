@@ -328,8 +328,12 @@
 
 /* ─ 태그 힌트 ─ */
 .dump-tag-hint {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--color-text-3);
-  margin-top: 4px;
-  padding-left: 2px;
+  margin: 8px 2px 20px;
 }
+.dump-tag-hint a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.dump-tag-hint a:hover { text-decoration: underline; }
