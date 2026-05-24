@@ -517,6 +517,64 @@
 .feat-sc-완료     .feat-sc-dot { background: var(--color-success); }
 
 /* ═══════════════════════════════════════
+   스케줄 상단 목표 요약 스트립
+═══════════════════════════════════════ */
+.goal-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.goal-strip-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 0.84rem;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.goal-strip-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+.goal-strip-item.urgent {
+  border-color: #fca5a5;
+  background: #fff9f9;
+}
+
+.goal-strip-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.goal-strip-title {
+  font-weight: 600;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-strip-pct {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
    단계별 목표 (Phased Goals)
 ═══════════════════════════════════════ */
 .goals-section {

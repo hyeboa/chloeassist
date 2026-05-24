@@ -180,6 +180,25 @@ const Roadmap = (() => {
     return { total, done, pct };
   }
 
+  function renderGoalStrip(goals) {
+    if (goals.length === 0) return '';
+    return `
+      <div class="goal-strip">
+        ${goals.map((g, i) => {
+          const { pct } = goalProgress(g);
+          const dd = g.targetDate ? dday(g.targetDate, pct === 100) : null;
+          const urgent = dd && (dd.cls === 'dday-soon' || dd.cls === 'dday-today' || dd.cls === 'dday-overdue');
+          return `
+            <a href="goals.html" class="goal-strip-item${urgent ? ' urgent' : ''}">
+              <span class="goal-strip-badge">${i + 1}차</span>
+              <span class="goal-strip-title">${escapeHtml(g.title)}</span>
+              ${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}
+              <span class="goal-strip-pct">${pct}%</span>
+            </a>`;
+        }).join('')}
+      </div>`;
+  }
+
   function renderGoalsSection() {
     const goals = getGoals();
     return `
@@ -295,13 +314,27 @@ const Roadmap = (() => {
     const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     if (pageMode === 'goals') {
-      app.innerHTML = renderGoalsSection();
+      app.innerHTML = `
+        ${renderGoalsSection()}
+        <div class="milestone-section">
+          <div class="ms-section-hd">
+            <div class="section-title" style="margin:0">마일스톤</div>
+            <span class="ms-section-meta">전체 ${milestones.length}개</span>
+          </div>
+          <div class="ms-col-list">
+            ${renderAddInput()}
+            ${renderMilestoneList(milestones)}
+          </div>
+        </div>`;
       bindGoalInputs();
+      bindMsInput();
       return;
     }
 
     if (pageMode === 'schedule') {
+      const goals = getGoals();
       app.innerHTML = `
+        ${renderGoalStrip(goals)}
         <div class="milestone-section">
           <div class="ms-section-hd">
             <div class="section-title" style="margin:0">스케줄</div>
