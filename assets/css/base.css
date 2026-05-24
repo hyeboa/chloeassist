@@ -212,18 +212,43 @@ img { max-width: 100%; display: block; }
 
 /* ===== 공통 빠른 입력 폼 (quick-add-wrap) ===== */
 .quick-add-wrap {
+  position: relative;
   background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 18px 22px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: box-shadow var(--transition);
+  z-index: 0;
+}
+
+/* 무지개 그라디언트 테두리 — ::before로 구현 */
+.quick-add-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--radius-md) + 2px);
+  background: linear-gradient(
+    135deg,
+    #f87171 0%,
+    #fb923c 18%,
+    #facc15 34%,
+    #4ade80 50%,
+    #60a5fa 66%,
+    #a78bfa 82%,
+    #f472b6 100%
+  );
+  opacity: 0.35;
+  z-index: -1;
+  transition: opacity var(--transition);
+}
+
+.quick-add-wrap:focus-within::before {
+  opacity: 1;
 }
 
 .quick-add-wrap:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
+  box-shadow: 0 4px 24px rgba(108, 99, 255, 0.15);
 }
 
 .quick-add-top {
