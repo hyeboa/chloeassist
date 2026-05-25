@@ -12,6 +12,15 @@ const Issues = (() => {
     resolved: { label: '해결',   cls: 'st-resolved', dot: 'dot-resolved' },
   };
 
+  /* ─ 우선도 정의 (순서 = 순환) ─ */
+  const PRIORITIES = ['low', 'normal', 'high', 'critical'];
+  const PRIORITY_META = {
+    critical: { label: '긴급',   cls: 'pr-critical', color: '#dc2626' },
+    high:     { label: '높음',   cls: 'pr-high',     color: '#ea580c' },
+    normal:   { label: '보통',   cls: 'pr-normal',   color: '#6b7280' },
+    low:      { label: '낮음',   cls: 'pr-low',      color: '#2563eb' },
+  };
+
   let filter = 'all'; // 'all' | 'open' | 'progress' | 'resolved'
 
   /* ─ 데이터 ─ */
@@ -24,6 +33,11 @@ const Issues = (() => {
   function nextStatus(status) {
     const i = STATUSES.indexOf(status);
     return STATUSES[(i + 1) % STATUSES.length];
+  }
+
+  function nextPriority(priority) {
+    const i = PRIORITIES.indexOf(priority);
+    return PRIORITIES[(i + 1) % PRIORITIES.length];
   }
 
   function counts(issues) {
@@ -64,12 +78,15 @@ const Issues = (() => {
   /* ─ 이슈 행 ─ */
   function renderRow(it) {
     const meta = STATUS_META[it.status] || STATUS_META.open;
+    const priorMeta = PRIORITY_META[it.priority || 'normal'];
     return `
       <div class="iss-item ${meta.cls}">
         <button class="iss-status-btn ${meta.cls}" onclick="Issues.cycleStatus('${it.id}')"
           title="클릭하면 다음 상태로 변경">
           <span class="iss-status-dot ${meta.dot}"></span>${meta.label}
         </button>
+        <button class="iss-priority-btn ${priorMeta.cls}" onclick="Issues.cyclePriority('${it.id}')"
+          title="클릭하면 다음 우선도로 변경">${priorMeta.label}</button>
         <input class="iss-title-edit" value="${escapeHtml(it.title)}"
           onblur="Issues.editTitle('${it.id}', this.value)"
           onkeydown="if(event.key==='Enter')this.blur()">
@@ -86,7 +103,12 @@ const Issues = (() => {
 
     const visible = (filter === 'all' ? issues : issues.filter(i => i.status === filter))
       .slice()
-      .sort((a, b) => STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status) || (b.createdAt || 0) - (a.createdAt || 0));
+      .sort((a, b) => {
+        if (a.status !== b.status) return STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status);
+        const pA = PRIORITIES.indexOf(a.priority || 'normal');
+        const pB = PRIORITIES.indexOf(b.priority || 'normal');
+        return pB - pA || (b.createdAt || 0) - (a.createdAt || 0); // 우선도 높은순, 그 다음 최신순
+      });
 
     app.innerHTML = `
       <div class="iss-summary">
@@ -143,6 +165,13 @@ const Issues = (() => {
     render();
   }
 
+  function cyclePriority(id) {
+    const it = getIssues().find(i => i.id === id);
+    if (!it) return;
+    Store.update('issues', id, { priority: nextPriority(it.priority || 'normal') });
+    render();
+  }
+
   function editTitle(id, text) {
     const t = text.trim();
     if (!t) { render(); return; }
@@ -160,7 +189,7 @@ const Issues = (() => {
     render();
   }
 
-  return { render, addIssue, cycleStatus, editTitle, deleteIssue, setFilter };
+  return { render, addIssue, cycleStatus, cyclePriority, editTitle, deleteIssue, setFilter };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Issues.render());

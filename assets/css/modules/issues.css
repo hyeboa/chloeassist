@@ -110,6 +110,29 @@
 .dot-progress { background: var(--color-primary); }
 .dot-resolved { background: var(--color-success); }
 
+/* ── 우선도 버튼 ── */
+.iss-priority-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 70px;
+  justify-content: center;
+  transition: filter var(--transition);
+  color: #fff;
+}
+.iss-priority-btn:hover { filter: brightness(0.95); }
+.pr-critical { background: #dc2626; }
+.pr-high     { background: #ea580c; }
+.pr-normal   { background: #6b7280; }
+.pr-low      { background: #2563eb; }
+
 /* ── 제목 ── */
 .iss-title-edit {
   flex: 1;
