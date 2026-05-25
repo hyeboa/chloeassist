@@ -83,7 +83,14 @@
     return;
   }
 
-  if (version === 'v14') return;
+  /* v14 → v15: 출시 체크리스트 추가 */
+  if (version === 'v14') {
+    injectLaunchChecklists();
+    localStorage.setItem('chloeassist:seeded', 'v15');
+    return;
+  }
+
+  if (version === 'v15') return;
 
   const now = Date.now();
   const d   = (offset) => new Date(now + offset * 86400000).toISOString().slice(0, 10);
@@ -159,7 +166,8 @@
   injectGoals();
   injectRoutines();
   injectRoutineLogs();
-  localStorage.setItem('chloeassist:seeded', 'v14');
+  injectLaunchChecklists();
+  localStorage.setItem('chloeassist:seeded', 'v15');
 
   /* ══════════════════════════════════════════════
      사이트맵 샘플 데이터 — 댕찾아 (v8)
@@ -607,5 +615,112 @@
       });
       if (changed) localStorage.setItem('chloeassist:goals', JSON.stringify(goals));
     } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════
+     출시 체크 리스트 샘플 데이터 — v15
+  ══════════════════════════════════════════════ */
+  function injectLaunchChecklists() {
+    if (localStorage.getItem('chloeassist:launchChecklists')) return;
+
+    const t = Date.now();
+    const item = (text) => ({ id: crypto.randomUUID(), text, done: false });
+
+    const checklists = [
+      {
+        id: crypto.randomUUID(),
+        title: '제품 출시',
+        category: 'product',
+        dueDate: '',
+        createdAt: t,
+        items: [
+          item('핵심 기능 QA 완료'),
+          item('베타 테스트 및 피드백 반영'),
+          item('성능 최적화 및 로딩 시간 개선'),
+          item('주요 버그 정리 및 문서화'),
+          item('개인정보 처리방침 작성 및 검토'),
+          item('이용약관 작성'),
+          item('앱 스토어/플레이스토어 개발자 계정 설정'),
+          item('스토어 등록 정보 작성(설명, 스크린샷, 아이콘)'),
+          item('온보딩/튜토리얼 UI 최종 점검'),
+          item('FAQ 문서 작성'),
+          item('crash 리포팅 도구(Firebase 등) 연동'),
+          item('버전 관리 전략 수립'),
+          item('출시 공지 초안 작성'),
+          item('고객 지원 채널 준비(이메일, 채팅 등)'),
+        ]
+      },
+      {
+        id: crypto.randomUUID(),
+        title: '마케팅 출시',
+        category: 'marketing',
+        dueDate: '',
+        createdAt: t,
+        items: [
+          item('출시 메시지·슬로건 확정'),
+          item('브랜드 로고·가이드라인 확정'),
+          item('출시 공개 페이지/랜딩 페이지 제작'),
+          item('소셜 미디어 프로필 완성(프로필 사진, 소개, 링크)'),
+          item('SNS 콘텐츠 달력 작성 및 예약 발행 준비'),
+          item('보도자료/프레스 릴리즈 작성'),
+          item('미디어 연락처 리스트 준비'),
+          item('이메일·뉴스레터 발송 준비'),
+          item('협업·인플루언서 컨택 목록 작성'),
+          item('아이디어 얼리어댑터 모집 계획'),
+          item('리뷰/평점 유도 전략 수립'),
+          item('광고 캠페인 세팅(Google Ads, Facebook 등)'),
+          item('분석 트래킹 설정(Google Analytics, 혼합 분석 등)'),
+          item('출시 이벤트/웨비나 기획'),
+        ]
+      },
+      {
+        id: crypto.randomUUID(),
+        title: '운영 출시',
+        category: 'operations',
+        dueDate: '',
+        createdAt: t,
+        items: [
+          item('운영 매뉴얼 문서화'),
+          item('긴급 연락처 및 에스컬레이션 매뉴얼 작성'),
+          item('일일/주간 점검 체크리스트 준비'),
+          item('고객 피드백 수집 및 분석 프로세스 정의'),
+          item('버그 리포팅 시스템 구축'),
+          item('성능 대시보드 구성'),
+          item('모니터링·알림 설정(Slack, PagerDuty 등)'),
+          item('데이터 백업 자동화 설정'),
+          item('장애 대응(롤백) 계획 수립 및 테스트'),
+          item('핵심 지표(KPI) 정의'),
+          item('CS 응대 템플릿 및 FAQ 준비'),
+          item('고객 온보딩 프로세스 정의'),
+        ]
+      },
+      {
+        id: crypto.randomUUID(),
+        title: '기술 점검',
+        category: 'technical',
+        dueDate: '',
+        createdAt: t,
+        items: [
+          item('최종 코드 리뷰 및 정리'),
+          item('프로덕션 배포 체크리스트 확인'),
+          item('데이터베이스 마이그레이션 테스트'),
+          item('백업·복구 프로세스 테스트'),
+          item('보안 취약점 스캔(OWASP, 등)'),
+          item('보안 헤더 설정 완료(HTTPS, CSP 등)'),
+          item('API 레이트 제한 설정'),
+          item('도메인 설정 및 DNS 확인'),
+          item('SSL/TLS 인증서 설치 및 확인'),
+          item('CDN·캐시 정책 설정'),
+          item('부하 테스트 진행 및 결과 분석'),
+          item('에러 로깅·모니터링 연동'),
+          item('로그 저장소 구성 및 보관 정책 수립'),
+          item('알림 통합 설정(Slack, 이메일 등)'),
+          item('버전 관리(Git 태그) 정책 확정'),
+          item('롤백 프로세스 문서화 및 테스트'),
+        ]
+      }
+    ];
+
+    localStorage.setItem('chloeassist:launchChecklists', JSON.stringify(checklists));
   }
 })();
