@@ -51,20 +51,19 @@ const Help = (() => {
   };
 
   function renderGuide(section, guides) {
+    const itemsHtml = guides.map(g => `
+      <div class="help-item">
+        <div class="help-item-title">◆ ${g.title}</div>
+        <div class="help-item-desc">${g.desc}</div>
+        ${g.example ? `<div class="help-item-example">예시: ${g.example}</div>` : ''}
+        ${g.detail ? `<div class="help-item-detail">${g.detail.split('\n').join('<br>')}</div>` : ''}
+        ${g.action ? `<div class="help-item-action">→ ${g.action}</div>` : ''}
+      </div>`).join('');
+
     return `
       <div class="help-section">
         <h2 class="help-section-title">${section}</h2>
-        <div class="help-items">
-          ${guides.map(g => `
-            <div class="help-item">
-              <div class="help-item-title">◆ ${g.title}</div>
-              <div class="help-item-desc">${g.desc}</div>
-              ${g.example ? `<div class="help-item-example">예시: ${g.example}</div>` : ''}
-              ${g.detail ? `<div class="help-item-detail">${g.detail.split('\n').join('<br>')}</div>` : ''}
-              ${g.action ? `<div class="help-item-action">→ ${g.action}</div>` : ''}
-            </div>
-          `).join('')}
-        </div>
+        <div class="help-items">${itemsHtml}</div>
       </div>`;
   }
 
@@ -72,12 +71,14 @@ const Help = (() => {
     const app = document.getElementById('app');
     if (!app) return;
 
+    const sectionsHtml = Object.entries(GUIDES)
+      .map(([section, guides]) => renderGuide(section, guides))
+      .join('');
+
     const html = `
       <div class="help-page">
-        <div class="help-intro">
-          <p>헬로아지의 주요 기능과 사용 방법을 소개합니다.</p>
-        </div>
-        ${Object.entries(GUIDES).map(([section, guides]) => renderGuide(section, guides)).join('')}
+        <div class="help-intro"><p>헬로아지의 주요 기능과 사용 방법을 소개합니다.</p></div>
+        ${sectionsHtml}
       </div>`;
 
     app.innerHTML = html;
