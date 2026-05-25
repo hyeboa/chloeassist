@@ -22,7 +22,6 @@ const Issues = (() => {
   };
 
   let filter = 'all'; // 'all' | 'open' | 'progress' | 'resolved'
-  let showLegend = true;
 
   /* ─ 데이터 ─ */
   function getIssues() { return Store.get('issues') || []; }
@@ -59,58 +58,44 @@ const Issues = (() => {
       </div>`;
   }
 
-  /* ─ 범례 섹션 ─ */
+  /* ─ 범례 섹션 (간략) ─ */
   function renderLegend() {
     return `
-      <div class="iss-legend-wrapper">
-        <button class="iss-legend-toggle" onclick="Issues.toggleLegend()" title="범례 열기/닫기">
-          ${showLegend ? '▼' : '▶'} 범례
-        </button>
-        ${!showLegend ? '' : `
-          <div class="iss-legend-content">
-            <div class="iss-legend-section">
-              <div class="iss-legend-title">상태</div>
-              <div class="iss-legend-items">
-                <div class="iss-legend-item">
-                  <span class="iss-legend-dot" style="background: var(--color-danger)"></span>
-                  <span class="iss-legend-label">열림</span>
-                  <span class="iss-legend-desc">아직 시작 안 함</span>
-                </div>
-                <div class="iss-legend-item">
-                  <span class="iss-legend-dot" style="background: var(--color-primary)"></span>
-                  <span class="iss-legend-label">진행중</span>
-                  <span class="iss-legend-desc">지금 작업 중</span>
-                </div>
-                <div class="iss-legend-item">
-                  <span class="iss-legend-dot" style="background: var(--color-success)"></span>
-                  <span class="iss-legend-label">해결</span>
-                  <span class="iss-legend-desc">완료됨</span>
-                </div>
-              </div>
+      <div class="iss-legend">
+        <div class="iss-legend-group">
+          <div class="iss-legend-title">상태</div>
+          <div class="iss-legend-items">
+            <div class="iss-legend-item">
+              <span class="iss-legend-dot" style="background: var(--color-danger)"></span>
+              <span class="iss-legend-label">열림</span>
             </div>
-            <div class="iss-legend-section">
-              <div class="iss-legend-title">우선도</div>
-              <div class="iss-legend-items">
-                <div class="iss-legend-item">
-                  <span class="iss-legend-badge" style="background: #dc2626">긴급</span>
-                  <span class="iss-legend-desc">즉시 처리</span>
-                </div>
-                <div class="iss-legend-item">
-                  <span class="iss-legend-badge" style="background: #ea580c">높음</span>
-                  <span class="iss-legend-desc">우선 처리</span>
-                </div>
-                <div class="iss-legend-item">
-                  <span class="iss-legend-badge" style="background: #6b7280">보통</span>
-                  <span class="iss-legend-desc">일반</span>
-                </div>
-                <div class="iss-legend-item">
-                  <span class="iss-legend-badge" style="background: #2563eb">낮음</span>
-                  <span class="iss-legend-desc">나중에</span>
-                </div>
-              </div>
+            <div class="iss-legend-item">
+              <span class="iss-legend-dot" style="background: var(--color-primary)"></span>
+              <span class="iss-legend-label">진행중</span>
+            </div>
+            <div class="iss-legend-item">
+              <span class="iss-legend-dot" style="background: var(--color-success)"></span>
+              <span class="iss-legend-label">해결</span>
             </div>
           </div>
-        `}
+        </div>
+        <div class="iss-legend-group">
+          <div class="iss-legend-title">우선도</div>
+          <div class="iss-legend-items">
+            <div class="iss-legend-item">
+              <span class="iss-legend-badge" style="background: #dc2626">긴급</span>
+            </div>
+            <div class="iss-legend-item">
+              <span class="iss-legend-badge" style="background: #ea580c">높음</span>
+            </div>
+            <div class="iss-legend-item">
+              <span class="iss-legend-badge" style="background: #6b7280">보통</span>
+            </div>
+            <div class="iss-legend-item">
+              <span class="iss-legend-badge" style="background: #2563eb">낮음</span>
+            </div>
+          </div>
+        </div>
       </div>`;
   }
 
@@ -167,20 +152,21 @@ const Issues = (() => {
       });
 
     app.innerHTML = `
-      <div class="iss-summary">
-        <div class="summary-card">
-          <div class="summary-label">미해결 이슈</div>
-          <div class="summary-value">${c.open + c.progress}<span>건</span></div>
-          <div class="summary-sub">열림 ${c.open} · 진행중 ${c.progress}</div>
+      <div class="iss-topbar">
+        <div class="iss-summary">
+          <div class="summary-card">
+            <div class="summary-label">미해결 이슈</div>
+            <div class="summary-value">${c.open + c.progress}<span>건</span></div>
+            <div class="summary-sub">열림 ${c.open} · 진행중 ${c.progress}</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">해결 완료</div>
+            <div class="summary-value">${c.resolved}<span>건</span></div>
+            <div class="summary-sub">전체 ${c.all}건 중</div>
+          </div>
         </div>
-        <div class="summary-card">
-          <div class="summary-label">해결 완료</div>
-          <div class="summary-value">${c.resolved}<span>건</span></div>
-          <div class="summary-sub">전체 ${c.all}건 중</div>
-        </div>
+        ${renderLegend()}
       </div>
-
-      ${renderLegend()}
 
       ${renderAddInput()}
       ${renderFilters(c)}
@@ -247,12 +233,7 @@ const Issues = (() => {
     render();
   }
 
-  function toggleLegend() {
-    showLegend = !showLegend;
-    render();
-  }
-
-  return { render, addIssue, cycleStatus, cyclePriority, editTitle, deleteIssue, setFilter, toggleLegend };
+  return { render, addIssue, cycleStatus, cyclePriority, editTitle, deleteIssue, setFilter };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Issues.render());
