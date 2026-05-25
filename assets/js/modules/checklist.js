@@ -4,7 +4,6 @@
  */
 
 const Checklist = (() => {
-  let expanded   = new Set();
   let showGuide  = false;
 
   /* ─ 카테고리 ─ */
@@ -22,47 +21,76 @@ const Checklist = (() => {
       label: '제품 출시', category: 'product',
       items: [
         '핵심 기능 QA 완료',
-        '베타 테스트 진행',
-        '성능 최적화 점검',
-        '주요 버그 정리',
-        '개인정보 처리방침 검토',
-        '스토어 등록 정보 작성',
+        '베타 테스트 및 피드백 반영',
+        '성능 최적화 및 로딩 시간 개선',
+        '주요 버그 정리 및 문서화',
+        '개인정보 처리방침 작성 및 검토',
+        '이용약관 작성',
+        '앱 스토어/플레이스토어 개발자 계정 설정',
+        '스토어 등록 정보 작성(설명, 스크린샷, 아이콘)',
+        '온보딩/튜토리얼 UI 최종 점검',
+        'FAQ 문서 작성',
+        'crash 리포팅 도구(Firebase 등) 연동',
+        '버전 관리 전략 수립',
         '출시 공지 초안 작성',
-        '고객 지원 채널 준비',
+        '고객 지원 채널 준비(이메일, 채팅 등)',
       ],
     },
     marketing: {
       label: '마케팅 출시', category: 'marketing',
       items: [
         '출시 메시지·슬로건 확정',
-        'SNS 콘텐츠 예약 발행',
-        '보도자료 작성',
+        '브랜드 로고·가이드라인 확정',
+        '출시 공개 페이지/랜딩 페이지 제작',
+        '소셜 미디어 프로필 완성(프로필 사진, 소개, 링크)',
+        'SNS 콘텐츠 달력 작성 및 예약 발행 준비',
+        '보도자료/프레스 릴리즈 작성',
+        '미디어 연락처 리스트 준비',
         '이메일·뉴스레터 발송 준비',
-        '협업·인플루언서 컨택',
-        '광고 캠페인 세팅',
-        '분석 트래킹 설정',
+        '협업·인플루언서 컨택 목록 작성',
+        '아이디어 얼리어댑터 모집 계획',
+        '리뷰/평점 유도 전략 수립',
+        '광고 캠페인 세팅(Google Ads, Facebook 등)',
+        '분석 트래킹 설정(Google Analytics, 혼합 분석 등)',
+        '출시 이벤트/웨비나 기획',
       ],
     },
     operations: {
       label: '운영 출시', category: 'operations',
       items: [
         '운영 매뉴얼 문서화',
-        '팀 교육 완료',
-        '모니터링·알림 설정',
-        '장애 대응(롤백) 계획 수립',
+        '긴급 연락처 및 에스컬레이션 매뉴얼 작성',
+        '일일/주간 점검 체크리스트 준비',
+        '고객 피드백 수집 및 분석 프로세스 정의',
+        '버그 리포팅 시스템 구축',
+        '성능 대시보드 구성',
+        '모니터링·알림 설정(Slack, PagerDuty 등)',
+        '데이터 백업 자동화 설정',
+        '장애 대응(롤백) 계획 수립 및 테스트',
         '핵심 지표(KPI) 정의',
-        'CS 응대 템플릿 준비',
+        'CS 응대 템플릿 및 FAQ 준비',
+        '고객 온보딩 프로세스 정의',
       ],
     },
     technical: {
       label: '기술 점검', category: 'technical',
       items: [
-        '프로덕션 배포 점검',
-        '백업·복구 테스트',
-        '보안 취약점 스캔',
-        '도메인·SSL 인증서 확인',
-        '부하 테스트 진행',
+        '최종 코드 리뷰 및 정리',
+        '프로덕션 배포 체크리스트 확인',
+        '데이터베이스 마이그레이션 테스트',
+        '백업·복구 프로세스 테스트',
+        '보안 취약점 스캔(OWASP, 등)',
+        '보안 헤더 설정 완료(HTTPS, CSP 등)',
+        'API 레이트 제한 설정',
+        '도메인 설정 및 DNS 확인',
+        'SSL/TLS 인증서 설치 및 확인',
+        'CDN·캐시 정책 설정',
+        '부하 테스트 진행 및 결과 분석',
         '에러 로깅·모니터링 연동',
+        '로그 저장소 구성 및 보관 정책 수립',
+        '알림 통합 설정(Slack, 이메일 등)',
+        '버전 관리(Git 태그) 정책 확정',
+        '롤백 프로세스 문서화 및 테스트',
       ],
     },
     empty: {
@@ -126,7 +154,6 @@ const Checklist = (() => {
   /* ─ 체크 리스트 카드 ─ */
   function renderCard(list) {
     const { done, total, pct } = progress(list);
-    const isExpanded = expanded.has(list.id);
     const allDone    = total > 0 && done === total;
     const cat        = CATS[list.category] || CATS.etc;
     const dd         = list.dueDate ? dday(list.dueDate, allDone) : null;
@@ -147,10 +174,8 @@ const Checklist = (() => {
       </div>`).join('');
 
     return `
-      <div class="goal-card cl-card${cardState}${isExpanded ? ' expanded' : ''}">
+      <div class="goal-card cl-card${cardState} expanded">
         <div class="goal-card-head">
-          <button class="goal-expand-btn${isExpanded ? ' expanded' : ''}"
-            onclick="Checklist.toggleExpand('${list.id}')" title="${isExpanded ? '접기' : '펼치기'}">${chevronSvg()}</button>
           <span class="cl-cat-badge ${cat.cls}">${cat.label}</span>
           <input class="goal-title-edit" value="${escapeHtml(list.title)}"
             onblur="Checklist.editTitle('${list.id}', this.value)"
@@ -163,22 +188,21 @@ const Checklist = (() => {
           <div class="summary-bar goal-bar"><div class="summary-bar-fill ${fillCls}" style="width:${pct}%"></div></div>
           <span class="goal-bar-pct">${pct}%</span>
         </div>
-        ${isExpanded ? `
-          <div class="goal-detail">
-            <div class="goal-date-row">
-              <label class="goal-date-label">목표일</label>
-              <input type="date" class="goal-date-input" value="${list.dueDate || ''}"
-                onchange="Checklist.setDueDate('${list.id}', this.value)">
-              ${list.dueDate ? `<button class="goal-date-clear" onclick="Checklist.setDueDate('${list.id}', '')">지우기</button>` : ''}
-            </div>
-            ${total === 0
-              ? '<div class="goal-checklist-empty">항목이 없어요. 아래에서 추가해보세요.</div>'
-              : `<div class="goal-checklist">${itemRows}</div>`}
-            <div class="mp-add-row goal-item-add-row">
-              <input class="mp-add-input cl-item-add-input" type="text" data-list="${list.id}" placeholder="항목 추가">
-              <span class="mp-add-hint">Enter</span>
-            </div>
-          </div>` : ''}
+        <div class="goal-detail">
+          <div class="goal-date-row">
+            <label class="goal-date-label">목표일</label>
+            <input type="date" class="goal-date-input" value="${list.dueDate || ''}"
+              onchange="Checklist.setDueDate('${list.id}', this.value)">
+            ${list.dueDate ? `<button class="goal-date-clear" onclick="Checklist.setDueDate('${list.id}', '')">지우기</button>` : ''}
+          </div>
+          ${total === 0
+            ? '<div class="goal-checklist-empty">항목이 없어요. 아래에서 추가해보세요.</div>'
+            : `<div class="goal-checklist">${itemRows}</div>`}
+          <div class="mp-add-row goal-item-add-row">
+            <input class="mp-add-input cl-item-add-input" type="text" data-list="${list.id}" placeholder="항목 추가">
+            <span class="mp-add-hint">Enter</span>
+          </div>
+        </div>
       </div>`;
   }
 
@@ -211,7 +235,22 @@ const Checklist = (() => {
   function render() {
     const app = document.getElementById('app');
     if (!app) return;
-    const lists = getLists();
+    let lists = getLists();
+
+    // 초기 로드 시 빈 체크리스트면 기본 템플릿 자동 생성
+    if (lists.length === 0) {
+      ['product', 'marketing', 'operations', 'technical'].forEach(key => {
+        const tpl = TEMPLATES[key];
+        const items = (tpl.items || []).map(text => ({ id: crypto.randomUUID(), text, done: false }));
+        Store.push('launchChecklists', {
+          title: tpl.label,
+          category: tpl.category,
+          dueDate: '',
+          items,
+        });
+      });
+      lists = getLists();
+    }
 
     app.innerHTML = `
       ${renderSummary(lists)}
@@ -315,8 +354,6 @@ const Checklist = (() => {
       dueDate: dueDate || '',
       items,
     });
-    const newId = pushed[pushed.length - 1].id;
-    expanded.add(newId);
     render();
     Toast.show('체크 리스트를 만들었어요.', 'success');
   }
@@ -330,7 +367,6 @@ const Checklist = (() => {
   function deleteList(id) {
     if (!confirm('이 체크 리스트를 삭제할까요?')) return;
     Store.remove('launchChecklists', id);
-    expanded.delete(id);
     render();
   }
 
@@ -363,11 +399,6 @@ const Checklist = (() => {
     render();
   }
 
-  function toggleExpand(id) {
-    if (expanded.has(id)) expanded.delete(id);
-    else expanded.add(id);
-    render();
-  }
 
   function toggleGuide() {
     showGuide = !showGuide;
@@ -376,7 +407,7 @@ const Checklist = (() => {
 
   return {
     render, openCreate, createList, editTitle, deleteList,
-    addItem, toggleItem, deleteItem, setDueDate, toggleExpand, toggleGuide,
+    addItem, toggleItem, deleteItem, setDueDate, toggleGuide,
   };
 })();
 
