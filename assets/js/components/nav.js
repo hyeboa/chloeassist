@@ -15,6 +15,7 @@ const Nav = (() => {
     target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
     layout: '<rect x="3" y="3.5" width="18" height="17" rx="2.5"/><path d="M3 9.5h18M9.5 20.5V9.5"/>',
     review: '<path d="M3.5 3.5v17h17"/><path d="M7.5 16v-4M12 16V8.5M16.5 16v-6"/>',
+    checklist: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 5.5l1.2 1.2L7.6 4.3M4 11.5l1.2 1.2L7.6 10.3M4 17.5l1.2 1.2L7.6 16.3"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.87 1.2v.1a2 2 0 1 1-4 0v-.06A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1.1H3a2 2 0 1 1 0-4h.06A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.1-1.6V3a2 2 0 1 1 4 0v.06a1.7 1.7 0 0 0 2.87 1.14l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.1a1.7 1.7 0 0 0 1.5 1.4H21a2 2 0 1 1 0 4h-.06a1.7 1.7 0 0 0-1.54.9z"/>',
   };
 
@@ -36,9 +37,10 @@ const Nav = (() => {
     {
       label: '헬로아지',
       items: [
-        { href: 'roadmap.html', label: '일정표',    icon: 'map' },
-        { href: 'goals.html',   label: '목표',      icon: 'target' },
-        { href: 'sitemap.html', label: '화면 구조', icon: 'layout' },
+        { href: 'roadmap.html',   label: '마일스톤',     icon: 'map' },
+        { href: 'goals.html',     label: '목표',         icon: 'target' },
+        { href: 'sitemap.html',   label: '제품 설계',    icon: 'layout' },
+        { href: 'checklist.html', label: '출시 체크 리스트', icon: 'checklist' },
       ]
     },
     {

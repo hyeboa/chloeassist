@@ -199,6 +199,13 @@
 }
 .routine-check.disabled { cursor: not-allowed; opacity: 0.4; }
 
+.routine-number {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  flex-shrink: 0;
+}
+
 .routine-name { flex: 1; font-size: 0.9rem; color: var(--color-text); word-break: break-word; }
 
 /* ─ 스트릭 배지 ─ */
