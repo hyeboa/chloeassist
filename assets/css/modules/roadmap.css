@@ -123,6 +123,19 @@
 /* ── 마일스톤 ── */
 .milestone-section {
   margin-bottom: 32px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.milestone-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.milestone-sidebar {
+  flex-shrink: 0;
+  width: 260px;
 }
 
 /* ─ 스케줄 / 마일스톤 탭 ─ */
@@ -1012,5 +1025,147 @@
 @media (max-width: 1100px) {
   .goals-page-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ── 진행 타임라인 ── */
+.timeline-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  position: sticky;
+  top: var(--header-height);
+  max-height: calc(100vh - var(--header-height) - 40px);
+  overflow-y: auto;
+}
+
+.timeline-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-3);
+  margin-bottom: 16px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-marker {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  transition: all var(--transition);
+}
+
+.timeline-item.done .timeline-marker {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+}
+
+.timeline-item.progress .timeline-marker {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.timeline-item.pending .timeline-marker {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+
+.timeline-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.timeline-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.timeline-count {
+  font-size: 0.72rem;
+  color: var(--color-text-3);
+  margin-bottom: 3px;
+}
+
+.timeline-progress-bar {
+  height: 4px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.timeline-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.timeline-item.done .timeline-progress-fill {
+  background: var(--color-success);
+}
+
+@media (max-width: 1400px) {
+  .milestone-sidebar {
+    width: 240px;
+  }
+
+  .timeline-container {
+    padding: 14px 12px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .milestone-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .milestone-sidebar {
+    width: 100%;
+  }
+
+  .timeline-container {
+    position: static;
+    max-height: none;
   }
 }

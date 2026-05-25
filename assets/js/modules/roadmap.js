@@ -90,6 +90,52 @@ const Roadmap = (() => {
     `;
   }
 
+  /* ─ 진행 타임라인 ─ */
+  function renderProgressTimeline(goals, milestones, tasks) {
+    // 각 단계별 진행도 계산
+    const goalPct = goals.length ? Math.round(goals.filter(g => g.done).length / goals.length * 100) : 0;
+    const milestonePct = milestones.length ? Math.round(milestones.filter(m => m.done).length / milestones.length * 100) : 0;
+    const taskPct = tasks.length ? Math.round(tasks.filter(t => t.done).length / tasks.length * 100) : 0;
+    const issuePct = 0; // Issues 데이터 필요시 추가
+
+    // 단계별 상태 판정
+    function getStatus(pct) {
+      if (pct === 100) return 'done';
+      if (pct > 0) return 'progress';
+      return 'pending';
+    }
+
+    const steps = [
+      { label: '목표 설정', pct: goalPct, status: getStatus(goalPct), count: `${goals.filter(g => g.done).length}/${goals.length}` },
+      { label: '마일스톤', pct: milestonePct, status: getStatus(milestonePct), count: `${milestones.filter(m => m.done).length}/${milestones.length}` },
+      { label: '할 일', pct: taskPct, status: getStatus(taskPct), count: `${tasks.filter(t => t.done).length}/${tasks.length}` },
+      { label: '이슈 추적', pct: issuePct, status: getStatus(issuePct), count: '0/0' },
+      { label: '완료', pct: Math.round((goalPct + milestonePct + taskPct + issuePct) / 4), status: 'pending', count: '' }
+    ];
+
+    const stepsHtml = steps.map((step, i) => `
+      <div class="timeline-item ${step.status}">
+        <div class="timeline-marker">
+          ${step.status === 'done' ? '✓' : step.status === 'progress' ? '' : ''}
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-label">${step.label}</div>
+          ${step.count ? `<div class="timeline-count">${step.count}</div>` : ''}
+          ${step.pct > 0 ? `<div class="timeline-progress-bar"><div class="timeline-progress-fill" style="width:${step.pct}%"></div></div>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="timeline-container">
+        <div class="timeline-title">작업 진행도</div>
+        <div class="timeline">
+          ${stepsHtml}
+        </div>
+      </div>
+    `;
+  }
+
   /* ─ 마일스톤 캘린더 뷰 ─ */
   function renderCalendarView(milestones) {
     const today    = new Date();
@@ -381,10 +427,16 @@ const Roadmap = (() => {
 
     if (pageMode === 'schedule') {
       const goals = getGoals();
+      const tasks = Store.get('tasks') || [];
       app.innerHTML = `
         ${renderGoalStrip(goals)}
         <div class="milestone-section">
-          ${renderCalendarView(milestones)}
+          <div class="milestone-content">
+            ${renderCalendarView(milestones)}
+          </div>
+          <div class="milestone-sidebar">
+            ${renderProgressTimeline(goals, milestones, tasks)}
+          </div>
         </div>`;
       return;
     }
