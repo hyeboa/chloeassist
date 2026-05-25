@@ -394,53 +394,6 @@
 
 .mo-memo::placeholder { color: var(--color-text-3); }
 
-/* ─ 회고 구조 ─ */
-.mo-reflect-group { margin-bottom: 14px; }
-.mo-reflect-group:last-of-type { margin-bottom: 0; }
-.mo-reflect-label {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-text-2);
-  margin-bottom: 6px;
-}
-.mo-reflect-input {
-  width: 100%;
-  min-height: 64px;
-  font-size: 0.84rem;
-  color: var(--color-text);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  resize: vertical;
-  outline: none;
-  font-family: inherit;
-  line-height: 1.6;
-  transition: border-color var(--transition);
-  box-sizing: border-box;
-}
-.mo-reflect-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(108,99,255,0.08);
-}
-.mo-reflect-input::placeholder { color: var(--color-text-3); }
-.mo-reflect-legacy {
-  margin-top: 14px;
-  font-size: 0.78rem;
-  color: var(--color-text-3);
-}
-.mo-reflect-legacy summary { cursor: pointer; padding: 4px 0; }
-.mo-reflect-legacy-body {
-  margin-top: 8px;
-  padding: 10px 12px;
-  background: var(--color-surface-2);
-  border-radius: 6px;
-  font-size: 0.8rem;
-  color: var(--color-text-2);
-  line-height: 1.6;
-}
-
 /* ─ 빈 상태 ─ */
 .mo-empty {
   font-size: 0.78rem;

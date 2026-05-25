@@ -77,7 +77,7 @@ const Monthly = (() => {
   /* ─ 메모 저장/불러오기 ─ */
   function getMemo(month) {
     const all = Store.get('monthlyReviews') || {};
-    return all[monthKey(month)] || { memo: '', aiSummary: '', reflectGood: '', reflectBad: '', reflectNext: '' };
+    return all[monthKey(month)] || { memo: '', aiSummary: '' };
   }
 
   function saveMemo(month, patch) {
@@ -256,30 +256,6 @@ const Monthly = (() => {
               ✦ ${memo.aiSummary ? '다시 생성' : 'AI 요약 생성'}
             </button>
           </div>
-
-          <div class="mo-section">
-            <div class="mo-section-title">회고</div>
-            <div class="mo-reflect-group">
-              <label class="mo-reflect-label">✅ 이번 달 잘한 점</label>
-              <textarea class="mo-reflect-input" id="mo-reflect-good"
-                placeholder="이번 달 가장 뿌듯한 일">${escapeHtml(memo.reflectGood || '')}</textarea>
-            </div>
-            <div class="mo-reflect-group">
-              <label class="mo-reflect-label">⚠️ 아쉬운 점 / 놓친 것</label>
-              <textarea class="mo-reflect-input" id="mo-reflect-bad"
-                placeholder="다음에 다르게 해볼 것">${escapeHtml(memo.reflectBad || '')}</textarea>
-            </div>
-            <div class="mo-reflect-group">
-              <label class="mo-reflect-label">🎯 다음 달 집중할 것</label>
-              <textarea class="mo-reflect-input" id="mo-reflect-next"
-                placeholder="다음 달 1~3개 우선순위">${escapeHtml(memo.reflectNext || '')}</textarea>
-            </div>
-            ${memo.memo ? `
-              <details class="mo-reflect-legacy">
-                <summary>이전 메모 보기</summary>
-                <div class="mo-reflect-legacy-body">${escapeHtml(memo.memo).replace(/\n/g, '<br>')}</div>
-              </details>` : ''}
-          </div>
         </div>
       </div>
     `;
@@ -287,25 +263,6 @@ const Monthly = (() => {
 
   function render() {
     document.getElementById('app').innerHTML = buildHTML();
-    bindMemo();
-  }
-
-  /* ─ 메모 자동 저장 ─ */
-  function bindMemo() {
-    const FIELDS = [
-      ['mo-reflect-good', 'reflectGood'],
-      ['mo-reflect-bad',  'reflectBad'],
-      ['mo-reflect-next', 'reflectNext'],
-    ];
-    let timer;
-    FIELDS.forEach(([id, key]) => {
-      const ta = document.getElementById(id);
-      if (!ta) return;
-      ta.addEventListener('input', () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => saveMemo(currentMonth, { [key]: ta.value }), 600);
-      });
-    });
   }
 
   /* ─ AI 월간 요약 ─ */
@@ -337,7 +294,6 @@ const Monthly = (() => {
     const doneFeat   = features.filter(f => f.status === '완료' && f.doneAt && inMonth(f.doneAt, currentMonth));
     const totalFeat  = features.length;
     const totalDone  = features.filter(f => f.status === '완료').length;
-    const reflect    = getMemo(currentMonth);
 
     const prompt = `나는 헬로아지(반려견 플랫폼 모바일 앱)를 1인으로 기획·디자인·운영하고 있어.
 
@@ -347,9 +303,6 @@ ${formatMonth(currentMonth)} 현황:
 - 마일스톤: ${monthMs.map(m => m.title + (m.done ? ' ✓' : ' ✗')).join(', ') || '없음'}
 - 이번 달 완료된 기능: ${doneFeat.map(f => f.name).join(', ') || '없음'}
 - 전체 기능 개발: ${totalDone}/${totalFeat}개 완료
-${reflect.reflectGood ? `\n내가 적은 잘한 점: ${reflect.reflectGood}` : ''}
-${reflect.reflectBad  ? `\n내가 적은 아쉬운 점: ${reflect.reflectBad}` : ''}
-${reflect.reflectNext ? `\n내가 적은 다음 달 집중: ${reflect.reflectNext}` : ''}
 
 위 데이터를 바탕으로 ${formatMonth(currentMonth)} 월간 리뷰를 써줘. 마크다운 없이 일반 텍스트로.
 
@@ -395,7 +348,7 @@ ${reflect.reflectNext ? `\n내가 적은 다음 달 집중: ${reflect.reflectNex
     render();
   }
 
-  return { render, prevMonth, nextMonth, generateSummary, renderHTML: buildHTML, bindMemo };
+  return { render, prevMonth, nextMonth, generateSummary, renderHTML: buildHTML };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Monthly.render());
