@@ -42,6 +42,29 @@
 .cat-filter-btn.active-마케팅 { background: var(--color-surface); color: var(--cat-마케팅-text);    box-shadow: var(--shadow-sm); }
 .cat-filter-btn.active-운영  { background: var(--color-surface); color: var(--cat-운영-text);      box-shadow: var(--shadow-sm); }
 
+/* ─ 완료 토글 (필터 바) ─ */
+.bl-done-toggle-bar {
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.bl-done-toggle-bar:hover { color: var(--color-text); }
+
+.bl-done-toggle-bar.active {
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  box-shadow: var(--shadow-sm);
+}
+
 /* ─ 검색 & 완료 토글 ─ */
 .bl-search-group {
   display: flex;
