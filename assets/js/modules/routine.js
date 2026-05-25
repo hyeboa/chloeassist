@@ -45,6 +45,20 @@ const Routine = (() => {
 
   function saveLog(date, log) { Store.set('routine-log:' + date, log); }
 
+  function cleanupFutureLogs() {
+    const today = todayStr();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('chloeassist:routine-log:')) {
+        const date = key.replace('chloeassist:routine-log:', '');
+        if (date > today) {
+          localStorage.removeItem(key);
+          i--;
+        }
+      }
+    }
+  }
+
   /* ─ 스트릭 계산 (today 기준, 연속 완료일) ─ */
   function calcStreak(routineId) {
     const t = todayStr();
@@ -61,7 +75,9 @@ const Routine = (() => {
   }
 
   /* ─ 공개 액션 ─ */
-  function selectDate(date) { selectedDate = date; render(); }
+  function selectDate(date) {
+    if (!isFuture(date)) { selectedDate = date; render(); }
+  }
 
   function prevWeek() {
     const d = new Date(selectedDate + 'T00:00:00');
@@ -263,6 +279,7 @@ const Routine = (() => {
 
   /* ─ 메인 렌더 ─ */
   function render() {
+    cleanupFutureLogs();
     const routines  = getRoutines();
     const log       = getLog(selectedDate);
     const doneCount = routines.filter(r => log[r.id]).length;
