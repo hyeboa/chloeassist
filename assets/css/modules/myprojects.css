@@ -235,9 +235,33 @@
 
 .mp-task-item.done .mp-task-title {
   text-decoration: line-through;
-  color: var(--color-text-3);
+  color: #9ca3af;
+  text-decoration-color: #d1d5db;
 }
-.mp-task-item.done { opacity: 0.55; }
+.mp-task-item.done {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  opacity: 1;
+}
+.mp-task-item.done:hover {
+  background: #eff1f5;
+  box-shadow: none;
+}
+.mp-task-item.done .mp-memo-preview {
+  color: #bfdbfe;
+}
+.mp-task-item.done .mp-due {
+  background: transparent;
+  border-color: #d1d5db;
+  color: #9ca3af;
+}
+.mp-task-item.done .mp-prio-dot {
+  opacity: 0.3;
+}
+.mp-task-item.done .mp-check.checked {
+  background: #10b981;
+  border-color: #10b981;
+}
 
 .mp-delete {
   opacity: 0;
