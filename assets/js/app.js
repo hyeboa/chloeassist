@@ -6,5 +6,4 @@
 document.addEventListener('DOMContentLoaded', () => {
   Nav.render();
   Banner.render();
-  Assistant.render();
 });
