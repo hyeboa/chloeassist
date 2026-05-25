@@ -175,14 +175,14 @@ const Routine = (() => {
         <span class="rmatrix-head-num">${dayNum(date)}</span>
       </div>`).join('');
 
-    const rows = routines.map(r => {
+    const rows = routines.map((r, index) => {
       const cells = weekDays.map(date => {
         if (isFuture(date) || !isActive(r, date)) return `<div class="rmatrix-cell future">─</div>`;
         const done = !!getLog(date)[r.id];
         return `<div class="rmatrix-cell ${done ? 'done' : 'miss'}">${done ? '✓' : '✗'}</div>`;
       }).join('');
       return `
-        <div class="rmatrix-name" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</div>
+        <div class="rmatrix-name" title="${escapeHtml(r.name)}"><span class="rmatrix-number">${index + 1}.</span> ${escapeHtml(r.name)}</div>
         ${cells}`;
     }).join('');
 
@@ -330,7 +330,7 @@ const Routine = (() => {
 
           <div class="routine-list">
             ${total === 0 ? `<div class="routine-empty">루틴을 추가해 매일 달성률을 확인해보세요</div>`
-            : routines.map((r, index) => {
+            : routines.map(r => {
               const done    = !!log[r.id];
               const streak  = isToday(selectedDate) ? calcStreak(r.id) : 0;
               const streakBadge = streak >= 3 ? `<span class="routine-streak fire">🔥 ${streak}일</span>`
@@ -341,7 +341,6 @@ const Routine = (() => {
                     onclick="Routine.toggleCheck('${r.id}')" ${future ? 'disabled' : ''}>
                     ${done ? '✓' : ''}
                   </button>
-                  <span class="routine-number">${index + 1}.</span>
                   <span class="routine-name">${escapeHtml(r.name)}</span>
                   ${streakBadge}
                   <button class="routine-delete" onclick="Routine.deleteRoutine('${r.id}')" title="삭제">✕</button>
