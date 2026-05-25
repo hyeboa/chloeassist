@@ -22,7 +22,7 @@ const Sitemap = (() => {
   ];
 
   const MAX_DEPTH = 4;
-  let viewMode = 'board';
+  let viewMode = 'diagram';
   let pageTab  = 'screens';
   let linkPickerScreenId = null;
 

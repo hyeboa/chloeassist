@@ -38,7 +38,7 @@ const Nav = (() => {
       items: [
         { href: 'roadmap.html', label: '마일스톤',  icon: 'map' },
         { href: 'goals.html',   label: '목표',      icon: 'target' },
-        { href: 'sitemap.html', label: '제품 설계', icon: 'layout' },
+        { href: 'sitemap.html', label: '화면 구조', icon: 'layout' },
       ]
     },
     {
