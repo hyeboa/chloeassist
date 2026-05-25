@@ -94,8 +94,11 @@ const Banner = (() => {
       el.innerHTML = `
         <span class="deadline-banner-dday">${escapeHtml(text)}</span>
         <span class="deadline-banner-label">${escapeHtml(label)}</span>
-        <button class="deadline-banner-dismiss" onclick="Banner.dismiss('${escapeHtml(key)}')" title="오늘 하루 숨기기">✕</button>
+        <button class="deadline-banner-dismiss" data-key="${escapeHtml(key)}" title="오늘 하루 숨기기">✕</button>
       `;
+      el.querySelector('.deadline-banner-dismiss').addEventListener('click', (e) => {
+        dismiss(key);
+      });
       wrap.appendChild(el);
     });
 
