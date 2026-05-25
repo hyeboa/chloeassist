@@ -182,7 +182,7 @@ const Routine = (() => {
         return `<div class="rmatrix-cell ${done ? 'done' : 'miss'}">${done ? '✓' : '✗'}</div>`;
       }).join('');
       return `
-        <div class="rmatrix-name" title="${escapeHtml(r.name)}"><span class="rmatrix-number">${index + 1}.</span> ${escapeHtml(r.name)}</div>
+        <div class="rmatrix-name" title="${escapeHtml(r.name)}"><span class="rmatrix-number">${index + 1}</span> ${escapeHtml(r.name)}</div>
         ${cells}`;
     }).join('');
 
