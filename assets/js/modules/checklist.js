@@ -4,7 +4,7 @@
  */
 
 const Checklist = (() => {
-  let showGuide  = false;
+  let showGuide  = true;
 
   /* ─ 카테고리 ─ */
   const CATS = {
@@ -130,23 +130,43 @@ const Checklist = (() => {
     return `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }
 
-  /* ─ 상단 요약 ─ */
-  function renderSummary(lists) {
+  /* ─ 상단 바: 통계 + AI 입력 ─ */
+  function renderTopBar(lists) {
     const totalLists = lists.length;
     const allItems   = lists.reduce((n, l) => n + (l.items || []).length, 0);
     const doneItems  = lists.reduce((n, l) => n + (l.items || []).filter(i => i.done).length, 0);
+    const remain     = allItems - doneItems;
     const pct        = allItems ? Math.round(doneItems / allItems * 100) : 0;
     return `
-      <div class="cl-summary">
-        <div class="summary-card">
-          <div class="summary-label">체크 리스트</div>
-          <div class="summary-value">${totalLists}<span>개</span></div>
+      <div class="cl-topbar">
+        <div class="cl-stats">
+          <div class="cl-stat">
+            <div class="cl-stat-value">${pct}<span>%</span></div>
+            <div class="cl-stat-label">전체 진행률</div>
+            <div class="cl-stat-bar"><div class="cl-stat-bar-fill ${pct === 100 ? 'done' : ''}" style="width:${pct}%"></div></div>
+          </div>
+          <div class="cl-stat-divider"></div>
+          <div class="cl-stat">
+            <div class="cl-stat-value">${remain}<span>개</span></div>
+            <div class="cl-stat-label">남은 항목</div>
+          </div>
+          <div class="cl-stat">
+            <div class="cl-stat-value">${doneItems}<span>개</span></div>
+            <div class="cl-stat-label">완료 항목</div>
+          </div>
+          <div class="cl-stat">
+            <div class="cl-stat-value">${totalLists}<span>개</span></div>
+            <div class="cl-stat-label">체크 리스트</div>
+          </div>
         </div>
-        <div class="summary-card">
-          <div class="summary-label">전체 진행률</div>
-          <div class="summary-value">${pct}<span>%</span></div>
-          <div class="summary-bar"><div class="summary-bar-fill ${pct === 100 ? 'green' : ''}" style="width:${pct}%"></div></div>
-          <div class="summary-sub">${doneItems} / ${allItems} 항목 완료</div>
+        <div class="cl-ai-add">
+          <div class="cl-ai-add-row">
+            <span class="cl-ai-icon">✦</span>
+            <input id="cl-ai-input" class="cl-ai-input" type="text"
+              placeholder="추가할 항목을 자유롭게 입력하면 AI가 분류해서 넣어줘요  (예: 앱스토어 스크린샷 5장 준비)">
+            <span class="cl-ai-hint">Enter</span>
+          </div>
+          <div class="cl-ai-status" id="cl-ai-status"></div>
         </div>
       </div>`;
   }
@@ -209,23 +229,26 @@ const Checklist = (() => {
   /* ─ 관리 가이드 ─ */
   function renderGuide() {
     const rows = [
-      ['새 체크 리스트 만들기', '상단 “+ 새 체크 리스트” 버튼을 눌러 템플릿(제품·마케팅·운영·기술)을 고르거나 빈 리스트로 시작하세요. 템플릿을 고르면 기본 항목이 자동으로 채워집니다.'],
-      ['항목 완료 표시', '카드를 펼친 뒤 항목 왼쪽의 원을 클릭하면 완료/해제가 토글됩니다. 진행률 바가 자동으로 갱신돼요.'],
-      ['항목 추가·삭제', '카드 맨 아래 입력창에 항목을 적고 Enter로 추가합니다. 항목에 마우스를 올리면 나타나는 ✕로 삭제할 수 있어요.'],
-      ['목표일 설정', '카드를 펼치면 목표일을 지정할 수 있고, D-day 배지로 남은 기간이 표시됩니다.'],
-      ['진행 상황 추적', '상단 요약 카드에서 전체 체크 리스트 수와 완료율을 한눈에 확인하세요.'],
+      ['✦', 'AI로 빠르게 추가', '상단 입력창에 떠오르는 일을 자유롭게 적고 Enter를 누르면, AI가 제품·마케팅·운영·기술 중 알맞은 곳에 알아서 분류해 넣어줘요.'],
+      ['✓', '항목 체크하기', '항목 왼쪽의 동그라미를 클릭하면 완료/해제가 토글돼요. 위 진행률이 실시간으로 갱신됩니다.'],
+      ['＋', '직접 추가·삭제', '각 카드 맨 아래 입력창에 적고 Enter로 추가할 수 있어요. 항목에 마우스를 올리면 ✕로 삭제됩니다.'],
+      ['📅', '목표일 지정', '카드 상단의 목표일을 설정하면 D-day 배지로 마감까지 남은 기간이 표시돼요. 임박하면 카드 색으로 강조됩니다.'],
+      ['🗂', '리스트 추가', '“+ 새 체크 리스트”로 나만의 리스트를 만들 수 있어요. 템플릿을 고르면 기본 항목이 자동으로 채워집니다.'],
     ];
     return `
       <div class="cl-guide">
         <button class="cl-guide-toggle${showGuide ? ' open' : ''}" onclick="Checklist.toggleGuide()">
-          ${chevronSvg()}<span>체크 리스트 관리 방법</span>
+          ${chevronSvg()}<span>사용 방법 한눈에 보기</span>
         </button>
         ${showGuide ? `
           <div class="cl-guide-body">
-            ${rows.map(([t, d]) => `
+            ${rows.map(([icon, t, d]) => `
               <div class="cl-guide-row">
-                <div class="cl-guide-t">${t}</div>
-                <div class="cl-guide-d">${d}</div>
+                <div class="cl-guide-icon">${icon}</div>
+                <div class="cl-guide-text">
+                  <div class="cl-guide-t">${t}</div>
+                  <div class="cl-guide-d">${d}</div>
+                </div>
               </div>`).join('')}
           </div>` : ''}
       </div>`;
@@ -253,12 +276,12 @@ const Checklist = (() => {
     }
 
     app.innerHTML = `
-      ${renderSummary(lists)}
+      ${renderTopBar(lists)}
       <div class="cl-section-hd">
-        <div class="section-title" style="margin:0">출시 체크 리스트</div>
+        <div class="section-title" style="margin:0">전체 체크 리스트</div>
         <button class="btn btn-primary cl-new-btn" onclick="Checklist.openCreate()">+ 새 체크 리스트</button>
       </div>
-      <div class="cl-list">
+      <div class="cl-grid">
         ${lists.length === 0
           ? `<div class="cl-empty">
                <div class="cl-empty-icon">🚀</div>
@@ -270,6 +293,7 @@ const Checklist = (() => {
       ${renderGuide()}`;
 
     bindItemInputs();
+    bindAiInput();
   }
 
   function bindItemInputs() {
@@ -281,6 +305,69 @@ const Checklist = (() => {
         addItem(inp.dataset.list, v);
       });
     });
+  }
+
+  /* ─ 상단 AI 입력: 자연어 → 카테고리 자동 분류 후 추가 ─ */
+  function bindAiInput() {
+    const input  = document.getElementById('cl-ai-input');
+    const status = document.getElementById('cl-ai-status');
+    if (!input) return;
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key !== 'Enter' || e.isComposing) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      // API 키 없으면 그냥 기타 카테고리에 원문 추가
+      if (!AI.getApiKey()) {
+        addItemToCategory('etc', text);
+        input.value = '';
+        return;
+      }
+
+      input.disabled = true;
+      status.textContent = '✦ AI가 분류 중...';
+      status.className = 'cl-ai-status loading';
+
+      try {
+        const result = await NLInput.parse('checklistItem', text);
+        const cat   = ['product', 'marketing', 'operations', 'technical'].includes(result.category)
+          ? result.category : 'product';
+        const added = addItemToCategory(cat, result.text || text); // 내부에서 render() 호출
+
+        // render() 로 입력 요소가 새로 생성되므로 새 요소에 결과 표시
+        const newStatus = document.getElementById('cl-ai-status');
+        const newInput  = document.getElementById('cl-ai-input');
+        if (newStatus) {
+          newStatus.textContent = `“${added.listTitle}”에 추가했어요`;
+          newStatus.className = 'cl-ai-status success';
+        }
+        if (newInput) newInput.focus();
+      } catch (err) {
+        status.textContent = '⚠ ' + err.message;
+        status.className = 'cl-ai-status error';
+        input.disabled = false;
+        input.focus();
+      }
+    });
+  }
+
+  // 카테고리에 맞는 리스트를 찾아 항목 추가 (없으면 자동 생성)
+  function addItemToCategory(category, text) {
+    let lists = getLists();
+    let target = lists.find(l => l.category === category);
+
+    if (!target) {
+      const tplKey = ['product', 'marketing', 'operations', 'technical'].includes(category) ? category : null;
+      const label  = tplKey ? TEMPLATES[tplKey].label : '기타';
+      Store.push('launchChecklists', { title: label, category, dueDate: '', items: [] });
+      target = getLists().find(l => l.category === category);
+    }
+
+    const items = [...(target.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
+    Store.update('launchChecklists', target.id, { items });
+    render();
+    return { listTitle: target.title };
   }
 
   /* ─ 생성 모달 ─ */

@@ -1,12 +1,112 @@
 /* ===== 출시 체크 리스트 ===== */
 
-/* ── 상단 요약 ── */
-.cl-summary {
+/* ── 상단 바: 통계 + AI 입력 ── */
+.cl-topbar {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
   margin-bottom: 28px;
 }
+@media (max-width: 900px) {
+  .cl-topbar { grid-template-columns: 1fr; }
+}
+
+/* 통계 */
+.cl-stats {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 18px 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.cl-stat { min-width: 0; }
+.cl-stat-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.cl-stat-value span { font-size: 0.9rem; font-weight: 600; color: var(--color-text-3); margin-left: 2px; }
+.cl-stat-label {
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  margin-top: 3px;
+}
+.cl-stat-bar {
+  margin-top: 8px;
+  height: 5px;
+  width: 120px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.cl-stat-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cl-stat-bar-fill.done { background: var(--color-success); }
+.cl-stat-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+/* AI 입력 */
+.cl-ai-add {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+}
+.cl-ai-add-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.cl-ai-icon { color: var(--color-primary); font-size: 1rem; flex-shrink: 0; }
+.cl-ai-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+.cl-ai-input::placeholder { color: var(--color-text-3); }
+.cl-ai-input:disabled { opacity: 0.6; }
+.cl-ai-hint {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+}
+.cl-ai-status {
+  font-size: 0.8rem;
+  min-height: 1.1em;
+  padding-left: 2px;
+}
+.cl-ai-status.loading { color: var(--color-primary); }
+.cl-ai-status.success { color: var(--color-success); }
+.cl-ai-status.error   { color: var(--color-danger); }
 
 /* ── 섹션 헤더 ── */
 .cl-section-hd {
@@ -23,13 +123,16 @@
   padding: 9px 16px;
 }
 
-/* ── 리스트 ── */
-.cl-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ── 멀티컬럼 그리드 (와이드 화면) ── */
+.cl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  align-items: start;
   margin-bottom: 32px;
 }
+.cl-grid .cl-card { margin-bottom: 0; }
+.cl-grid .goal-card-head { cursor: default; }
 
 /* ── 카테고리 배지 ── */
 .cl-cat-badge {
@@ -48,6 +151,7 @@
 
 /* ── 빈 상태 ── */
 .cl-empty {
+  grid-column: 1 / -1;
   text-align: center;
   padding: 56px 20px;
   background: var(--color-surface);
@@ -142,24 +246,42 @@
 .cl-guide-toggle.open svg { transform: rotate(90deg); }
 
 .cl-guide-body {
-  padding: 4px 18px 18px;
+  padding: 10px 18px 18px;
   border-top: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 4px 24px;
 }
 
 .cl-guide-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--color-border);
 }
-.cl-guide-row:last-child { border-bottom: none; }
 
+.cl-guide-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+}
+
+.cl-guide-text { min-width: 0; }
 .cl-guide-t {
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .cl-guide-d {
-  font-size: 0.84rem;
+  font-size: 0.83rem;
   color: var(--color-text-2);
-  line-height: 1.6;
+  line-height: 1.55;
 }

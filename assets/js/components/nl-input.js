@@ -16,6 +16,7 @@ const NLInput = (() => {
     feature:   { required: ['기능명'],       hint: '필수 · 분야·설명은 선택' },
     task:      { required: ['할 일'],        hint: '필수 · 날짜·분야는 선택' },
     goal:      { required: ['목표명'],       hint: '필수 · 날짜는 선택' },
+    checklistItem: { required: ['항목'],     hint: 'AI가 카테고리를 자동 분류' },
   };
 
   const PROMPTS = {
@@ -65,6 +66,21 @@ const NLInput = (() => {
 - title: 목표 이름 (필수)
 - targetDate: YYYY-MM-DD 형식 (없으면 null. 자연어 날짜 변환. "3월까지" → 3월 말일, "1달 안에" → 오늘+30일 등)
 - title을 찾을 수 없으면 {"error": "안내 메시지"} 반환
+
+텍스트: "${text}"
+`.trim(),
+
+    checklistItem: (text) => `
+아래 텍스트에서 출시 체크리스트 항목을 추출해 JSON만 반환하세요. 설명 없이 JSON만.
+
+규칙:
+- text: 체크리스트 항목 내용 (필수. 간결한 '할 일' 형태로 다듬기)
+- category: 아래 4개 중 가장 알맞은 하나. 불명확하면 "product"
+  - product: 제품/기능/QA/스토어 등록/개인정보·약관 등 제품 자체 관련
+  - marketing: 홍보/SNS/보도자료/광고/브랜딩 등 마케팅 관련
+  - operations: 운영/CS/매뉴얼/모니터링/KPI 등 운영 관련
+  - technical: 배포/보안/인프라/도메인·SSL/부하테스트 등 기술 관련
+- text를 찾을 수 없으면 {"error": "안내 메시지"} 반환
 
 텍스트: "${text}"
 `.trim(),
