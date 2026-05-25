@@ -293,7 +293,6 @@
 .feat-linked-screens {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-border);
 }
 .feat-linked-label {
   display: flex; align-items: center; gap: 8px;
@@ -331,7 +330,6 @@
 .feat-panel {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-border);
 }
 
 .feat-panel-tasks {

@@ -78,11 +78,6 @@ const Projects = (() => {
     const tasks      = linkedTasks(f.id);
     const done       = tasks.filter(t => t.done).length;
     const pct        = tasks.length ? Math.round(done / tasks.length * 100) : 0;
-    const nextStatus = STATUSES[STATUSES.indexOf(f.status) + 1];
-    const prevStatus = STATUSES[STATUSES.indexOf(f.status) - 1];
-    const cat        = f.category || '';
-    const nextSc     = nextStatus ? sc(nextStatus) : null;
-    const prevSc     = prevStatus ? sc(prevStatus) : null;
 
     /* 접힌 상태에서 할 일 미리보기 (최대 3개) */
     const taskPreview = !isOpen && tasks.length > 0 ? `
@@ -101,14 +96,6 @@ const Projects = (() => {
         ondragstart="Projects.cardDragStart(event,'${f.id}')"
         ondragend="Projects.cardDragEnd(event)"
         onclick="Projects.toggleExpand('${f.id}')">
-        <div class="feature-card-head">
-          ${nextStatus
-            ? `<button class="feature-quick-next" title="다음 단계: ${nextStatus}"
-                style="background:${nextSc.bg};color:${nextSc.text};border-color:${nextSc.border}"
-                onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">${chevronRightSvg()}</button>`
-            : `<span class="feature-quick-done">${checkSvg()}</span>`}
-        </div>
-
         <div class="feature-card-name">${escapeHtml(f.name)}</div>
         ${f.desc ? `<div class="feature-card-desc">${escapeHtml(f.desc)}</div>` : ''}
 
@@ -123,6 +110,7 @@ const Projects = (() => {
         ${taskPreview}
 
         ${isOpen ? `
+          ${renderTaskPanel(f)}
           ${(() => {
             const screens = linkedScreens(f.id);
             if (!screens.length) return '';
@@ -143,22 +131,7 @@ const Projects = (() => {
                 </div>
               </div>`;
           })()}
-          ${renderTaskPanel(f)}
-          <div class="feature-card-actions-row">
-            ${prevStatus ? `
-              <button class="feature-action-btn prev"
-                style="background:${prevSc.bg};color:${prevSc.text};border-color:${prevSc.border}"
-                onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${prevStatus}')">
-                ${chevronLeftSvg()} ${prevStatus}
-              </button>` : ''}
-            ${nextStatus ? `
-              <button class="feature-action-btn next"
-                style="background:${nextSc.bg};color:${nextSc.text};border-color:${nextSc.border}"
-                onclick="event.stopPropagation();Projects.moveStatus('${f.id}','${nextStatus}')">
-                ${nextStatus} ${chevronRightSvg()}
-              </button>` : ''}
-            <button class="feature-action-btn del" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">삭제</button>
-          </div>` : ''}
+          <button class="feature-action-btn del" style="margin-top:12px" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">삭제</button>` : ''}
       </div>
     `;
   }
