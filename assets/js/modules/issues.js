@@ -22,6 +22,7 @@ const Issues = (() => {
   };
 
   let filter = 'all'; // 'all' | 'open' | 'progress' | 'resolved'
+  let showLegend = true;
 
   /* ─ 데이터 ─ */
   function getIssues() { return Store.get('issues') || []; }
@@ -55,6 +56,61 @@ const Issues = (() => {
       <div class="mp-add-row iss-add-row">
         <input id="iss-input" class="mp-add-input" type="text" placeholder="새 이슈 입력 (예: 로그인 화면 버튼 정렬 깨짐)">
         <span class="mp-add-hint">Enter</span>
+      </div>`;
+  }
+
+  /* ─ 범례 섹션 ─ */
+  function renderLegend() {
+    return `
+      <div class="iss-legend-wrapper">
+        <button class="iss-legend-toggle" onclick="Issues.toggleLegend()" title="범례 열기/닫기">
+          ${showLegend ? '▼' : '▶'} 범례
+        </button>
+        ${!showLegend ? '' : `
+          <div class="iss-legend-content">
+            <div class="iss-legend-section">
+              <div class="iss-legend-title">상태</div>
+              <div class="iss-legend-items">
+                <div class="iss-legend-item">
+                  <span class="iss-legend-dot" style="background: var(--color-danger)"></span>
+                  <span class="iss-legend-label">열림</span>
+                  <span class="iss-legend-desc">아직 시작 안 함</span>
+                </div>
+                <div class="iss-legend-item">
+                  <span class="iss-legend-dot" style="background: var(--color-primary)"></span>
+                  <span class="iss-legend-label">진행중</span>
+                  <span class="iss-legend-desc">지금 작업 중</span>
+                </div>
+                <div class="iss-legend-item">
+                  <span class="iss-legend-dot" style="background: var(--color-success)"></span>
+                  <span class="iss-legend-label">해결</span>
+                  <span class="iss-legend-desc">완료됨</span>
+                </div>
+              </div>
+            </div>
+            <div class="iss-legend-section">
+              <div class="iss-legend-title">우선도</div>
+              <div class="iss-legend-items">
+                <div class="iss-legend-item">
+                  <span class="iss-legend-badge" style="background: #dc2626">긴급</span>
+                  <span class="iss-legend-desc">즉시 처리</span>
+                </div>
+                <div class="iss-legend-item">
+                  <span class="iss-legend-badge" style="background: #ea580c">높음</span>
+                  <span class="iss-legend-desc">우선 처리</span>
+                </div>
+                <div class="iss-legend-item">
+                  <span class="iss-legend-badge" style="background: #6b7280">보통</span>
+                  <span class="iss-legend-desc">일반</span>
+                </div>
+                <div class="iss-legend-item">
+                  <span class="iss-legend-badge" style="background: #2563eb">낮음</span>
+                  <span class="iss-legend-desc">나중에</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `}
       </div>`;
   }
 
@@ -124,6 +180,8 @@ const Issues = (() => {
         </div>
       </div>
 
+      ${renderLegend()}
+
       ${renderAddInput()}
       ${renderFilters(c)}
 
@@ -189,7 +247,12 @@ const Issues = (() => {
     render();
   }
 
-  return { render, addIssue, cycleStatus, cyclePriority, editTitle, deleteIssue, setFilter };
+  function toggleLegend() {
+    showLegend = !showLegend;
+    render();
+  }
+
+  return { render, addIssue, cycleStatus, cyclePriority, editTitle, deleteIssue, setFilter, toggleLegend };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Issues.render());
