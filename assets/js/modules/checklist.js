@@ -269,16 +269,16 @@ const Checklist = (() => {
 
     app.innerHTML = `
       ${renderTopBar(lists)}
-      <div class=”cl-section-hd”>
-        <div class=”section-title” style=”margin:0”>전체 체크 리스트</div>
-        <button class=”btn btn-primary cl-new-btn” onclick=”Checklist.openCreate()”>+ 새 체크 리스트</button>
+      <div class="cl-section-hd">
+        <div class="section-title" style="margin:0">전체 체크 리스트</div>
+        <button class="btn btn-primary cl-new-btn" onclick="Checklist.openCreate()">+ 새 체크 리스트</button>
       </div>
-      <div class=”cl-items-view”>
+      <div class="cl-items-view">
         ${!hasItems
-          ? `<div class=”cl-empty”>
-               <div class=”cl-empty-icon”>🚀</div>
-               <div class=”cl-empty-title”>아직 항목이 없어요</div>
-               <div class=”cl-empty-sub”>상단 AI 입력으로 추가하거나 “+ 새 체크 리스트”로 시작하세요</div>
+          ? `<div class="cl-empty">
+               <div class="cl-empty-icon">🚀</div>
+               <div class="cl-empty-title">아직 항목이 없어요</div>
+               <div class="cl-empty-sub">상단 AI 입력으로 추가하거나 '+ 새 체크 리스트'로 시작하세요</div>
              </div>`
           : ['product', 'marketing', 'operations', 'technical'].map(cat => renderCategorySection(lists, cat)).join('')}
       </div>
