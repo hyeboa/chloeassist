@@ -269,10 +269,56 @@ const Weekly = (() => {
             </button>
           </div>
 
+          <div class="wk-section">
+            <div class="wk-section-header">
+              <span class="wk-section-dot memo"></span>
+              회고
+            </div>
+            <div class="wk-reflect-group">
+              <label class="wk-reflect-label">✅ 이번 주 잘한 점</label>
+              <textarea class="wk-reflect-input" id="wk-reflect-good"
+                placeholder="이번 주 가장 뿌듯한 일">${escapeHtml(memo.reflectGood || '')}</textarea>
+            </div>
+            <div class="wk-reflect-group">
+              <label class="wk-reflect-label">⚠️ 아쉬운 점 / 놓친 것</label>
+              <textarea class="wk-reflect-input" id="wk-reflect-bad"
+                placeholder="다음에 다르게 해볼 것">${escapeHtml(memo.reflectBad || '')}</textarea>
+            </div>
+            <div class="wk-reflect-group">
+              <label class="wk-reflect-label">🎯 다음 주 집중할 것</label>
+              <textarea class="wk-reflect-input" id="wk-reflect-next"
+                placeholder="다음 주 1~3개 우선순위">${escapeHtml(memo.reflectNext || '')}</textarea>
+            </div>
+            ${memo.memo ? `
+              <details class="wk-reflect-legacy">
+                <summary>이전 메모 보기</summary>
+                <div class="wk-reflect-legacy-body">${escapeHtml(memo.memo).replace(/\n/g, '<br>')}</div>
+              </details>` : ''}
+          </div>
+
         </div>
       </div>
     `;
 
+    bindMemo();
+  }
+
+  /* ─ 회고 자동 저장 ─ */
+  function bindMemo() {
+    const FIELDS = [
+      ['wk-reflect-good', 'reflectGood'],
+      ['wk-reflect-bad',  'reflectBad'],
+      ['wk-reflect-next', 'reflectNext'],
+    ];
+    let timer;
+    FIELDS.forEach(([id, key]) => {
+      const ta = document.getElementById(id);
+      if (!ta) return;
+      ta.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => saveMemo(currentWeekStart, { [key]: ta.value }), 600);
+      });
+    });
   }
 
   /* ─ AI 주간 요약 생성 ─ */
