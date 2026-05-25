@@ -326,9 +326,18 @@ const Roadmap = (() => {
 
   function renderAddGoalInput() {
     return `
-      <div class="mp-add-row goal-add-row">
-        <input id="goal-add-input" class="mp-add-input" type="text" placeholder="새 단계 목표 추가">
-        <span class="mp-add-hint">Enter</span>
+      <div class="quick-add-wrap">
+        <div class="quick-add-inner">
+          <div class="quick-add-top">
+            <input id="goal-add-input" class="quick-add-input" type="text"
+              placeholder="분기별 마케팅 전략 수립 3월 말까지...">
+            <span class="ai-badge">✦ AI</span>
+          </div>
+          <div class="quick-add-footer">
+            <span class="quick-add-hint">Enter로 추가</span>
+          </div>
+          <div class="quick-add-status" id="goal-status"></div>
+        </div>
       </div>`;
   }
 
@@ -403,11 +412,34 @@ const Roadmap = (() => {
 
   function bindGoalInputs() {
     const goalInput = document.getElementById('goal-add-input');
-    goalInput?.addEventListener('keydown', (e) => {
+    const goalStatus = document.getElementById('goal-status');
+
+    goalInput?.addEventListener('keydown', async (e) => {
       if (e.key !== 'Enter' || e.isComposing) return;
-      const v = goalInput.value.trim();
-      if (!v) return;
-      addGoal(v);
+      const text = goalInput.value.trim();
+      if (!text) return;
+
+      if (!AI.getApiKey()) {
+        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+        return;
+      }
+
+      goalInput.disabled = true;
+      goalStatus.textContent = '✦ AI가 분석 중...';
+      goalStatus.className = 'quick-add-status';
+
+      try {
+        const result = await NLInput.parse('goal', text);
+        addGoal(result.title, result.targetDate || null);
+        goalInput.value = '';
+        goalStatus.textContent = '';
+        render();
+      } catch (err) {
+        goalStatus.textContent = '⚠ ' + err.message;
+        goalStatus.className = 'quick-add-status error';
+        goalInput.disabled = false;
+        goalInput.focus();
+      }
     });
 
     document.querySelectorAll('.goal-item-add-input').forEach(inp => {
@@ -467,8 +499,8 @@ const Roadmap = (() => {
   }
 
   /* ─ 목표 동작 ─ */
-  function addGoal(title) {
-    Store.push('goals', { title: title.trim(), items: [] });
+  function addGoal(title, targetDate = null) {
+    Store.push('goals', { title: title.trim(), items: [], targetDate: targetDate || null });
     render();
   }
 
