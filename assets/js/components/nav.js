@@ -121,7 +121,7 @@ const Nav = (() => {
       display:flex; align-items:center; justify-content:center;
     `;
     modal.innerHTML = `
-      <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:28px;width:360px;box-shadow:var(--shadow-lg)">
+      <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:28px;width:400px;box-shadow:var(--shadow-lg);max-height:80vh;overflow-y:auto">
         <h3 style="font-size:1rem;font-weight:600;margin-bottom:16px">설정</h3>
         <label style="font-size:0.82rem;color:var(--color-text-2);display:block;margin-bottom:6px">
           Claude API 키
@@ -136,12 +136,48 @@ const Nav = (() => {
             <input id="import-file" type="file" accept=".json" style="display:none">
           </div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end">
+        <div style="border-top:1px solid var(--color-border);margin:16px 0;padding-top:16px">
+          <button id="guide-toggle" style="background:none;border:none;cursor:pointer;padding:0;width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:0.78rem;font-weight:600;color:var(--color-text-2)">기능 가이드</span>
+            <span style="font-size:0.8rem;color:var(--color-text-3)">▼</span>
+          </button>
+          <div id="guide-content" style="display:none;font-size:0.75rem;color:var(--color-text-2);line-height:1.6">
+            <div style="margin-bottom:10px">
+              <div style="font-weight:600;color:var(--color-text);margin-bottom:3px">◆ AI 자연어 입력</div>
+              <div style="color:var(--color-text-3)">마일스톤·목표 입력창에 "베타 출시 6월 30일"처럼 자연어로 입력하면 AI가 자동으로 제목과 날짜를 파싱합니다.</div>
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-weight:600;color:var(--color-text);margin-bottom:3px">◆ 마감 임박 배너</div>
+              <div style="color:var(--color-text-3)">미완료 항목의 마감이 7일 이내면 상단에 색상별 경고 배너가 표시됩니다. ✕로 오늘 하루 숨길 수 있습니다.</div>
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-weight:600;color:var(--color-text);margin-bottom:3px">◆ 마일스톤 연결</div>
+              <div style="color:var(--color-text-3)">마일스톤을 목표에 연결하면 목표의 세부 항목으로 함께 추적됩니다.</div>
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-weight:600;color:var(--color-text);margin-bottom:3px">◆ D-day 계산</div>
+              <div style="color:var(--color-text-3)">날짜가 있는 모든 항목에서 D-day가 자동으로 계산되어 시각적 우선순위를 표시합니다.</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
           <button id="settings-cancel" class="btn btn-ghost">취소</button>
           <button id="settings-save" class="btn btn-primary">저장</button>
         </div>
       </div>
     `;
+
+    modal.querySelector('#guide-toggle').addEventListener('click', () => {
+      const content = modal.querySelector('#guide-content');
+      const toggle = modal.querySelector('#guide-toggle span:last-child');
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        toggle.textContent = '▲';
+      } else {
+        content.style.display = 'none';
+        toggle.textContent = '▼';
+      }
+    });
 
     modal.querySelector('#settings-cancel').addEventListener('click', () => modal.remove());
     modal.querySelector('#settings-save').addEventListener('click', () => {
