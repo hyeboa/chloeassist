@@ -4,6 +4,7 @@
 
 const Routine = (() => {
   let selectedDate = todayStr();
+  let weekStartDate = todayStr();
   let activeTab = 'week';
 
   /* ─ 날짜 유틸 ─ */
@@ -80,20 +81,20 @@ const Routine = (() => {
   }
 
   function prevWeek() {
-    const d = new Date(selectedDate + 'T00:00:00');
+    const d = new Date(weekStartDate + 'T00:00:00');
     d.setDate(d.getDate() - 7);
-    selectedDate = d.toISOString().slice(0, 10);
+    weekStartDate = d.toISOString().slice(0, 10);
     render();
   }
 
   function nextWeek() {
-    const d = new Date(selectedDate + 'T00:00:00');
+    const d = new Date(weekStartDate + 'T00:00:00');
     d.setDate(d.getDate() + 7);
-    selectedDate = d.toISOString().slice(0, 10);
+    weekStartDate = d.toISOString().slice(0, 10);
     render();
   }
 
-  function goToday() { selectedDate = todayStr(); render(); }
+  function goToday() { selectedDate = todayStr(); weekStartDate = todayStr(); render(); }
 
   function setTab(tab) { activeTab = tab; render(); }
 
@@ -116,7 +117,7 @@ const Routine = (() => {
 
   /* ─ 날짜 네비 ─ */
   function renderDateNav(routines) {
-    const weekDays = getWeekDays(selectedDate);
+    const weekDays = getWeekDays(weekStartDate);
     const pills = weekDays.map(date => {
       const log  = getLog(date);
       const done = routines.filter(r => log[r.id]).length;
