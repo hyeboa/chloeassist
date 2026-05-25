@@ -7,6 +7,7 @@ const Projects = (() => {
   const STATUSES = ['아이디어', '기획중', '디자인중', '개발중', '완료'];
 
   let expandedId = null;
+  let draggedFeatureId = null;
 
   function getFeatures() { return Store.get('features') || []; }
   function getTasks()    { return Store.get('tasks')    || []; }
@@ -95,7 +96,11 @@ const Projects = (() => {
       </div>` : '';
 
     return `
-      <div class="feature-card ${isOpen ? 'expanded' : ''}" data-status="${f.status}" onclick="Projects.toggleExpand('${f.id}')">
+      <div class="feature-card ${isOpen ? 'expanded' : ''}" data-status="${f.status}" data-id="${f.id}"
+        draggable="true"
+        ondragstart="Projects.cardDragStart(event,'${f.id}')"
+        ondragend="Projects.cardDragEnd(event)"
+        onclick="Projects.toggleExpand('${f.id}')">
         <div class="feature-card-head">
           ${nextStatus
             ? `<button class="feature-quick-next" title="다음 단계: ${nextStatus}"
@@ -179,7 +184,10 @@ const Projects = (() => {
         ${STATUSES.map(status => {
           const cols = features.filter(f => f.status === status);
           return `
-            <div class="kanban-col" data-status="${status}">
+            <div class="kanban-col" data-status="${status}"
+              ondragover="Projects.colDragOver(event)"
+              ondragleave="Projects.colDragLeave(event)"
+              ondrop="Projects.colDrop(event,'${status}')">
               <div class="kanban-col-header">
                 <span class="kanban-col-title">${status}</span>
                 <span class="kanban-count">${cols.length}</span>
@@ -303,9 +311,40 @@ const Projects = (() => {
     render();
   }
 
+  /* ─ 드래그&드롭 ─ */
+  function cardDragStart(e, featureId) {
+    draggedFeatureId = featureId;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.5';
+  }
+
+  function cardDragEnd(e) {
+    e.currentTarget.style.opacity = '1';
+    draggedFeatureId = null;
+  }
+
+  function colDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.style.background = 'var(--color-surface-2)';
+  }
+
+  function colDragLeave(e) {
+    e.currentTarget.style.background = '';
+  }
+
+  function colDrop(e, status) {
+    e.preventDefault();
+    e.currentTarget.style.background = '';
+    if (draggedFeatureId) {
+      moveStatus(draggedFeatureId, status);
+    }
+  }
+
   return {
     render, buildHTML, bindFeatInput, goToScreens,
     deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask, toggleTaskDone,
+    cardDragStart, cardDragEnd, colDragOver, colDragLeave, colDrop,
   };
 })();
 

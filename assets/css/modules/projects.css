@@ -38,6 +38,7 @@
   min-height: 200px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  transition: background var(--transition);
 }
 
 /* ─ 컬럼 헤더: 상단 색깔 배경 블록 (라인 없음) ─ */
@@ -113,6 +114,18 @@
 
 .feature-card.expanded {
   box-shadow: var(--shadow-md);
+}
+
+.feature-card[draggable="true"] {
+  user-select: none;
+}
+
+.feature-card[draggable="true"]:hover {
+  cursor: grab;
+}
+
+.feature-card[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 /* ─ 헤더 행: 상태 뱃지 + 빠른 다음단계 ─ */
