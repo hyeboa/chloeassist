@@ -103,7 +103,10 @@ const Banner = (() => {
     });
 
     const mainWrapper = document.querySelector('.main-wrapper');
-    if (mainWrapper) mainWrapper.prepend(wrap);
+    if (!mainWrapper) return;
+    const header = mainWrapper.querySelector('.page-header');
+    if (header) header.insertAdjacentElement('afterend', wrap);
+    else mainWrapper.prepend(wrap);
   }
 
   return { render, dismiss };
