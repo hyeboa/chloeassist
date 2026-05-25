@@ -123,6 +123,7 @@
 .mp-section-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -353,16 +354,22 @@
 
 /* ─ 완료 보기 버튼 ─ */
 .mp-show-done-btn {
-  margin: 4px 0 2px 32px;
-  padding: 4px 0;
+  padding: 4px 12px;
   font-size: 0.8rem;
   color: var(--color-text-3);
-  background: transparent;
+  background: var(--color-surface-2);
   border: none;
+  border-radius: var(--radius-full);
   cursor: pointer;
-  transition: color var(--transition);
+  transition: all var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
 }
-.mp-show-done-btn:hover { color: var(--color-text); }
+.mp-show-done-btn:hover {
+  color: var(--color-text);
+  background: var(--color-border);
+}
 
 /* mp-add-row / mp-add-input / mp-add-hint → base.css 공통 정의 사용 */
 

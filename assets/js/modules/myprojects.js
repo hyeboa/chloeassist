@@ -139,17 +139,17 @@ const MyProjects = (() => {
             ${escapeHtml(project)}
           </span>
           <span class="mp-section-count">${todo.length}개 남음${done.length ? ` · 완료 ${done.length}` : ''}</span>
+          ${done.length ? `
+            <button class="mp-show-done-btn" onclick="MyProjects.toggleShowDone('${escapeHtml(project)}')">
+              ${showDone ? '▲ 완료 숨기기' : `▼ ${done.length}개`}
+            </button>
+          ` : ''}
         </div>
 
         <div class="mp-task-list">
           ${todo.map(t => renderTask(t)).join('')}
 
-          ${done.length ? `
-            <button class="mp-show-done-btn" onclick="MyProjects.toggleShowDone('${escapeHtml(project)}')">
-              ${showDone ? '▲ 완료 숨기기' : `▼ 완료된 항목 ${done.length}개 보기`}
-            </button>
-            ${showDone ? done.map(t => renderTask(t)).join('') : ''}
-          ` : ''}
+          ${done.length && showDone ? done.map(t => renderTask(t)).join('') : ''}
         </div>
 
         <div class="mp-add-row">

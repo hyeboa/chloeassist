@@ -181,17 +181,6 @@ const Schedule = (() => {
   /* ─ 렌더 ─ */
   function render() {
     document.getElementById('app').innerHTML = `
-      <div class="backlog-toolbar">
-        <div class="bl-search-group">
-          <input id="bl-search" class="bl-search-input" type="text"
-            placeholder="🔍 할 일 검색..." value="${escapeHtml(searchQuery)}">
-          <button class="bl-done-toggle ${hideDone ? 'active' : ''}"
-            onclick="Schedule.toggleHideDone()">
-            ${hideDone ? '완료 보기' : '완료 숨기기'}
-          </button>
-        </div>
-      </div>
-
       <div class="quick-add-wrap">
         <div class="quick-add-inner">
           <div class="quick-add-top">
@@ -217,24 +206,17 @@ const Schedule = (() => {
           <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
             onclick="Schedule.setFilter('${c}')">${c}</button>
         `).join('')}
+        <button class="bl-done-toggle-bar ${hideDone ? 'active' : ''}"
+          onclick="Schedule.toggleHideDone()">
+          ${hideDone ? '완료 보기' : '완료 숨기기'}
+        </button>
       </div>
 
       <div id="bl-list">${buildListHTML()}</div>
     `;
 
     bindInput();
-    bindSearch();
     bindDateEdit();
-  }
-
-  /* ─ 검색바 ─ */
-  function bindSearch() {
-    const input = document.getElementById('bl-search');
-    if (!input) return;
-    input.addEventListener('input', (e) => {
-      searchQuery = e.target.value;
-      renderList();
-    });
   }
 
   /* ─ 새 할 일 입력 (NL 파싱) ─ */
