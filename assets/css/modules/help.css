@@ -1,0 +1,90 @@
+/* ===== 도움말 페이지 ===== */
+
+.help-page {
+  max-width: 900px;
+}
+
+.help-intro {
+  background: var(--color-primary-light);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.help-section {
+  margin-bottom: 40px;
+}
+
+.help-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--color-primary);
+  letter-spacing: -0.3px;
+}
+
+.help-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.help-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+
+.help-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 12px rgba(108, 99, 255, 0.08);
+}
+
+.help-item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.help-item-desc {
+  font-size: 0.88rem;
+  color: var(--color-text-2);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.help-item-example {
+  font-size: 0.82rem;
+  background: var(--color-surface-2);
+  border-left: 3px solid var(--color-primary);
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: var(--color-text-2);
+  font-family: var(--font-mono);
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.help-item-detail {
+  font-size: 0.82rem;
+  color: var(--color-text-3);
+  padding: 8px 0 0 16px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.help-item-action {
+  font-size: 0.82rem;
+  color: var(--color-primary);
+  font-weight: 500;
+  margin-top: 8px;
+}
