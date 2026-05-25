@@ -442,6 +442,12 @@
   font-size: 0.85rem;
 }
 
+.cal-date-num.today-num.sun,
+.cal-date-num.today-num.sat {
+  background: #9ca3af;
+  color: #fff;
+}
+
 .cal-date-num.sun { color: #ef4444; }
 .cal-date-num.sat { color: #3b82f6; }
 

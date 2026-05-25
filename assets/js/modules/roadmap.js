@@ -384,10 +384,6 @@ const Roadmap = (() => {
       app.innerHTML = `
         ${renderGoalStrip(goals)}
         <div class="milestone-section">
-          <div class="ms-section-hd">
-            <div class="section-title" style="margin:0">캘린더</div>
-            <span class="ms-section-meta">마일스톤 ${milestones.length}개</span>
-          </div>
           ${renderCalendarView(milestones)}
         </div>`;
       return;
