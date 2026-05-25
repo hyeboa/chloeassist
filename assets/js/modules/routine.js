@@ -42,6 +42,18 @@ const Routine = (() => {
   /* ─ 스토어 ─ */
   function getRoutines() { return Store.get('routines') || []; }
 
+  /* 루틴 시작일 (추가된 날짜) — 이 날짜부터 표시 */
+  function routineStart(r) {
+    return new Date(r.createdAt || Date.now()).toISOString().slice(0, 10);
+  }
+
+  function isActive(r, date) { return routineStart(r) <= date; }
+
+  /* 특정 날짜에 활성인 루틴만 */
+  function activeRoutines(date) {
+    return getRoutines().filter(r => isActive(r, date));
+  }
+
   function getLog(date) { return Store.get('routine-log:' + date) || {}; }
 
   function saveLog(date, log) { Store.set('routine-log:' + date, log); }
@@ -62,6 +74,8 @@ const Routine = (() => {
 
   /* ─ 스트릭 계산 (today 기준, 연속 완료일) ─ */
   function calcStreak(routineId) {
+    const r = getRoutines().find(x => x.id === routineId);
+    const start = r ? routineStart(r) : null;
     const t = todayStr();
     const todayLog = getLog(t);
     if (!todayLog[routineId]) return 0;
@@ -70,6 +84,7 @@ const Routine = (() => {
     for (let i = 0; i < 365; i++) {
       d.setDate(d.getDate() - 1);
       const ds = d.toISOString().slice(0, 10);
+      if (start && ds < start) break;
       if (getLog(ds)[routineId]) { streak++; } else { break; }
     }
     return streak;
@@ -116,12 +131,13 @@ const Routine = (() => {
   }
 
   /* ─ 날짜 네비 ─ */
-  function renderDateNav(routines) {
+  function renderDateNav() {
     const weekDays = getWeekDays(weekStartDate);
     const pills = weekDays.map(date => {
+      const active = activeRoutines(date);
       const log  = getLog(date);
-      const done = routines.filter(r => log[r.id]).length;
-      const all  = routines.length;
+      const done = active.filter(r => log[r.id]).length;
+      const all  = active.length;
       const dotClass = isFuture(date) || all === 0 ? 'none'
         : done === all ? 'full'
         : done > 0    ? 'partial'
@@ -148,8 +164,10 @@ const Routine = (() => {
   }
 
   /* ─ 주간 매트릭스 ─ */
-  function renderWeekMatrix(routines) {
-    const weekDays = getWeekDays(selectedDate);
+  function renderWeekMatrix() {
+    const weekDays = getWeekDays(weekStartDate);
+    const lastDay  = weekDays[6];
+    const routines = getRoutines().filter(r => routineStart(r) <= lastDay);
 
     const headCells = weekDays.map(date => `
       <div class="rmatrix-head ${isToday(date) ? 'today' : ''} ${isFuture(date) ? 'future' : ''}">
@@ -159,7 +177,7 @@ const Routine = (() => {
 
     const rows = routines.map(r => {
       const cells = weekDays.map(date => {
-        if (isFuture(date)) return `<div class="rmatrix-cell future">─</div>`;
+        if (isFuture(date) || !isActive(r, date)) return `<div class="rmatrix-cell future">─</div>`;
         const done = !!getLog(date)[r.id];
         return `<div class="rmatrix-cell ${done ? 'done' : 'miss'}">${done ? '✓' : '✗'}</div>`;
       }).join('');
@@ -183,15 +201,16 @@ const Routine = (() => {
   }
 
   /* ─ 30일 바 차트 ─ */
-  function renderChart(routines) {
+  function renderChart() {
     const days = [];
     for (let i = -29; i <= 0; i++) {
       const d = new Date(todayStr() + 'T00:00:00');
       d.setDate(d.getDate() + i);
-      const date = d.toISOString().slice(0, 10);
-      const log  = getLog(date);
-      const done = routines.filter(r => log[r.id]).length;
-      const pct  = routines.length ? Math.round(done / routines.length * 100) : 0;
+      const date   = d.toISOString().slice(0, 10);
+      const log    = getLog(date);
+      const active = activeRoutines(date);
+      const done   = active.filter(r => log[r.id]).length;
+      const pct    = active.length ? Math.round(done / active.length * 100) : 0;
       days.push({ date, pct, isToday: i === 0, day: dayName(date), num: dayNum(date) });
     }
 
@@ -281,7 +300,7 @@ const Routine = (() => {
   /* ─ 메인 렌더 ─ */
   function render() {
     cleanupFutureLogs();
-    const routines  = getRoutines();
+    const routines  = activeRoutines(selectedDate);
     const log       = getLog(selectedDate);
     const doneCount = routines.filter(r => log[r.id]).length;
     const total     = routines.length;
@@ -292,7 +311,7 @@ const Routine = (() => {
     if (!app) return;
 
     app.innerHTML = `
-      ${renderDateNav(routines)}
+      ${renderDateNav()}
 
       <div class="routine-layout">
 
@@ -342,7 +361,7 @@ const Routine = (() => {
             <button class="routine-tab ${activeTab === 'history' ? 'active' : ''}" onclick="Routine.setTab('history')">30일 기록</button>
           </div>
           <div class="routine-tab-content">
-            ${activeTab === 'week' ? renderWeekMatrix(routines) : renderChart(routines)}
+            ${activeTab === 'week' ? renderWeekMatrix() : renderChart()}
           </div>
         </div>
 
