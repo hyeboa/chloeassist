@@ -106,22 +106,6 @@ const Checklist = (() => {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function progress(list) {
-    const items = list.items || [];
-    const done  = items.filter(i => i.done).length;
-    const pct   = items.length ? Math.round(done / items.length * 100) : 0;
-    return { done, total: items.length, pct };
-  }
-
-  function dday(dateStr, allDone) {
-    if (allDone) return { label: '완료', cls: 'dday-done' };
-    const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
-    if (diff === 0)  return { label: 'D-Day', cls: 'dday-today' };
-    if (diff < 0)    return { label: `D+${Math.abs(diff)}`, cls: 'dday-overdue' };
-    if (diff <= 14)  return { label: `D-${diff}`, cls: 'dday-soon' };
-    return { label: `D-${diff}`, cls: 'dday-future' };
-  }
-
   function checkSvg() {
     return `<svg width="11" height="11" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }
@@ -219,11 +203,10 @@ const Checklist = (() => {
   /* ─ 관리 가이드 ─ */
   function renderGuide() {
     const rows = [
-      ['✦', 'AI로 빠르게 추가', '상단 입력창에 떠오르는 일을 자유롭게 적고 Enter를 누르면, AI가 제품·마케팅·운영·기술 중 알맞은 곳에 알아서 분류해 넣어줘요.'],
-      ['✓', '항목 체크하기', '항목 왼쪽의 동그라미를 클릭하면 완료/해제가 토글돼요. 위 진행률이 실시간으로 갱신됩니다.'],
-      ['＋', '직접 추가·삭제', '각 카드 맨 아래 입력창에 적고 Enter로 추가할 수 있어요. 항목에 마우스를 올리면 ✕로 삭제됩니다.'],
-      ['📅', '목표일 지정', '카드 상단의 목표일을 설정하면 D-day 배지로 마감까지 남은 기간이 표시돼요. 임박하면 카드 색으로 강조됩니다.'],
-      ['🗂', '리스트 추가', '“+ 새 체크 리스트”로 나만의 리스트를 만들 수 있어요. 템플릿을 고르면 기본 항목이 자동으로 채워집니다.'],
+      ['✦', 'AI로 항목 추가', '상단 입력창에 떠오르는 일을 자유롭게 적고 Enter를 누르면, AI가 제품·마케팅·운영·기술 중 알맞은 곳에 알아서 분류해 넣어줘요.'],
+      ['✓', '항목 체크하기', '항목 왼쪽의 체크박스를 클릭하면 완료/해제가 토글돼요. 상단 진행률이 실시간으로 갱신됩니다.'],
+      ['✕', '항목 삭제', '항목에 마우스를 올리면 오른쪽에 나타나는 ✕ 버튼으로 삭제할 수 있어요.'],
+      ['📊', '한눈에 보기', '제품·마케팅·운영·기술 카테고리별로 모든 항목이 펼쳐져 있어, 출시 준비 상태를 바로 확인할 수 있어요.'],
     ];
     return `
       <div class="cl-guide">
@@ -271,32 +254,19 @@ const Checklist = (() => {
       ${renderTopBar(lists)}
       <div class="cl-section-hd">
         <div class="section-title" style="margin:0">전체 체크 리스트</div>
-        <button class="btn btn-primary cl-new-btn" onclick="Checklist.openCreate()">+ 새 체크 리스트</button>
       </div>
       <div class="cl-items-view">
         ${!hasItems
           ? `<div class="cl-empty">
                <div class="cl-empty-icon">🚀</div>
                <div class="cl-empty-title">아직 항목이 없어요</div>
-               <div class="cl-empty-sub">상단 AI 입력으로 추가하거나 '+ 새 체크 리스트'로 시작하세요</div>
+               <div class="cl-empty-sub">상단 AI 입력으로 추가해보세요</div>
              </div>`
           : ['product', 'marketing', 'operations', 'technical'].map(cat => renderCategorySection(lists, cat)).join('')}
       </div>
       ${renderGuide()}`;
 
-    bindItemInputs();
     bindAiInput();
-  }
-
-  function bindItemInputs() {
-    document.querySelectorAll('.cl-item-add-input').forEach(inp => {
-      inp.addEventListener('keydown', (e) => {
-        if (e.key !== 'Enter' || e.isComposing) return;
-        const v = inp.value.trim();
-        if (!v) return;
-        addItem(inp.dataset.list, v);
-      });
-    });
   }
 
   /* ─ 상단 AI 입력: 자연어 → 카테고리 자동 분류 후 추가 ─ */
@@ -362,101 +332,7 @@ const Checklist = (() => {
     return { listTitle: target.title };
   }
 
-  /* ─ 생성 모달 ─ */
-  function openCreate() {
-    const existing = document.getElementById('cl-modal');
-    if (existing) { existing.remove(); return; }
-
-    const tplOptions = Object.entries(TEMPLATES).map(([key, t]) =>
-      `<option value="${key}">${t.label}${t.items.length ? ` (${t.items.length}개 항목)` : ''}</option>`
-    ).join('');
-    const catOptions = Object.entries(CATS).map(([key, c]) =>
-      `<option value="${key}">${c.label}</option>`
-    ).join('');
-
-    const modal = document.createElement('div');
-    modal.id = 'cl-modal';
-    modal.className = 'cl-modal-overlay';
-    modal.innerHTML = `
-      <div class="cl-modal">
-        <h3 class="cl-modal-title">새 체크 리스트</h3>
-        <label class="cl-field-label">템플릿</label>
-        <select id="cl-tpl" class="cl-field-input">${tplOptions}</select>
-        <label class="cl-field-label">제목</label>
-        <input id="cl-title" class="cl-field-input" type="text" placeholder="예: 헬로아지 v1.0 출시">
-        <label class="cl-field-label">카테고리</label>
-        <select id="cl-cat" class="cl-field-input">${catOptions}</select>
-        <label class="cl-field-label">목표일 (선택)</label>
-        <input id="cl-due" class="cl-field-input" type="date">
-        <div class="cl-modal-actions">
-          <button class="btn btn-ghost" id="cl-cancel">취소</button>
-          <button class="btn btn-primary" id="cl-create">만들기</button>
-        </div>
-      </div>`;
-
-    const tplSel   = modal.querySelector('#cl-tpl');
-    const titleInp = modal.querySelector('#cl-title');
-    const catSel   = modal.querySelector('#cl-cat');
-
-    function syncFromTemplate() {
-      const tpl = TEMPLATES[tplSel.value];
-      if (!tpl) return;
-      catSel.value = tpl.category;
-      if (!titleInp.value.trim() && tpl.label && tplSel.value !== 'empty') {
-        titleInp.placeholder = `예: ${tpl.label}`;
-      }
-    }
-    tplSel.addEventListener('change', syncFromTemplate);
-    syncFromTemplate();
-
-    modal.querySelector('#cl-cancel').addEventListener('click', () => modal.remove());
-    modal.querySelector('#cl-create').addEventListener('click', () => {
-      const tplKey = tplSel.value;
-      const tpl    = TEMPLATES[tplKey];
-      const title  = titleInp.value.trim() || (tplKey !== 'empty' ? tpl.label : '새 체크 리스트');
-      createList(title, catSel.value, modal.querySelector('#cl-due').value || '', tplKey);
-      modal.remove();
-    });
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-
-    document.body.appendChild(modal);
-    titleInp.focus();
-  }
-
   /* ─ 동작 ─ */
-  function createList(title, category, dueDate, templateKey) {
-    const tpl   = TEMPLATES[templateKey] || TEMPLATES.empty;
-    const items = (tpl.items || []).map(text => ({ id: crypto.randomUUID(), text, done: false }));
-    const pushed = Store.push('launchChecklists', {
-      title: title.trim(),
-      category: category || 'etc',
-      dueDate: dueDate || '',
-      items,
-    });
-    render();
-    Toast.show('체크 리스트를 만들었어요.', 'success');
-  }
-
-  function editTitle(id, text) {
-    const t = text.trim();
-    if (!t) { render(); return; }
-    Store.update('launchChecklists', id, { title: t });
-  }
-
-  function deleteList(id) {
-    if (!confirm('이 체크 리스트를 삭제할까요?')) return;
-    Store.remove('launchChecklists', id);
-    render();
-  }
-
-  function addItem(listId, text) {
-    const list = getLists().find(l => l.id === listId);
-    if (!list) return;
-    const items = [...(list.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
-    Store.update('launchChecklists', listId, { items });
-    render();
-  }
-
   function toggleItem(listId, itemId) {
     const list = getLists().find(l => l.id === listId);
     if (!list) return;
@@ -473,20 +349,13 @@ const Checklist = (() => {
     render();
   }
 
-  function setDueDate(id, date) {
-    Store.update('launchChecklists', id, { dueDate: date || '' });
-    render();
-  }
-
-
   function toggleGuide() {
     showGuide = !showGuide;
     render();
   }
 
   return {
-    render, openCreate, createList, editTitle, deleteList,
-    addItem, toggleItem, deleteItem, setDueDate, toggleGuide,
+    render, toggleItem, deleteItem, toggleGuide,
   };
 })();
 
