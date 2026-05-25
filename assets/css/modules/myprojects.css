@@ -354,21 +354,30 @@
 
 /* ─ 완료 보기 버튼 ─ */
 .mp-show-done-btn {
-  padding: 4px 12px;
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 0.78rem;
   color: var(--color-text-3);
-  background: var(--color-surface-2);
+  background: transparent;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: color var(--transition), background var(--transition);
   white-space: nowrap;
   flex-shrink: 0;
   margin-left: auto;
 }
+.mp-show-done-btn svg {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mp-show-done-btn.open svg {
+  transform: rotate(180deg);
+}
 .mp-show-done-btn:hover {
-  color: var(--color-text);
-  background: var(--color-border);
+  color: var(--color-text-2);
+  background: var(--color-surface-2);
 }
 
 /* mp-add-row / mp-add-input / mp-add-hint → base.css 공통 정의 사용 */

@@ -140,8 +140,9 @@ const MyProjects = (() => {
           </span>
           <span class="mp-section-count">${todo.length}개 남음${done.length ? ` · 완료 ${done.length}` : ''}</span>
           ${done.length ? `
-            <button class="mp-show-done-btn" onclick="MyProjects.toggleShowDone('${escapeHtml(project)}')">
-              ${showDone ? '▲ 완료 숨기기' : `▼ ${done.length}개`}
+            <button class="mp-show-done-btn${showDone ? ' open' : ''}" onclick="MyProjects.toggleShowDone('${escapeHtml(project)}')">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M4 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>완료 ${done.length}</span>
             </button>
           ` : ''}
         </div>

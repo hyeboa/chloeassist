@@ -60,13 +60,30 @@
 
 /* AI 입력 */
 .cl-ai-add {
+  --qa-angle: 0deg;
+  border-radius: var(--radius-md);
+  padding: 3px;
+  background: conic-gradient(
+    from var(--qa-angle),
+    #f87171, #fb923c, #facc15, #4ade80,
+    #60a5fa, #a78bfa, #f472b6, #f87171
+  );
+  animation: qa-rainbow-spin 5s linear infinite;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.07);
+  transition: box-shadow var(--transition);
+}
+.cl-ai-add:focus-within {
+  animation-duration: 2s;
+  box-shadow: 0 4px 28px rgba(108, 99, 255, 0.2);
+}
+.cl-ai-inner {
   display: flex;
   flex-direction: column;
-  padding: 16px 20px;
+  justify-content: center;
+  height: 100%;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  border-radius: calc(var(--radius-md) - 1px);
+  padding: 14px 18px;
 }
 .cl-ai-add-row {
   display: flex;

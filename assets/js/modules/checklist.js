@@ -144,13 +144,15 @@ const Checklist = (() => {
           </div>
         </div>
         <div class="cl-ai-add">
-          <div class="cl-ai-add-row">
-            <span class="cl-ai-icon">✦</span>
-            <input id="cl-ai-input" class="cl-ai-input" type="text"
-              placeholder="추가할 항목을 자유롭게 입력하면 AI가 분류해서 넣어줘요  (예: 앱스토어 스크린샷 5장 준비)">
-            <span class="cl-ai-hint">Enter</span>
+          <div class="cl-ai-inner">
+            <div class="cl-ai-add-row">
+              <span class="cl-ai-icon">✦</span>
+              <input id="cl-ai-input" class="cl-ai-input" type="text"
+                placeholder="추가할 항목을 자유롭게 입력하면 AI가 분류해서 넣어줘요  (예: 앱스토어 스크린샷 5장 준비)">
+              <span class="cl-ai-hint">Enter</span>
+            </div>
+            <div class="cl-ai-status" id="cl-ai-status"></div>
           </div>
-          <div class="cl-ai-status" id="cl-ai-status"></div>
         </div>
       </div>`;
   }

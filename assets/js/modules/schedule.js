@@ -201,14 +201,18 @@ const Schedule = (() => {
         </div>
       </div>
 
-      <div class="cat-filter-bar">
-        ${CATS.map(c => `
-          <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
-            onclick="Schedule.setFilter('${c}')">${c}</button>
-        `).join('')}
+      <div class="bl-filter-row">
+        <div class="cat-filter-bar">
+          ${CATS.map(c => `
+            <button class="cat-filter-btn ${activeFilter === c ? 'active-' + c : ''}"
+              onclick="Schedule.setFilter('${c}')">${c}</button>
+          `).join('')}
+        </div>
         <button class="bl-done-toggle-bar ${hideDone ? 'active' : ''}"
           onclick="Schedule.toggleHideDone()">
-          ${hideDone ? '완료 보기' : '완료 숨기기'}
+          ${hideDone
+            ? '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="1.8" fill="currentColor"/></svg>완료 표시'
+            : '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.3"/><path d="M3 3l10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>완료 숨김'}
         </button>
       </div>
 
