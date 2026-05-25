@@ -15,6 +15,7 @@ const NLInput = (() => {
     milestone: { required: ['이름', '날짜'], hint: '필수 · 나머지는 메모로 저장' },
     feature:   { required: ['기능명'],       hint: '필수 · 분야·설명은 선택' },
     task:      { required: ['할 일'],        hint: '필수 · 날짜·분야는 선택' },
+    goal:      { required: ['목표명'],       hint: '필수 · 날짜는 선택' },
   };
 
   const PROMPTS = {
@@ -51,6 +52,18 @@ const NLInput = (() => {
 - title: 할 일 이름 (필수)
 - date: YYYY-MM-DD 형식 (없으면 null. 자연어 날짜 변환)
 - category: 기획 / 디자인 / 개발 / 마케팅 / 운영 중 하나 (불명확하면 "기획")
+- title을 찾을 수 없으면 {"error": "안내 메시지"} 반환
+
+텍스트: "${text}"
+`.trim(),
+
+    goal: (text, today) => `
+오늘 날짜: ${today}.
+아래 텍스트에서 목표 정보를 추출해 JSON만 반환하세요. 설명 없이 JSON만.
+
+규칙:
+- title: 목표 이름 (필수)
+- targetDate: YYYY-MM-DD 형식 (없으면 null. 자연어 날짜 변환. "3월까지" → 3월 말일, "1달 안에" → 오늘+30일 등)
 - title을 찾을 수 없으면 {"error": "안내 메시지"} 반환
 
 텍스트: "${text}"
