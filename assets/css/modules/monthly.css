@@ -205,6 +205,15 @@
 }
 
 .mo-week-label.current { color: var(--color-primary); }
+.mo-week-label.current .mo-week-date { color: var(--color-primary); }
+
+.mo-week-date {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-text-3);
+  margin-top: 3px;
+}
 
 .mo-week-sub {
   font-size: 0.78rem;

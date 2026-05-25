@@ -178,7 +178,10 @@ const Monthly = (() => {
                       style="height:${st.pct}%"></div>
                   </div>
                 </div>
-                <div class="mo-week-label ${isCur ? 'current' : ''}">${i + 1}주차</div>
+                <div class="mo-week-label ${isCur ? 'current' : ''}">
+                  ${i + 1}주차
+                  <span class="mo-week-date">${w.start.getMonth() + 1}월 ${w.start.getDate()}일 ~ ${w.end.getDate()}일</span>
+                </div>
                 <div class="mo-week-sub">${st.total > 0 ? `${st.done}/${st.total}` : '-'}</div>
               </div>`;
           }).join('')}
