@@ -123,16 +123,160 @@
   padding: 9px 16px;
 }
 
-/* ── 멀티컬럼 그리드 (와이드 화면) ── */
-.cl-grid {
+/* ── 항목 뷰: 카테고리별 섹션 ── */
+.cl-items-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 16px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 24px;
   margin-bottom: 32px;
 }
-.cl-grid .cl-card { margin-bottom: 0; }
-.cl-grid .goal-card-head { cursor: default; }
+
+.cl-category-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.cl-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--color-surface-2), var(--color-surface));
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cl-category-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cl-progress-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  white-space: nowrap;
+}
+
+.cl-progress-bar {
+  width: 100px;
+  height: 5px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.cl-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.cl-category-items {
+  padding: 8px 0;
+}
+
+.cl-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition);
+}
+.cl-item-row:hover {
+  background: var(--color-bg);
+}
+.cl-item-row:last-child {
+  border-bottom: none;
+}
+.cl-item-row.done {
+  opacity: 0.6;
+  background: var(--color-bg);
+}
+
+.cl-item-check {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cl-item-check:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+.cl-item-check.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.cl-item-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+.cl-item-row.done .cl-item-text {
+  text-decoration: line-through;
+  color: var(--color-text-3);
+}
+
+.cl-item-list-tag {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.cl-item-del {
+  flex-shrink: 0;
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  cursor: pointer;
+  font-size: 0.7rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.cl-item-row:hover .cl-item-del {
+  opacity: 1;
+}
+.cl-item-del:hover {
+  background: #fee2e2;
+  color: var(--color-danger);
+}
+
+.cl-items-empty {
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-3);
+}
 
 /* ── 카테고리 배지 ── */
 .cl-cat-badge {

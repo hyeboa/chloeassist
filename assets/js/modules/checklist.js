@@ -171,57 +171,47 @@ const Checklist = (() => {
       </div>`;
   }
 
-  /* ─ 체크 리스트 카드 ─ */
-  function renderCard(list) {
-    const { done, total, pct } = progress(list);
-    const allDone    = total > 0 && done === total;
-    const cat        = CATS[list.category] || CATS.etc;
-    const dd         = list.dueDate ? dday(list.dueDate, allDone) : null;
-    const urgent     = dd && (dd.cls === 'dday-today' || dd.cls === 'dday-overdue' || dd.cls === 'dday-soon');
-    const fillCls    = allDone ? 'goal-fill-done' : urgent ? 'goal-fill-urgent' : 'goal-fill-normal';
-    const cardState  = allDone ? ' done' : urgent ? ' urgent' : '';
+  /* ─ 카테고리별 항목 리스트 ─ */
+  function renderCategorySection(lists, category) {
+    const cat = CATS[category] || CATS.etc;
+    const catLists = lists.filter(l => l.category === category);
 
-    const itemRows = (list.items || []).map(it => `
-      <div class="mp-task-item${it.done ? ' done' : ''}">
-        <div class="mp-task-main">
-          <button class="mp-check${it.done ? ' checked' : ''}"
-            onclick="Checklist.toggleItem('${list.id}','${it.id}')" title="${it.done ? '완료 해제' : '완료'}">
-            ${it.done ? checkSvg() : ''}
-          </button>
-          <span class="mp-task-title">${escapeHtml(it.text)}</span>
-          <button class="mp-delete" onclick="Checklist.deleteItem('${list.id}','${it.id}')" title="삭제">✕</button>
-        </div>
+    // 이 카테고리의 모든 항목 수집
+    const allItems = [];
+    catLists.forEach(list => {
+      (list.items || []).forEach(item => {
+        allItems.push({ ...item, listId: list.id, listTitle: list.title });
+      });
+    });
+
+    const done = allItems.filter(i => i.done).length;
+    const total = allItems.length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+
+    const itemRows = allItems.map(it => `
+      <div class="cl-item-row${it.done ? ' done' : ''}">
+        <button class="cl-item-check${it.done ? ' checked' : ''}"
+          onclick="Checklist.toggleItem('${it.listId}','${it.id}')" title="${it.done ? '완료 해제' : '완료'}">
+          ${it.done ? checkSvg() : ''}
+        </button>
+        <span class="cl-item-text">${escapeHtml(it.text)}</span>
+        <span class="cl-item-list-tag">${escapeHtml(it.listTitle)}</span>
+        <button class="cl-item-del" onclick="Checklist.deleteItem('${it.listId}','${it.id}')" title="삭제">✕</button>
       </div>`).join('');
 
     return `
-      <div class="goal-card cl-card${cardState} expanded">
-        <div class="goal-card-head">
+      <div class="cl-category-section">
+        <div class="cl-category-header">
           <span class="cl-cat-badge ${cat.cls}">${cat.label}</span>
-          <input class="goal-title-edit" value="${escapeHtml(list.title)}"
-            onblur="Checklist.editTitle('${list.id}', this.value)"
-            onkeydown="if(event.key==='Enter')this.blur()">
-          ${dd ? `<span class="goal-dday ${dd.cls}">${dd.label}</span>` : ''}
-          <span class="goal-progress-compact">${done}/${total}</span>
-          <button class="goal-del-btn" onclick="Checklist.deleteList('${list.id}')" title="체크 리스트 삭제">✕</button>
-        </div>
-        <div class="goal-bar-wrap">
-          <div class="summary-bar goal-bar"><div class="summary-bar-fill ${fillCls}" style="width:${pct}%"></div></div>
-          <span class="goal-bar-pct">${pct}%</span>
-        </div>
-        <div class="goal-detail">
-          <div class="goal-date-row">
-            <label class="goal-date-label">목표일</label>
-            <input type="date" class="goal-date-input" value="${list.dueDate || ''}"
-              onchange="Checklist.setDueDate('${list.id}', this.value)">
-            ${list.dueDate ? `<button class="goal-date-clear" onclick="Checklist.setDueDate('${list.id}', '')">지우기</button>` : ''}
+          <div class="cl-category-progress">
+            <span class="cl-progress-text">${done} / ${total}</span>
+            <div class="cl-progress-bar"><div class="cl-progress-fill" style="width:${pct}%"></div></div>
           </div>
+        </div>
+        <div class="cl-category-items">
           ${total === 0
-            ? '<div class="goal-checklist-empty">항목이 없어요. 아래에서 추가해보세요.</div>'
-            : `<div class="goal-checklist">${itemRows}</div>`}
-          <div class="mp-add-row goal-item-add-row">
-            <input class="mp-add-input cl-item-add-input" type="text" data-list="${list.id}" placeholder="항목 추가">
-            <span class="mp-add-hint">Enter</span>
-          </div>
+            ? '<div class="cl-items-empty">항목이 없어요</div>'
+            : itemRows}
         </div>
       </div>`;
   }
@@ -275,20 +265,22 @@ const Checklist = (() => {
       lists = getLists();
     }
 
+    const hasItems = lists.some(l => (l.items || []).length > 0);
+
     app.innerHTML = `
       ${renderTopBar(lists)}
-      <div class="cl-section-hd">
-        <div class="section-title" style="margin:0">전체 체크 리스트</div>
-        <button class="btn btn-primary cl-new-btn" onclick="Checklist.openCreate()">+ 새 체크 리스트</button>
+      <div class=”cl-section-hd”>
+        <div class=”section-title” style=”margin:0”>전체 체크 리스트</div>
+        <button class=”btn btn-primary cl-new-btn” onclick=”Checklist.openCreate()”>+ 새 체크 리스트</button>
       </div>
-      <div class="cl-grid">
-        ${lists.length === 0
-          ? `<div class="cl-empty">
-               <div class="cl-empty-icon">🚀</div>
-               <div class="cl-empty-title">아직 체크 리스트가 없어요</div>
-               <div class="cl-empty-sub">“+ 새 체크 리스트”로 출시 준비를 시작해보세요</div>
+      <div class=”cl-items-view”>
+        ${!hasItems
+          ? `<div class=”cl-empty”>
+               <div class=”cl-empty-icon”>🚀</div>
+               <div class=”cl-empty-title”>아직 항목이 없어요</div>
+               <div class=”cl-empty-sub”>상단 AI 입력으로 추가하거나 “+ 새 체크 리스트”로 시작하세요</div>
              </div>`
-          : lists.map(renderCard).join('')}
+          : ['product', 'marketing', 'operations', 'technical'].map(cat => renderCategorySection(lists, cat)).join('')}
       </div>
       ${renderGuide()}`;
 
