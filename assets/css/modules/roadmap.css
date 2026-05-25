@@ -764,9 +764,18 @@
 /* D-day badge on goal card */
 .goal-dday {
   flex-shrink: 0;
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.goal-item-dday {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
   border-radius: var(--radius-full);
   white-space: nowrap;
 }

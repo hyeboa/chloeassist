@@ -315,7 +315,7 @@ const Roadmap = (() => {
             </button>
             <span class="goal-ms-tag">마일스톤</span>
             <span class="mp-task-title">${escapeHtml(m.title)}</span>
-            <span class="milestone-dday ${d.cls}">${d.label}</span>
+            <span class="goal-item-dday ${d.cls}">${d.label}</span>
             <button class="mp-delete" onclick="Roadmap.assignMilestoneGoal('${m.id}', null)" title="연결 해제">✕</button>
           </div>
         </div>`;
