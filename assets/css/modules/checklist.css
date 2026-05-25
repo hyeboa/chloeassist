@@ -1,0 +1,165 @@
+/* ===== 출시 체크 리스트 ===== */
+
+/* ── 상단 요약 ── */
+.cl-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+/* ── 섹션 헤더 ── */
+.cl-section-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.cl-new-btn {
+  flex-shrink: 0;
+  font-size: 0.88rem;
+  padding: 9px 16px;
+}
+
+/* ── 리스트 ── */
+.cl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+/* ── 카테고리 배지 ── */
+.cl-cat-badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.cl-cat-badge.cat-product    { background: var(--cat-기획-bg);   color: var(--cat-기획-text); }
+.cl-cat-badge.cat-marketing  { background: var(--cat-마케팅-bg); color: var(--cat-마케팅-text); }
+.cl-cat-badge.cat-operations { background: var(--cat-운영-bg);   color: var(--cat-운영-text); }
+.cl-cat-badge.cat-technical  { background: var(--cat-개발-bg);   color: var(--cat-개발-text); }
+.cl-cat-badge.cat-etc        { background: var(--cat-미분류-bg); color: var(--cat-미분류-text); }
+
+/* ── 빈 상태 ── */
+.cl-empty {
+  text-align: center;
+  padding: 56px 20px;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+.cl-empty-icon  { font-size: 2.4rem; margin-bottom: 12px; }
+.cl-empty-title { font-size: 1rem; font-weight: 600; color: var(--color-text-2); }
+.cl-empty-sub   { font-size: 0.86rem; color: var(--color-text-3); margin-top: 6px; }
+
+/* ── 생성 모달 ── */
+.cl-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cl-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cl-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.cl-field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin-bottom: 6px;
+}
+
+.cl-field-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  margin-bottom: 16px;
+  transition: border-color var(--transition);
+}
+.cl-field-input:focus { border-color: var(--color-primary); }
+
+.cl-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ── 관리 가이드 ── */
+.cl-guide {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.cl-guide-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+}
+.cl-guide-toggle svg {
+  color: var(--color-text-3);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cl-guide-toggle.open svg { transform: rotate(90deg); }
+
+.cl-guide-body {
+  padding: 4px 18px 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cl-guide-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.cl-guide-row:last-child { border-bottom: none; }
+
+.cl-guide-t {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+.cl-guide-d {
+  font-size: 0.84rem;
+  color: var(--color-text-2);
+  line-height: 1.6;
+}
