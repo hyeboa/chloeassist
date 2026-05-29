@@ -15,11 +15,11 @@ const Banner = (() => {
   }
 
   function isDismissed(key) {
-    return localStorage.getItem(DISMISS_PREFIX + key) === today();
+    return Store.getUiSetting(DISMISS_PREFIX + key, null) === today();
   }
 
-  function dismiss(key) {
-    localStorage.setItem(DISMISS_PREFIX + key, today());
+  async function dismiss(key) {
+    await Store.saveUiSetting(DISMISS_PREFIX + key, today());
     const el = document.getElementById('deadline-banner-' + key.replace(/[^a-z0-9]/gi, '_'));
     if (el) el.remove();
     cleanEmptyContainer();
@@ -78,7 +78,8 @@ const Banner = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function render() {
+  async function render() {
+    await Store.loadUiSettings?.();
     const items = getItems();
     if (items.length === 0) return;
 

@@ -40,7 +40,11 @@ const Routine = (() => {
   function dayNum(date) { return new Date(date + 'T00:00:00').getDate(); }
 
   /* ─ 스토어 ─ */
-  function getRoutines() { return Store.get('routines') || []; }
+  let routinesCache = [];
+  let routineLogsCache = {};
+  function getRoutines() { return routinesCache.length ? routinesCache : (Store.get('routines') || []); }
+  async function loadRoutines() { routinesCache = await Store.loadRoutines(); return routinesCache; }
+  async function loadRoutineLogs() { routineLogsCache = await Store.loadRoutineLogs(); return routineLogsCache; }
 
   /* 루틴 시작일 (추가된 날짜) — 이 날짜부터 표시 */
   function routineStart(r) {
@@ -54,20 +58,20 @@ const Routine = (() => {
     return getRoutines().filter(r => isActive(r, date));
   }
 
-  function getLog(date) { return Store.get('routine-log:' + date) || {}; }
+  function getLog(date) { return routineLogsCache[date] || Store.getRoutineLog?.(date) || {}; }
 
-  function saveLog(date, log) { Store.set('routine-log:' + date, log); }
+  function saveLog(date, log) {
+    routineLogsCache[date] = log;
+    Store.saveRoutineLog(date, log);
+  }
 
-  function cleanupFutureLogs() {
+  async function cleanupFutureLogs() {
     const today = todayStr();
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('chloeassist:routine-log:')) {
-        const date = key.replace('chloeassist:routine-log:', '');
-        if (date > today) {
-          localStorage.removeItem(key);
-          i--;
-        }
+    const keys = Object.keys(routineLogsCache);
+    for (const date of keys) {
+      if (date > today) {
+        delete routineLogsCache[date];
+        await Store.deleteRoutineLog(date);
       }
     }
   }
@@ -115,12 +119,13 @@ const Routine = (() => {
 
   function addRoutine(name) {
     if (!name.trim()) return;
-    Store.push('routines', { name: name.trim() });
+    const item = { id: crypto.randomUUID(), name: name.trim(), createdAt: Date.now() };
+    Store.pushRoutine(item).catch(()=>{});
     render();
     setTimeout(() => { const el = document.getElementById('routine-input'); if (el) el.focus(); }, 0);
   }
 
-  function deleteRoutine(id) { Store.remove('routines', id); render(); }
+  async function deleteRoutine(id) { Store.remove('routines', id); Store.removeRoutine(id).catch(()=>{}); render(); }
 
   function toggleCheck(id) {
     if (isFuture(selectedDate)) return;
@@ -298,8 +303,9 @@ const Routine = (() => {
   }
 
   /* ─ 메인 렌더 ─ */
-  function render() {
-    cleanupFutureLogs();
+  async function render() {
+    await Promise.all([loadRoutines(), loadRoutineLogs()]);
+    await cleanupFutureLogs();
     const routines  = activeRoutines(selectedDate);
     const log       = getLog(selectedDate);
     const doneCount = routines.filter(r => log[r.id]).length;

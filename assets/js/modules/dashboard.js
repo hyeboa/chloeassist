@@ -4,7 +4,6 @@
 
 const Dashboard = (() => {
   const CATS = ['기획', '디자인', '개발', '마케팅', '운영'];
-  const FOCUS_KEY = 'chloeassist:focusMode';
   const TAG_COLORS = [
     { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' },
     { bg: '#e0e7ff', text: '#4338ca', border: '#a5b4fc' },
@@ -20,7 +19,7 @@ const Dashboard = (() => {
     { bg: '#fae8ff', text: '#a21caf', border: '#f0abfc' },
   ];
   let showDone    = false;
-  let focusMode   = localStorage.getItem(FOCUS_KEY) === 'true';
+  let focusMode   = false;
   let focusOffset = 0;
 
   function projectColor(name) {
@@ -122,7 +121,7 @@ const Dashboard = (() => {
 
   function addTask(title, category, dueDate) {
     if (!title.trim()) return;
-    Store.push('tasks', { title: title.trim(), category, done: false, isToday: true, dueDate: dueDate || null });
+    Store.pushTask({ title: title.trim(), category, done: false, isToday: true, dueDate: dueDate || null }).catch(()=>{});
     render();
   }
 
@@ -196,10 +195,10 @@ const Dashboard = (() => {
   let selectedCat = '기획';
 
   /* ─ 집중 모드 ─ */
-  function toggleFocusMode() {
+  async function toggleFocusMode() {
     focusMode = !focusMode;
     focusOffset = 0;
-    localStorage.setItem(FOCUS_KEY, focusMode);
+    await Store.saveUiSetting('focusMode', focusMode);
     render();
   }
 
@@ -340,7 +339,31 @@ const Dashboard = (() => {
       </button>`;
   }
 
-  function render() {
+  async function copyCurrentUrl() {
+    const url = location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      Toast.show('현재 주소를 복사했습니다.', 'success');
+    } catch {
+      Toast.show('주소 복사에 실패했습니다.', 'error');
+    }
+  }
+
+  function renderAccessCard() {
+    return `
+      <div class="site-access-card">
+        <div class="site-access-label">접속 주소</div>
+        <div class="site-access-url" title="${location.href}">${location.href}</div>
+        <div class="site-access-actions">
+          <button class="btn btn-ghost site-access-btn" onclick="Dashboard.copyCurrentUrl()">현재 주소 복사</button>
+          <a class="btn btn-primary site-access-btn" href="${location.href}" target="_blank" rel="noreferrer">새 탭 열기</a>
+        </div>
+      </div>`;
+  }
+
+  async function render() {
+    await Promise.all([Store.loadTasks?.(), Store.loadMilestones?.(), Store.loadProjectTasks?.(), Store.loadFeatures?.(), Store.loadUiSettings?.()]);
+    focusMode = !!Store.getUiSetting('focusMode', false);
     if (focusMode) {
       document.getElementById('app').innerHTML = `
         <div class="today-header focus-header">
@@ -364,6 +387,7 @@ const Dashboard = (() => {
 
     document.getElementById('app').innerHTML = `
       ${renderBanner(done, total, pct)}
+      ${renderAccessCard()}
 
       <div class="quick-add-wrap">
         <div class="quick-add-inner">
@@ -411,7 +435,7 @@ const Dashboard = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      if (!AI.getApiKey()) {
+      if (!AI.hasApiKey()) {
         addTask(text, selectedCat);
         input.value = '';
         input.focus();

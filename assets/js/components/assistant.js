@@ -92,7 +92,7 @@ const Assistant = (() => {
     const text  = input?.value.trim();
     if (!text) return;
 
-    if (!AI.getApiKey()) {
+    if (!AI.hasApiKey()) {
       Toast.show('설정(⚙)에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
       return;
     }

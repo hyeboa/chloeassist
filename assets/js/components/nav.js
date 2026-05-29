@@ -49,6 +49,7 @@ const Nav = (() => {
       label: '돌아보기',
       items: [
         { href: 'weekly.html',   label: '리뷰',        icon: 'review' },
+        { href: 'monthly.html',  label: '월간 리뷰',   icon: 'review' },
       ]
     },
   ];
@@ -121,7 +122,7 @@ const Nav = (() => {
     const existing = document.getElementById('settings-modal');
     if (existing) { existing.remove(); return; }
 
-    const currentKey = AI.getApiKey();
+    const hasKey = AI.hasApiKey();
     const modal = document.createElement('div');
     modal.id = 'settings-modal';
     modal.style.cssText = `
@@ -134,8 +135,11 @@ const Nav = (() => {
         <label style="font-size:0.82rem;color:var(--color-text-2);display:block;margin-bottom:6px">
           Claude API 키
         </label>
-        <input id="api-key-input" type="password" placeholder="sk-ant-..." value="${currentKey}"
-          style="width:100%;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.85rem;outline:none;margin-bottom:16px">
+        <input id="api-key-input" type="password" placeholder="${hasKey ? '새 키를 입력해 교체하세요' : 'sk-ant-...'}"
+          style="width:100%;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius-sm);font-size:0.85rem;outline:none;margin-bottom:10px">
+        <div style="font-size:0.78rem;color:var(--color-text-3);margin-bottom:16px">
+          ${hasKey ? '저장되어 있습니다.' : '아직 저장된 키가 없습니다.'}
+        </div>
         <div style="border-top:1px solid var(--color-border);margin:4px 0 16px;padding-top:16px">
           <div style="font-size:0.78rem;font-weight:600;color:var(--color-text-2);margin-bottom:10px">데이터 백업</div>
           <div style="display:flex;gap:8px">
@@ -145,6 +149,7 @@ const Nav = (() => {
           </div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
+          ${hasKey ? '<button id="settings-delete" class="btn btn-ghost">삭제</button>' : ''}
           <button id="settings-cancel" class="btn btn-ghost">취소</button>
           <button id="settings-save" class="btn btn-primary">저장</button>
         </div>
@@ -152,13 +157,30 @@ const Nav = (() => {
     `;
 
     modal.querySelector('#settings-cancel').addEventListener('click', () => modal.remove());
-    modal.querySelector('#settings-save').addEventListener('click', () => {
+    modal.querySelector('#settings-save').addEventListener('click', async () => {
       const val = modal.querySelector('#api-key-input').value.trim();
-      if (val) { AI.setApiKey(val); Toast.show('API 키가 저장되었습니다.', 'success'); }
+      if (val) {
+        try {
+          await AI.saveApiKey(val);
+          Toast.show('API 키가 저장되었습니다.', 'success');
+        } catch (err) {
+          Toast.show(err.message, 'error');
+          return;
+        }
+      }
       modal.remove();
     });
+    modal.querySelector('#settings-delete')?.addEventListener('click', async () => {
+      try {
+        await AI.deleteApiKey();
+        Toast.show('API 키를 삭제했습니다.', 'success');
+        modal.remove();
+      } catch (err) {
+        Toast.show(err.message, 'error');
+      }
+    });
 
-    modal.querySelector('#btn-export').addEventListener('click', () => exportData());
+    modal.querySelector('#btn-export').addEventListener('click', async () => { await exportData(); });
     modal.querySelector('#btn-import').addEventListener('click', () => {
       modal.querySelector('#import-file').click();
     });
@@ -174,16 +196,32 @@ const Nav = (() => {
     modal.querySelector('#api-key-input').focus();
   }
 
-  function exportData() {
-    const PREFIX = 'chloeassist:';
-    const backup = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith(PREFIX)) {
-        try { backup[key] = JSON.parse(localStorage.getItem(key)); }
-        catch { backup[key] = localStorage.getItem(key); }
-      }
-    }
+  async function exportData() {
+    await Promise.all([
+      Store.loadTasks?.(), Store.loadNotes?.(), Store.loadGoals?.(), Store.loadMilestones?.(),
+      Store.loadProjectTasks?.(), Store.loadFeatures?.(), Store.loadIssues?.(), Store.loadRoutines?.(),
+      Store.loadRoutineLogs?.(),
+      Store.loadLaunchChecklists?.(), Store.loadSitemapSections?.(), Store.loadSitemapScreens?.(), Store.loadSitemapComponents?.(),
+      Store.loadWeeklyReviews?.(), Store.loadMonthlyReviews?.(), Store.loadUiSettings?.(),
+    ]);
+    const backup = {
+      tasks: Store.get('tasks') || [],
+      notes: Store.get('notes') || [],
+      goals: Store.get('goals') || [],
+      milestones: Store.get('milestones') || [],
+      projectTasks: Store.get('projectTasks') || [],
+      features: Store.get('features') || [],
+      issues: Store.get('issues') || [],
+      routines: Store.get('routines') || [],
+      routineLogs: Store.get('routineLogs') || {},
+      launchChecklists: Store.get('launchChecklists') || [],
+      sitemapSections: Store.get('sitemapSections') || [],
+      sitemapScreens: Store.get('sitemapScreens') || [],
+      sitemapComponents: Store.get('sitemapComponents') || [],
+      weeklyReviews: Store.get('weeklyReviews') || {},
+      monthlyReviews: Store.get('monthlyReviews') || {},
+      uiSettings: Store.get('uiSettings') || {},
+    };
     const date = new Date().toISOString().slice(0, 10);
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
@@ -192,19 +230,35 @@ const Nav = (() => {
     a.download = `chloeassist-backup-${date}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    Toast.show('백업 파일이 다운로드되었습니다.', 'success');
+    Toast.show('로컬 데이터를 백업했습니다.', 'success');
   }
 
-  function importData(file, modal) {
+  async function importData(file, modal) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const backup = JSON.parse(e.target.result);
         if (typeof backup !== 'object' || backup === null) throw new Error();
-        Object.entries(backup).forEach(([key, val]) => {
-          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
-        });
-        Toast.show('데이터가 복원되었습니다. 페이지를 새로고침합니다.', 'success');
+
+        await restoreArray('tasks', backup.tasks || [], Store.loadTasks, Store.removeTask, Store.pushTask);
+        await restoreArray('notes', backup.notes || [], Store.loadNotes, Store.removeNote, Store.pushNote);
+        await restoreArray('goals', backup.goals || [], Store.loadGoals, Store.removeGoal, Store.pushGoal);
+        await restoreArray('milestones', backup.milestones || [], Store.loadMilestones, Store.removeMilestone, Store.pushMilestone);
+        await restoreArray('projectTasks', backup.projectTasks || [], Store.loadProjectTasks, Store.removeProjectTask, Store.pushProjectTask);
+        await restoreArray('features', backup.features || [], Store.loadFeatures, Store.removeFeature, Store.pushFeature);
+        await restoreArray('issues', backup.issues || [], Store.loadIssues, Store.removeIssue, Store.pushIssue);
+        await restoreArray('routines', backup.routines || [], Store.loadRoutines, Store.removeRoutine, Store.pushRoutine);
+        await restoreObject('routineLogs', backup.routineLogs || {}, Store.loadRoutineLogs, Store.saveRoutineLog, Store.deleteRoutineLog);
+        await restoreArray('launchChecklists', backup.launchChecklists || [], Store.loadLaunchChecklists, Store.removeLaunchChecklist, Store.pushLaunchChecklist);
+        await restoreArray('sitemapSections', backup.sitemapSections || [], Store.loadSitemapSections, Store.removeSitemapSection, Store.pushSitemapSection);
+        await restoreArray('sitemapScreens', backup.sitemapScreens || [], Store.loadSitemapScreens, Store.removeSitemapScreen, Store.pushSitemapScreen);
+        await restoreArray('sitemapComponents', backup.sitemapComponents || [], Store.loadSitemapComponents, Store.removeSitemapComponent, Store.pushSitemapComponent);
+
+        await restoreObject('weeklyReviews', backup.weeklyReviews || {}, Store.loadWeeklyReviews, Store.saveWeeklyReview, Store.deleteWeeklyReview);
+        await restoreObject('monthlyReviews', backup.monthlyReviews || {}, Store.loadMonthlyReviews, Store.saveMonthlyReview, Store.deleteMonthlyReview);
+        await restoreObject('uiSettings', backup.uiSettings || {}, Store.loadUiSettings, Store.saveUiSetting, Store.removeUiSetting);
+
+        Toast.show('로컬 데이터가 복원되었습니다. 페이지를 새로고침합니다.', 'success');
         modal.remove();
         setTimeout(() => location.reload(), 1200);
       } catch {
@@ -212,6 +266,30 @@ const Nav = (() => {
       }
     };
     reader.readAsText(file);
+  }
+
+  async function restoreArray(name, items, loadFn, removeFn, pushFn) {
+    if (typeof loadFn === 'function') await loadFn();
+    const current = Store.get(name) || [];
+    for (const item of current) {
+      if (item && item.id) await removeFn(item.id);
+    }
+    for (const item of items) {
+      await pushFn(item);
+    }
+    Store.set(name, items);
+  }
+
+  async function restoreObject(name, obj, loadFn, saveFn, removeFn) {
+    if (typeof loadFn === 'function') await loadFn();
+    const current = Store.get(name) || {};
+    for (const key of Object.keys(current)) {
+      if (!(key in obj) && typeof removeFn === 'function') await removeFn(key);
+    }
+    for (const [key, value] of Object.entries(obj)) {
+      await saveFn(key, value);
+    }
+    Store.set(name, obj);
   }
 
   return { render };

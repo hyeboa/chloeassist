@@ -11,7 +11,10 @@ const Schedule = (() => {
   let searchQuery   = '';
   let hideDone      = false;
 
-  function getTasks() { return Store.get('tasks') || []; }
+  let tasksCache = [];
+
+  function getTasks() { return tasksCache.length ? tasksCache : (Store.get('tasks') || []); }
+  async function loadTasks() { tasksCache = await Store.loadTasks(); return tasksCache; }
 
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -179,7 +182,8 @@ const Schedule = (() => {
   }
 
   /* ─ 렌더 ─ */
-  function render() {
+  async function render() {
+    await loadTasks();
     document.getElementById('app').innerHTML = `
       <div class="quick-add-wrap">
         <div class="quick-add-inner">
@@ -234,8 +238,16 @@ const Schedule = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      if (!AI.getApiKey()) {
-        Store.push('tasks', { title: text, category: selectedCat, done: false, isToday: false });
+      if (!AI.hasApiKey()) {
+        const item = {
+          id: crypto.randomUUID(),
+          title: text,
+          category: selectedCat,
+          done: false,
+          isToday: false,
+          createdAt: Date.now(),
+        };
+        await Store.pushTask(item);
         input.value = '';
         render();
         return;
@@ -247,13 +259,16 @@ const Schedule = (() => {
 
       try {
         const result = await NLInput.parse('task', text);
-        Store.push('tasks', {
+        const item = {
+          id: crypto.randomUUID(),
           title:    result.title,
           category: result.category || selectedCat,
           done:     false,
           isToday:  false,
           dueDate:  result.date || null,
-        });
+          createdAt: Date.now(),
+        };
+        await Store.pushTask(item);
         input.value = '';
         status.textContent = '';
         render();
@@ -287,6 +302,7 @@ const Schedule = (() => {
       const direct = text.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
       if (direct) {
         const iso = `${direct[1]}-${direct[2].padStart(2, '0')}-${direct[3].padStart(2, '0')}`;
+        await Store.updateTask(editingDateId, { dueDate: iso, isToday: iso === today });
         Store.update('tasks', editingDateId, { dueDate: iso, isToday: iso === today });
         Toast.show('날짜가 설정됐어요.', 'success');
         editingDateId = null;
@@ -294,7 +310,7 @@ const Schedule = (() => {
         return;
       }
 
-      if (!AI.getApiKey()) {
+      if (!AI.hasApiKey()) {
         Toast.show('API 키 없이는 자연어 날짜를 쓸 수 없어요. YYYY-MM-DD 형식으로 입력해 주세요.', 'warning');
         editingDateId = null;
         renderList();
@@ -309,6 +325,7 @@ const Schedule = (() => {
         );
         const match = raw.trim().match(/\d{4}-\d{2}-\d{2}/);
         if (match) {
+          await Store.updateTask(editingDateId, { dueDate: match[0], isToday: match[0] === today });
           Store.update('tasks', editingDateId, { dueDate: match[0], isToday: match[0] === today });
           Toast.show('날짜가 설정됐어요.', 'success');
         } else {
@@ -327,27 +344,32 @@ const Schedule = (() => {
   }
 
   /* ─ 공개 메서드 ─ */
-  function toggleDone(id) {
+  async function toggleDone(id) {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
+    await Store.updateTask(id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     Store.update('tasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     renderList();
   }
 
-  function toggleStar(id) {
+  async function toggleStar(id) {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
+    await Store.updateTask(id, { starred: !t.starred });
     Store.update('tasks', id, { starred: !t.starred });
     renderList();
   }
 
-  function moveToToday(id) {
-    Store.update('tasks', id, { isToday: true, dueDate: new Date().toISOString().slice(0, 10) });
+  async function moveToToday(id) {
+    const changes = { isToday: true, dueDate: new Date().toISOString().slice(0, 10) };
+    await Store.updateTask(id, changes);
+    Store.update('tasks', id, changes);
     Toast.show('오늘 할 일로 추가됐어요.', 'success');
     renderList();
   }
 
-  function deleteTask(id) {
+  async function deleteTask(id) {
+    await Store.removeTask(id);
     Store.remove('tasks', id);
     renderList();
   }

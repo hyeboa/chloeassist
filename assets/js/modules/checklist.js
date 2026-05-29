@@ -100,7 +100,9 @@ const Checklist = (() => {
   };
 
   /* ─ 데이터 ─ */
-  function getLists() { return Store.get('launchChecklists') || []; }
+  let listsCache = [];
+  function getLists() { return listsCache.length ? listsCache : (Store.get('launchChecklists') || []); }
+  async function loadLists() { listsCache = await Store.loadLaunchChecklists(); return listsCache; }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -232,7 +234,8 @@ const Checklist = (() => {
   }
 
   /* ─ 렌더 ─ */
-  function render() {
+  async function render() {
+    await loadLists();
     const app = document.getElementById('app');
     if (!app) return;
     let lists = getLists();
@@ -242,12 +245,8 @@ const Checklist = (() => {
       ['product', 'marketing', 'operations', 'technical'].forEach(key => {
         const tpl = TEMPLATES[key];
         const items = (tpl.items || []).map(text => ({ id: crypto.randomUUID(), text, done: false }));
-        Store.push('launchChecklists', {
-          title: tpl.label,
-          category: tpl.category,
-          dueDate: '',
-          items,
-        });
+        const item = { id: crypto.randomUUID(), title: tpl.label, category: tpl.category, dueDate: '', items, createdAt: Date.now() };
+        Store.pushLaunchChecklist(item).catch(()=>{});
       });
       lists = getLists();
     }
@@ -285,7 +284,7 @@ const Checklist = (() => {
       if (!text) return;
 
       // API 키 없으면 그냥 기타 카테고리에 원문 추가
-      if (!AI.getApiKey()) {
+      if (!AI.hasApiKey()) {
         addItemToCategory('etc', text);
         input.value = '';
         return;
@@ -326,12 +325,14 @@ const Checklist = (() => {
     if (!target) {
       const tplKey = ['product', 'marketing', 'operations', 'technical'].includes(category) ? category : null;
       const label  = tplKey ? TEMPLATES[tplKey].label : '기타';
-      Store.push('launchChecklists', { title: label, category, dueDate: '', items: [] });
-      target = getLists().find(l => l.category === category);
+      const item = { id: crypto.randomUUID(), title: label, category, dueDate: '', items: [], createdAt: Date.now() };
+      Store.pushLaunchChecklist(item).catch(()=>{});
+      target = { ...item };
     }
 
     const items = [...(target.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
     Store.update('launchChecklists', target.id, { items });
+    Store.updateLaunchChecklist(target.id, { items }).catch(()=>{});
     render();
     return { listTitle: target.title };
   }
@@ -342,6 +343,7 @@ const Checklist = (() => {
     if (!list) return;
     const items = (list.items || []).map(it => it.id === itemId ? { ...it, done: !it.done } : it);
     Store.update('launchChecklists', listId, { items });
+    Store.updateLaunchChecklist(listId, { items }).catch(()=>{});
     render();
   }
 
@@ -350,6 +352,7 @@ const Checklist = (() => {
     if (!list) return;
     const items = (list.items || []).filter(it => it.id !== itemId);
     Store.update('launchChecklists', listId, { items });
+    Store.updateLaunchChecklist(listId, { items }).catch(()=>{});
     render();
   }
 

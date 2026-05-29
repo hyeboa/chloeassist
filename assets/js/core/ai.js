@@ -1,11 +1,13 @@
 /**
  * ai.js — Claude API 연동
  *
- * 설정: config.json에 apiKey 저장 또는 초기 설정 화면에서 입력
+ * API 키는 브라우저 로컬 저장소에 보관하고, Claude API를 직접 호출한다.
  */
 
 const AI = (() => {
   const CONFIG_KEY = 'chloeassist:config';
+  let initPromise = null;
+  let hasSavedKey = false;
 
   function getConfig() {
     try {
@@ -15,14 +17,53 @@ const AI = (() => {
     }
   }
 
-  function setApiKey(key) {
-    const cfg = getConfig();
-    cfg.apiKey = key;
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+  function setConfig(cfg) {
+    try {
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+    } catch (e) {
+      console.error('[AI] 설정 저장 실패:', e);
+    }
   }
 
   function getApiKey() {
     return getConfig().apiKey || '';
+  }
+
+  function hasApiKey() {
+    return !!getApiKey();
+  }
+
+  function setApiKey(key) {
+    const cfg = getConfig();
+    cfg.apiKey = String(key || '').trim();
+    setConfig(cfg);
+    hasSavedKey = !!cfg.apiKey;
+  }
+
+  async function saveApiKey(key) {
+    const value = String(key || '').trim();
+    if (!value) throw new Error('API 키를 입력해 주세요.');
+    setApiKey(value);
+    return true;
+  }
+
+  async function deleteApiKey() {
+    try {
+      const cfg = getConfig();
+      delete cfg.apiKey;
+      setConfig(cfg);
+    } catch {}
+    hasSavedKey = false;
+    return true;
+  }
+
+  async function init() {
+    if (!initPromise) {
+      initPromise = Promise.resolve().then(() => {
+        hasSavedKey = !!getApiKey();
+      });
+    }
+    return initPromise;
   }
 
   /**
@@ -118,12 +159,14 @@ const AI = (() => {
           if (evt.type === 'content_block_delta' && evt.delta?.text) {
             onChunk(evt.delta.text);
           }
-        } catch { /* 파싱 오류 무시 */ }
+        } catch {
+          /* ignore */
+        }
       }
     }
 
     if (onDone) onDone();
   }
 
-  return { chat, chatStream, setApiKey, getApiKey };
+  return { init, chat, chatStream, saveApiKey, deleteApiKey, getApiKey, hasApiKey, setApiKey };
 })();

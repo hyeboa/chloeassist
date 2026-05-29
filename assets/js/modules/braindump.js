@@ -32,8 +32,10 @@ const Braindump = (() => {
   let activeProject = '전체';
   let hideDone      = false;
   let lastProject   = '';
+  let notesCache    = [];
 
-  function getNotes() { return Store.get('notes') || []; }
+  function getNotes() { return notesCache.length ? notesCache : (Store.get('notes') || []); }
+  async function loadNotes() { notesCache = await Store.loadNotes(); return notesCache; }
 
   function projectColor(name) {
     if (!name) return null;
@@ -53,12 +55,20 @@ const Braindump = (() => {
     if (!text.trim()) return;
     const proj = project.trim() || null;
     if (proj) lastProject = proj;
-    Store.push('notes', { text: text.trim(), project: proj, done: false });
+    const item = {
+      id: crypto.randomUUID(),
+      text: text.trim(),
+      project: proj,
+      done: false,
+      createdAt: Date.now(),
+    };
+    Store.pushNote(item).catch(() => {});
     render();
   }
 
   function deleteNote(id) {
     Store.remove('notes', id);
+    Store.removeNote(id).catch(() => {});
     render();
   }
 
@@ -67,6 +77,7 @@ const Braindump = (() => {
     const n = getNotes().find(x => x.id === id);
     if (!n) return;
     Store.update('notes', id, { done: !n.done, doneAt: !n.done ? Date.now() : null });
+    Store.updateNote(id, { done: !n.done, doneAt: !n.done ? Date.now() : null }).catch(() => {});
     renderList();
   }
 
@@ -135,12 +146,22 @@ const Braindump = (() => {
     }
 
     if (note.project) {
-      Store.push('projectTasks', { project: note.project, title: note.text, done: false });
+      const item = {
+        id: crypto.randomUUID(),
+        project: note.project,
+        title: note.text,
+        done: false,
+        createdAt: Date.now(),
+      };
+      Store.pushProjectTask(item).catch(() => {});
       Toast.show(`${note.project} 할 일로 추가됐어요!`, 'success');
     } else {
-      Store.push('tasks', {
+      const item = {
+        id: crypto.randomUUID(),
         title: note.text, done: false, category: convertCat, dueDate, isToday,
-      });
+        createdAt: Date.now(),
+      };
+      Store.pushTask(item).catch(() => {});
       Toast.show('할 일로 추가됐어요!', 'success');
     }
     Store.remove('notes', convertingId);
@@ -250,7 +271,8 @@ const Braindump = (() => {
   }
 
   /* ─ 전체 렌더 ─ */
-  function render() {
+  async function render() {
+    await loadNotes();
     if (keyHandler) { document.removeEventListener('keydown', keyHandler); keyHandler = null; }
 
     const allNotes = [...getNotes()].sort((a, b) => b.createdAt - a.createdAt);
@@ -340,7 +362,7 @@ const Braindump = (() => {
   }
 
   async function aiOrganize() {
-    if (!AI.getApiKey()) {
+    if (!AI.hasApiKey()) {
       Toast.show('설정(⚙)에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
       return;
     }
@@ -376,7 +398,16 @@ ${noteList}`;
 
       tasks.forEach(t => {
         if (!t.title) return;
-        Store.push('tasks', { title: t.title, category: t.category || '', done: false, isToday: false, dueDate: t.date || null });
+        const item = {
+          id: crypto.randomUUID(),
+          title: t.title,
+          category: t.category || '',
+          done: false,
+          isToday: false,
+          dueDate: t.date || null,
+          createdAt: Date.now(),
+        };
+        Store.pushTask(item).catch(() => {});
       });
 
       Toast.show(`✦ ${tasks.length}개 할 일로 정리했어요. 할 일 목록에서 확인하세요.`, 'success');

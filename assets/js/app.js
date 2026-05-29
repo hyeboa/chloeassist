@@ -3,7 +3,8 @@
  * 모든 HTML 페이지의 마지막 <script>로 로드
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await AI.init?.();
   Nav.render();
   Banner.render();
 });

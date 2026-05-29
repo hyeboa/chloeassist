@@ -113,6 +113,45 @@
   flex-shrink: 0;
 }
 
+/* ===== 접속 주소 카드 ===== */
+.site-access-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.site-access-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-access-url {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.site-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.site-access-btn {
+  min-height: 40px;
+  padding: 8px 14px;
+}
+
 /* ===== (deprecated) 펄스 스냅샷 — 다른 페이지 호환용 ===== */
 .today-pulse {
   display: grid;
@@ -612,4 +651,3 @@
 }
 .proj-due.today   { background: #ffedd5; color: #c2410c; border-color: #fdba74; }
 .proj-due.overdue { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
-

@@ -7,7 +7,8 @@
 /* ===== Sidebar ===== */
 .sidebar {
   width: var(--sidebar-width);
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(180deg, #1e2036 0%, var(--color-sidebar-bg) 55%, #16172a 100%);
   display: flex;
   flex-direction: column;
@@ -17,6 +18,9 @@
   z-index: 100;
   border-right: 1px solid rgba(255,255,255,0.05);
   transition: transform var(--transition);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebar-logo {
@@ -58,11 +62,12 @@
 
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   padding: 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .sidebar-section { margin-bottom: 6px; }
@@ -295,3 +300,13 @@
   color: inherit;
 }
 .deadline-banner-dismiss:hover { opacity: 1; }
+
+@media (max-width: 1024px) {
+  .sidebar {
+    overflow-y: auto;
+  }
+
+  .sidebar-nav {
+    overflow: visible;
+  }
+}

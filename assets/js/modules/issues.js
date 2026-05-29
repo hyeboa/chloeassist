@@ -24,7 +24,9 @@ const Issues = (() => {
   let filter = 'all'; // 'all' | 'open' | 'progress' | 'resolved'
 
   /* ─ 데이터 ─ */
-  function getIssues() { return Store.get('issues') || []; }
+  let issuesCache = [];
+  function getIssues() { return issuesCache.length ? issuesCache : (Store.get('issues') || []); }
+  async function loadIssues() { issuesCache = await Store.loadIssues(); return issuesCache; }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -136,7 +138,8 @@ const Issues = (() => {
   }
 
   /* ─ 렌더 ─ */
-  function render() {
+  async function render() {
+    await loadIssues();
     const app = document.getElementById('app');
     if (!app) return;
     const issues = getIssues();
@@ -198,7 +201,8 @@ const Issues = (() => {
 
   /* ─ 동작 ─ */
   function addIssue(title) {
-    Store.push('issues', { title: title.trim(), status: 'open' });
+    const item = { id: crypto.randomUUID(), title: title.trim(), status: 'open', createdAt: Date.now() };
+    Store.pushIssue(item).catch(()=>{});
     render();
   }
 
@@ -206,6 +210,7 @@ const Issues = (() => {
     const it = getIssues().find(i => i.id === id);
     if (!it) return;
     Store.update('issues', id, { status: nextStatus(it.status) });
+    Store.updateIssue(id, { status: nextStatus(it.status) }).catch(()=>{});
     render();
   }
 
@@ -213,6 +218,7 @@ const Issues = (() => {
     const it = getIssues().find(i => i.id === id);
     if (!it) return;
     Store.update('issues', id, { priority: nextPriority(it.priority || 'normal') });
+    Store.updateIssue(id, { priority: nextPriority(it.priority || 'normal') }).catch(()=>{});
     render();
   }
 
@@ -220,11 +226,13 @@ const Issues = (() => {
     const t = text.trim();
     if (!t) { render(); return; }
     Store.update('issues', id, { title: t });
+    Store.updateIssue(id, { title: t }).catch(()=>{});
   }
 
   function deleteIssue(id) {
     if (!confirm('이 이슈를 삭제할까요?')) return;
     Store.remove('issues', id);
+    Store.removeIssue(id).catch(()=>{});
     render();
   }
 

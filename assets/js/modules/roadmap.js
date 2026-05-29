@@ -10,8 +10,13 @@ const Roadmap = (() => {
   let expandedGoals = new Set();
 
   /* ─ 데이터 ─ */
-  function getMilestones() { return Store.get('milestones') || []; }
-  function getGoals()      { return Store.get('goals')      || []; }
+  let milestonesCache = [];
+  let goalsCache = [];
+
+  function getMilestones() { return milestonesCache.length ? milestonesCache : (Store.get('milestones') || []); }
+  function getGoals()      { return goalsCache.length ? goalsCache : (Store.get('goals')      || []); }
+  async function loadMilestones() { milestonesCache = await Store.loadMilestones(); return milestonesCache; }
+  async function loadGoals() { goalsCache = await Store.loadGoals(); return goalsCache; }
 
   /* ─ D-day ─ */
   function dday(dateStr, done) {
@@ -396,7 +401,9 @@ const Roadmap = (() => {
   }
 
   /* ─ 렌더 ─ */
-  function render() {
+  async function render() {
+    await loadGoals();
+    await loadMilestones();
     const app = document.getElementById('app');
     if (!app) return;
     const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -467,8 +474,8 @@ const Roadmap = (() => {
       const text = goalInput.value.trim();
       if (!text) return;
 
-      if (!AI.getApiKey()) {
-        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+      if (!AI.hasApiKey()) {
+        Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
         return;
       }
 
@@ -510,8 +517,8 @@ const Roadmap = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      if (!AI.getApiKey()) {
-        Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+      if (!AI.hasApiKey()) {
+        Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
         return;
       }
 
@@ -521,7 +528,8 @@ const Roadmap = (() => {
 
       try {
         const result = await NLInput.parse('milestone', text);
-        Store.push('milestones', { title: result.title, date: result.date, desc: result.desc || '', done: false });
+        const item = { id: crypto.randomUUID(), title: result.title, date: result.date, desc: result.desc || '', done: false, createdAt: Date.now() };
+        Store.pushMilestone(item).catch(() => {});
         input.value = '';
         status.textContent = '';
         render();
@@ -538,17 +546,20 @@ const Roadmap = (() => {
     const ms = getMilestones().find(m => m.id === id);
     if (!ms) return;
     Store.update('milestones', id, { done: !ms.done, doneAt: !ms.done ? Date.now() : null });
+    Store.updateMilestone(id, { done: !ms.done, doneAt: !ms.done ? Date.now() : null }).catch(() => {});
     render();
   }
 
   function deleteMilestone(id) {
     Store.remove('milestones', id);
+    Store.removeMilestone(id).catch(() => {});
     render();
   }
 
   /* ─ 목표 동작 ─ */
   function addGoal(title, targetDate = null) {
-    Store.push('goals', { title: title.trim(), items: [], targetDate: targetDate || null });
+    const item = { id: crypto.randomUUID(), title: title.trim(), items: [], targetDate: targetDate || null, createdAt: Date.now(), sortIndex: getGoals().length };
+    Store.pushGoal(item).catch(() => {});
     render();
   }
 
@@ -556,6 +567,7 @@ const Roadmap = (() => {
     const t = text.trim();
     if (!t) { render(); return; }
     Store.update('goals', id, { title: t });
+    Store.updateGoal(id, { title: t }).catch(() => {});
   }
 
   function deleteGoal(id) {
@@ -564,6 +576,7 @@ const Roadmap = (() => {
       .filter(m => m.goalId === id)
       .forEach(m => Store.update('milestones', m.id, { goalId: null }));
     Store.remove('goals', id);
+    Store.removeGoal(id).catch(() => {});
     render();
   }
 
@@ -573,6 +586,7 @@ const Roadmap = (() => {
     if (i <= 0) return;
     [goals[i - 1], goals[i]] = [goals[i], goals[i - 1]];
     Store.set('goals', goals);
+    goals.forEach((g, idx) => Store.updateGoal(g.id, { sortIndex: idx }).catch(() => {}));
     render();
   }
 
@@ -582,6 +596,7 @@ const Roadmap = (() => {
     if (i < 0 || i >= goals.length - 1) return;
     [goals[i + 1], goals[i]] = [goals[i], goals[i + 1]];
     Store.set('goals', goals);
+    goals.forEach((g, idx) => Store.updateGoal(g.id, { sortIndex: idx }).catch(() => {}));
     render();
   }
 
@@ -590,6 +605,7 @@ const Roadmap = (() => {
     if (!goal) return;
     const items = [...(goal.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
     Store.update('goals', goalId, { items });
+    Store.updateGoal(goalId, { items }).catch(() => {});
     render();
   }
 
@@ -598,6 +614,7 @@ const Roadmap = (() => {
     if (!goal) return;
     const items = (goal.items || []).map(it => it.id === itemId ? { ...it, done: !it.done } : it);
     Store.update('goals', goalId, { items });
+    Store.updateGoal(goalId, { items }).catch(() => {});
     render();
   }
 
@@ -606,6 +623,7 @@ const Roadmap = (() => {
     if (!goal) return;
     const items = (goal.items || []).filter(it => it.id !== itemId);
     Store.update('goals', goalId, { items });
+    Store.updateGoal(goalId, { items }).catch(() => {});
     render();
   }
 
@@ -617,11 +635,13 @@ const Roadmap = (() => {
 
   function setGoalDate(id, date) {
     Store.update('goals', id, { targetDate: date || null });
+    Store.updateGoal(id, { targetDate: date || null }).catch(() => {});
     render();
   }
 
   function assignMilestoneGoal(milestoneId, goalId) {
     Store.update('milestones', milestoneId, { goalId: goalId || null });
+    Store.updateMilestone(milestoneId, { goalId: goalId || null }).catch(() => {});
     render();
   }
 

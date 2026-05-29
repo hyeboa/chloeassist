@@ -80,11 +80,12 @@ const Monthly = (() => {
     return all[monthKey(month)] || { memo: '', aiSummary: '' };
   }
 
-  function saveMemo(month, patch) {
+  async function saveMemo(month, patch) {
+    const k = monthKey(month);
     const all = Store.get('monthlyReviews') || {};
-    const k   = monthKey(month);
-    all[k]    = { ...(all[k] || {}), ...patch };
+    all[k] = { ...(all[k] || {}), ...patch };
     Store.set('monthlyReviews', all);
+    await Store.saveMonthlyReview(k, patch);
   }
 
   /* ─ 렌더 ─ */
@@ -261,14 +262,15 @@ const Monthly = (() => {
     `;
   }
 
-  function render() {
+  async function render() {
+    await Promise.all([Store.loadTasks?.(), Store.loadMilestones?.(), Store.loadFeatures?.()]);
     document.getElementById('app').innerHTML = buildHTML();
   }
 
   /* ─ AI 월간 요약 ─ */
   async function generateSummary() {
-    if (!AI.getApiKey()) {
-      Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+    if (!AI.hasApiKey()) {
+      Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
       return;
     }
 

@@ -122,7 +122,7 @@ const Projects = (() => {
                     const sColor = sc(s.status || '미정');
                     return `
                     <span class="feat-linked-chip"
-                      onclick="event.stopPropagation();Projects.goToScreens()" title="화면 탭으로 이동"
+                      onclick="event.stopPropagation();Projects.goToScreens('${s.id}')" title="화면으로 이동"
                       style="background:${sColor.bg};border-color:${sColor.border}">
                       <span class="feat-linked-chip-name" style="color:${sColor.text}">${escapeHtml(s.name)}</span>
                       <span class="feat-linked-status" style="color:${sColor.text};border-color:${sColor.border};opacity:0.7">${s.status || '미정'}</span>
@@ -193,8 +193,8 @@ const Projects = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      if (!AI.getApiKey()) {
-        Store.push('features', { name: text, desc: '', category: '기획', status: '아이디어' });
+      if (!AI.hasApiKey()) {
+        Store.pushFeature({ name: text, desc: '', category: '기획', status: '아이디어' }).catch(() => {});
         input.value = '';
         render();
         return;
@@ -204,16 +204,16 @@ const Projects = (() => {
       input.placeholder = '✦ AI가 분석 중...';
       try {
         const result = await NLInput.parse('feature', text);
-        Store.push('features', {
+        Store.pushFeature({
           name: result.name || text,
           desc: result.desc || '',
           category: result.category || '기획',
           status: '아이디어',
-        });
+        }).catch(() => {});
         input.value = '';
         render();
       } catch {
-        Store.push('features', { name: text, desc: '', category: '기획', status: '아이디어' });
+        Store.pushFeature({ name: text, desc: '', category: '기획', status: '아이디어' }).catch(() => {});
         input.value = '';
         render();
       } finally {
@@ -226,10 +226,16 @@ const Projects = (() => {
   }
 
   /* ─ 화면 탭으로 이동 ─ */
-  function goToScreens() {
+  function goToScreens(screenId = null) {
     if (typeof Sitemap !== 'undefined') {
-      Sitemap.setPageTab('screens');
+      if (screenId && typeof Sitemap.goToScreen === 'function') {
+        Sitemap.goToScreen(screenId);
+      } else {
+        Sitemap.setPageTab('screens');
+        Sitemap.setView('board');
+      }
     } else {
+      if (screenId) sessionStorage.setItem('chloeassist:sitemap:focusScreen', screenId);
       location.href = 'sitemap.html';
     }
   }
@@ -245,9 +251,7 @@ const Projects = (() => {
     const input = e.currentTarget;
     const text  = input.value.trim();
     if (!text) return;
-    Store.push('tasks', {
-      title: text, featureId, done: false, isToday: false, category: '',
-    });
+    Store.pushTask({ title: text, featureId, done: false, isToday: false, category: '' }).catch(() => {});
     input.value = '';
     render();
     setTimeout(() => {
@@ -257,30 +261,30 @@ const Projects = (() => {
   }
 
   function deleteTask(taskId) {
-    Store.remove('tasks', taskId);
+    Store.removeTask(taskId).catch(() => {});
     render();
   }
 
   function toggleTaskDone(taskId) {
     const t = getTasks().find(x => x.id === taskId);
     if (!t) return;
-    Store.update('tasks', taskId, { done: !t.done });
+    Store.updateTask(taskId, { done: !t.done }).catch(() => {});
     render();
   }
 
   function deleteFeature(id) {
     getTasks().filter(t => t.featureId === id)
-      .forEach(t => Store.update('tasks', t.id, { featureId: null }));
-    Store.remove('features', id);
+      .forEach(t => Store.updateTask(t.id, { featureId: null }).catch(() => {}));
+    Store.removeFeature(id).catch(() => {});
     if (expandedId === id) expandedId = null;
     render();
   }
 
   function moveStatus(id, newStatus) {
-    Store.update('features', id, {
+    Store.updateFeature(id, {
       status: newStatus,
       doneAt: newStatus === '완료' ? Date.now() : null,
-    });
+    }).catch(() => {});
     render();
   }
 
@@ -324,4 +328,3 @@ const Projects = (() => {
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof Sitemap === 'undefined') Projects.render();
 });
-

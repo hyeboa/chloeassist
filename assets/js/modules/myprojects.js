@@ -28,8 +28,14 @@ const MyProjects = (() => {
   let activeProject  = '전체';
   let showDoneMap    = {}; // { [project]: boolean }
   let expandedTaskId = null;
+  let tasksCache = [];
 
-  function getTasks() { return Store.get('projectTasks') || []; }
+  function getTasks() { return tasksCache.length ? tasksCache : (Store.get('projectTasks') || []); }
+
+  async function loadTasks() {
+    tasksCache = await Store.loadProjectTasks();
+    return tasksCache;
+  }
 
   function projectColor(name) {
     if (!name) return TAG_COLORS[0];
@@ -60,22 +66,32 @@ const MyProjects = (() => {
   }
 
   /* ─ 동작 ─ */
-  function toggleDone(id) {
+  async function toggleDone(id) {
     const t = getTasks().find(x => x.id === id);
     if (!t) return;
+    await Store.updateProjectTask(id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     Store.update('projectTasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     renderList();
   }
 
-  function deleteTask(id) {
+  async function deleteTask(id) {
+    await Store.removeProjectTask(id);
     Store.remove('projectTasks', id);
     if (expandedTaskId === id) expandedTaskId = null;
     renderList();
   }
 
-  function addTask(project, title) {
+  async function addTask(project, title) {
     if (!title.trim()) return;
-    Store.push('projectTasks', { project, title: title.trim(), done: false, priority: 'normal' });
+    const item = {
+      id: crypto.randomUUID(),
+      project,
+      title: title.trim(),
+      done: false,
+      priority: 'normal',
+      createdAt: Date.now(),
+    };
+    await Store.pushProjectTask(item);
     renderList();
   }
 
@@ -84,17 +100,20 @@ const MyProjects = (() => {
     renderList();
   }
 
-  function setPriority(id, priority) {
+  async function setPriority(id, priority) {
+    await Store.updateProjectTask(id, { priority });
     Store.update('projectTasks', id, { priority });
     renderList();
   }
 
-  function setDueDate(id, dateStr) {
+  async function setDueDate(id, dateStr) {
+    await Store.updateProjectTask(id, { dueDate: dateStr || null });
     Store.update('projectTasks', id, { dueDate: dateStr || null });
     renderList();
   }
 
-  function saveMemo(id, text) {
+  async function saveMemo(id, text) {
+    await Store.updateProjectTask(id, { memo: text.trim() || null });
     Store.update('projectTasks', id, { memo: text.trim() || null });
     renderList();
   }
@@ -287,7 +306,8 @@ const MyProjects = (() => {
   }
 
   /* ─ 전체 렌더 ─ */
-  function render() {
+  async function render() {
+    await loadTasks();
     const all      = getTasks();
     const projects = [...new Set(all.map(t => t.project).filter(Boolean))];
 

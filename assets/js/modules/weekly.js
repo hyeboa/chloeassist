@@ -77,11 +77,12 @@ const Weekly = (() => {
     return all[weekKey(weekStart)] || { memo: '', aiSummary: '' };
   }
 
-  function saveMemo(weekStart, patch) {
+  async function saveMemo(weekStart, patch) {
+    const k = weekKey(weekStart);
     const all = Store.get('weeklyReviews') || {};
-    const k   = weekKey(weekStart);
-    all[k]    = { ...(all[k] || {}), ...patch };
+    all[k] = { ...(all[k] || {}), ...patch };
     Store.set('weeklyReviews', all);
+    await Store.saveWeeklyReview(k, patch);
   }
 
   /* ─ 태스크 칩 ─ */
@@ -98,7 +99,8 @@ const Weekly = (() => {
   function setReviewTab() { render(); }
 
   /* ─ 렌더 ─ */
-  function render() {
+  async function render() {
+    await Promise.all([Store.loadProjectTasks?.(), Store.loadTasks?.(), Store.loadGoals?.(), Store.loadMilestones?.(), Store.loadFeatures?.()]);
     const weekEnd   = getWeekEnd(currentWeekStart);
     const today     = new Date();
     const thisWeek  = weekKey(getWeekStart(today));
@@ -276,8 +278,8 @@ const Weekly = (() => {
 
   /* ─ AI 주간 요약 생성 ─ */
   async function generateSummary() {
-    if (!AI.getApiKey()) {
-      Toast.show('설정(⚙)에서 API 키를 먼저 입력해 주세요.', 'warning');
+    if (!AI.hasApiKey()) {
+      Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
       return;
     }
 
