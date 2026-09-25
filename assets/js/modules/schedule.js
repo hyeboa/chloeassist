@@ -11,10 +11,8 @@ const Schedule = (() => {
   let searchQuery   = '';
   let hideDone      = false;
 
-  let tasksCache = [];
-
-  function getTasks() { return tasksCache.length ? tasksCache : (Store.get('tasks') || []); }
-  async function loadTasks() { tasksCache = await Store.loadTasks(); return tasksCache; }
+  function getTasks() { return Store.get('tasks') || []; }
+  async function loadTasks() { return Store.loadTasks(); }
 
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -32,11 +30,10 @@ const Schedule = (() => {
   };
 
   function getGroup(t) {
-    const todayMs  = new Date().setHours(0, 0, 0, 0);
-    const todayStr = new Date(todayMs).toDateString();
-    if (t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === todayStr)) return '오늘';
+    const todayKey = LocalDate.today();
+    if (t.isToday || t.dueDate === todayKey) return '오늘';
     if (!t.dueDate) return '날짜 없음';
-    const diff = Math.ceil((new Date(t.dueDate) - todayMs) / 86400000);
+    const diff = LocalDate.diffDays(t.dueDate);
     if (diff < 0)   return '기한 지남';
     if (diff <= 7)  return '이번 주';
     if (diff <= 14) return '다음 주';
@@ -52,7 +49,7 @@ const Schedule = (() => {
 
   /* ─ 날짜 포맷 ─ */
   function shortDate(str) {
-    const d = new Date(str);
+    const d = LocalDate.fromKey(str);
     return `${d.getMonth() + 1}/${d.getDate()}`;
   }
 
@@ -128,9 +125,9 @@ const Schedule = (() => {
         // 완료 나중에
         if (a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
         // 날짜순
-        const aD = a.dueDate ? new Date(a.dueDate) : null;
-        const bD = b.dueDate ? new Date(b.dueDate) : null;
-        if (aD && bD) return aD - bD;
+        const aD = a.dueDate || null;
+        const bD = b.dueDate || null;
+        if (aD && bD) return aD.localeCompare(bD);
         if (aD) return -1;
         if (bD) return 1;
         return b.createdAt - a.createdAt;
@@ -212,12 +209,17 @@ const Schedule = (() => {
               onclick="Schedule.setFilter('${c}')">${c}</button>
           `).join('')}
         </div>
-        <button class="bl-done-toggle-bar ${hideDone ? 'active' : ''}"
-          onclick="Schedule.toggleHideDone()">
-          ${hideDone
-            ? '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="1.8" fill="currentColor"/></svg>완료 표시'
-            : '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.3"/><path d="M3 3l10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>완료 숨김'}
-        </button>
+        <div class="bl-search-group">
+          <input class="bl-search-input" type="search" value="${escapeHtml(searchQuery)}"
+            placeholder="할 일 검색" aria-label="할 일 검색"
+            oninput="Schedule.setSearch(this.value)">
+          <button class="bl-done-toggle-bar ${hideDone ? 'active' : ''}"
+            onclick="Schedule.toggleHideDone()">
+            ${hideDone
+              ? '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="1.8" fill="currentColor"/></svg>완료 표시'
+              : '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8s2.5-4.5 6-4.5S14 8 14 8s-2.5 4.5-6 4.5S2 8 2 8z" stroke="currentColor" stroke-width="1.3"/><path d="M3 3l10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>완료 숨김'}
+          </button>
+        </div>
       </div>
 
       <div id="bl-list">${buildListHTML()}</div>
@@ -297,13 +299,12 @@ const Schedule = (() => {
       const text = input.value.trim();
       if (!text) { editingDateId = null; renderList(); return; }
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = LocalDate.today();
 
       const direct = text.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
       if (direct) {
         const iso = `${direct[1]}-${direct[2].padStart(2, '0')}-${direct[3].padStart(2, '0')}`;
         await Store.updateTask(editingDateId, { dueDate: iso, isToday: iso === today });
-        Store.update('tasks', editingDateId, { dueDate: iso, isToday: iso === today });
         Toast.show('날짜가 설정됐어요.', 'success');
         editingDateId = null;
         renderList();
@@ -311,7 +312,7 @@ const Schedule = (() => {
       }
 
       if (!AI.hasApiKey()) {
-        Toast.show('API 키 없이는 자연어 날짜를 쓸 수 없어요. YYYY-MM-DD 형식으로 입력해 주세요.', 'warning');
+        Toast.show('로컬 AI가 날짜를 읽지 못했어요. YYYY-MM-DD 형식으로 입력해 주세요.', 'warning');
         editingDateId = null;
         renderList();
         return;
@@ -326,7 +327,6 @@ const Schedule = (() => {
         const match = raw.trim().match(/\d{4}-\d{2}-\d{2}/);
         if (match) {
           await Store.updateTask(editingDateId, { dueDate: match[0], isToday: match[0] === today });
-          Store.update('tasks', editingDateId, { dueDate: match[0], isToday: match[0] === today });
           Toast.show('날짜가 설정됐어요.', 'success');
         } else {
           Toast.show('날짜를 인식하지 못했어요.', 'error');
@@ -348,7 +348,6 @@ const Schedule = (() => {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
     await Store.updateTask(id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
-    Store.update('tasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     renderList();
   }
 
@@ -356,27 +355,29 @@ const Schedule = (() => {
     const t = getTasks().find(t => t.id === id);
     if (!t) return;
     await Store.updateTask(id, { starred: !t.starred });
-    Store.update('tasks', id, { starred: !t.starred });
     renderList();
   }
 
   async function moveToToday(id) {
-    const changes = { isToday: true, dueDate: new Date().toISOString().slice(0, 10) };
+    const changes = { isToday: true, dueDate: LocalDate.today() };
     await Store.updateTask(id, changes);
-    Store.update('tasks', id, changes);
     Toast.show('오늘 할 일로 추가됐어요.', 'success');
     renderList();
   }
 
   async function deleteTask(id) {
     await Store.removeTask(id);
-    Store.remove('tasks', id);
     renderList();
   }
 
   function setFilter(f) {
     activeFilter = f;
     render();
+  }
+
+  function setSearch(value) {
+    searchQuery = value;
+    renderList();
   }
 
   function selectCat(cat) {
@@ -397,7 +398,7 @@ const Schedule = (() => {
   }
 
   return {
-    render, setFilter, toggleDone, toggleStar,
+    render, setFilter, setSearch, toggleDone, toggleStar,
     moveToToday, deleteTask, selectCat, startDateEdit, toggleHideDone,
   };
 })();

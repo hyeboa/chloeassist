@@ -28,14 +28,8 @@ const MyProjects = (() => {
   let activeProject  = '전체';
   let showDoneMap    = {}; // { [project]: boolean }
   let expandedTaskId = null;
-  let tasksCache = [];
-
-  function getTasks() { return tasksCache.length ? tasksCache : (Store.get('projectTasks') || []); }
-
-  async function loadTasks() {
-    tasksCache = await Store.loadProjectTasks();
-    return tasksCache;
-  }
+  function getTasks() { return Store.get('projectTasks') || []; }
+  async function loadTasks() { return Store.loadProjectTasks(); }
 
   function projectColor(name) {
     if (!name) return TAG_COLORS[0];
@@ -50,12 +44,19 @@ const MyProjects = (() => {
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function escapeJs(str) {
+    return String(str)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/\r/g, '\\r')
+      .replace(/\n/g, '\\n');
+  }
+
   /* ─ 마감일 배지 ─ */
   function dueBadge(t) {
     if (!t.dueDate) return '';
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const due   = new Date(t.dueDate + 'T00:00:00');
-    const diff  = Math.round((due - today) / 86400000);
+    const due   = LocalDate.fromKey(t.dueDate);
+    const diff  = LocalDate.diffDays(t.dueDate);
 
     let cls = 'mp-due', label;
     if (!t.done && diff < 0)      { cls += ' overdue'; label = `${-diff}일 지남`; }
@@ -70,13 +71,11 @@ const MyProjects = (() => {
     const t = getTasks().find(x => x.id === id);
     if (!t) return;
     await Store.updateProjectTask(id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
-    Store.update('projectTasks', id, { done: !t.done, doneAt: !t.done ? Date.now() : null });
     renderList();
   }
 
   async function deleteTask(id) {
     await Store.removeProjectTask(id);
-    Store.remove('projectTasks', id);
     if (expandedTaskId === id) expandedTaskId = null;
     renderList();
   }
@@ -102,20 +101,53 @@ const MyProjects = (() => {
 
   async function setPriority(id, priority) {
     await Store.updateProjectTask(id, { priority });
-    Store.update('projectTasks', id, { priority });
     renderList();
   }
 
   async function setDueDate(id, dateStr) {
     await Store.updateProjectTask(id, { dueDate: dateStr || null });
-    Store.update('projectTasks', id, { dueDate: dateStr || null });
     renderList();
   }
 
   async function saveMemo(id, text) {
     await Store.updateProjectTask(id, { memo: text.trim() || null });
-    Store.update('projectTasks', id, { memo: text.trim() || null });
     renderList();
+  }
+
+  async function createProject() {
+    const projectInput = document.getElementById('mp-new-project');
+    const taskInput = document.getElementById('mp-new-project-task');
+    const project = projectInput?.value.trim() || '';
+    const title = taskInput?.value.trim() || '';
+
+    if (!project) {
+      Toast.show('프로젝트 이름을 입력해 주세요.', 'warning');
+      projectInput?.focus();
+      return;
+    }
+    if (!title) {
+      Toast.show('첫 할 일을 하나 입력해 주세요.', 'warning');
+      taskInput?.focus();
+      return;
+    }
+
+    await Store.pushProjectTask({
+      id: crypto.randomUUID(),
+      project,
+      title,
+      done: false,
+      priority: 'normal',
+      createdAt: Date.now(),
+    });
+    activeProject = project;
+    await render();
+    Toast.show(`${project} 프로젝트를 시작했어요.`, 'success');
+  }
+
+  function handleProjectCreate(e) {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    e.preventDefault();
+    createProject();
   }
 
   function toggleShowDone(project) {
@@ -143,6 +175,19 @@ const MyProjects = (() => {
     });
   }
 
+  function sortProjectsByAttention(all, projects) {
+    const originalOrder = new Map(projects.map((project, index) => [project, index]));
+    const nextDue = (project) => all
+      .filter(task => task.project === project && !task.done && task.dueDate)
+      .map(task => task.dueDate)
+      .sort()[0] || '9999-12-31';
+
+    return [...projects].sort((a, b) => {
+      const dueCompare = nextDue(a).localeCompare(nextDue(b));
+      return dueCompare || originalOrder.get(a) - originalOrder.get(b);
+    });
+  }
+
   /* ─ 프로젝트 섹션 ─ */
   function renderSection(project, tasks) {
     const color    = projectColor(project);
@@ -159,7 +204,7 @@ const MyProjects = (() => {
           </span>
           <span class="mp-section-count">${todo.length}개 남음${done.length ? ` · 완료 ${done.length}` : ''}</span>
           ${done.length ? `
-            <button class="mp-show-done-btn${showDone ? ' open' : ''}" onclick="MyProjects.toggleShowDone('${escapeHtml(project)}')">
+            <button class="mp-show-done-btn${showDone ? ' open' : ''}" onclick="MyProjects.toggleShowDone('${escapeJs(project)}')">
               <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M4 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>완료 ${done.length}</span>
             </button>
@@ -230,7 +275,7 @@ const MyProjects = (() => {
     const el = document.getElementById('mp-dashboard');
     if (!el || projects.length === 0) { if (el) el.innerHTML = ''; return; }
 
-    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const today = LocalDate.today();
 
     el.innerHTML = `
       <div class="mp-dashboard">
@@ -245,21 +290,21 @@ const MyProjects = (() => {
 
           const withDue  = tasks.filter(t => !t.done && t.dueDate)
             .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-          const overdue  = withDue.filter(t => new Date(t.dueDate + 'T00:00:00') < today);
+          const overdue  = withDue.filter(t => t.dueDate < today);
 
           let dueHtml = '';
           if (overdue.length) {
             dueHtml = `<span class="mp-dash-due overdue">${overdue.length}개 마감 초과</span>`;
           } else if (withDue.length) {
-            const d    = new Date(withDue[0].dueDate + 'T00:00:00');
-            const diff = Math.round((d - today) / 86400000);
+            const d    = LocalDate.fromKey(withDue[0].dueDate);
+            const diff = LocalDate.diffDays(withDue[0].dueDate);
             const lbl  = diff === 0 ? '오늘 마감' : diff === 1 ? '내일 마감' : `${d.getMonth() + 1}/${d.getDate()} 마감`;
             dueHtml = `<span class="mp-dash-due">${lbl}</span>`;
           }
 
           return `
             <div class="mp-dash-card${isActive ? ' active' : ''}"
-              onclick="MyProjects.setFilter('${escapeHtml(proj)}')"
+              onclick="MyProjects.setFilter('${escapeJs(proj)}')"
               style="${isActive ? `border-color:${color.text};box-shadow:0 0 0 2px ${color.bg}` : ''}">
               <span class="mp-project-badge"
                 style="background:${color.bg};color:${color.text};border-color:${color.border}">
@@ -287,14 +332,14 @@ const MyProjects = (() => {
     if (!listEl) return;
 
     const all      = getTasks();
-    const projects = [...new Set(all.map(t => t.project).filter(Boolean))];
+    const projects = sortProjectsByAttention(all, [...new Set(all.map(t => t.project).filter(Boolean))]);
 
     renderDashboard(all, projects);
 
     if (projects.length === 0) {
       listEl.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-text">브레인 덤프에서 프로젝트 태그를 달고 할 일로 변환하면 여기 나타나요</div>
+          <div class="empty-state-text">위에서 프로젝트 이름과 첫 할 일을 입력해 시작해보세요</div>
         </div>`;
       return;
     }
@@ -309,15 +354,28 @@ const MyProjects = (() => {
   async function render() {
     await loadTasks();
     const all      = getTasks();
-    const projects = [...new Set(all.map(t => t.project).filter(Boolean))];
+    const projects = sortProjectsByAttention(all, [...new Set(all.map(t => t.project).filter(Boolean))]);
 
     const filterBtns = ['전체', ...projects]
       .map(p => `<button class="mp-filter-btn${activeProject === p ? ' active' : ''}"
-          data-proj="${p}" onclick="MyProjects.setFilter('${p}')">${p}</button>`)
+          data-proj="${escapeHtml(p)}" onclick="MyProjects.setFilter('${escapeJs(p)}')">${escapeHtml(p)}</button>`)
       .join('');
 
     document.getElementById('app').innerHTML = `
-      <div class="mp-braindump-hint">새 프로젝트와 할 일 추가는 <a href="braindump.html">브레인 덤프</a>에서 — 생각을 적고 프로젝트 태그를 달면 여기로 모여요.</div>
+      <div class="mp-create-card">
+        <div class="mp-create-copy">
+          <strong>프로젝트 시작</strong>
+          <span>헬로아지나 사이드 프로젝트의 이름과 다음 할 일 하나만 적어보세요.</span>
+        </div>
+        <div class="mp-create-fields">
+          <input id="mp-new-project" class="mp-create-input" type="text" placeholder="프로젝트 이름"
+            onkeydown="MyProjects.handleProjectCreate(event)">
+          <input id="mp-new-project-task" class="mp-create-input mp-create-task" type="text" placeholder="첫 할 일"
+            onkeydown="MyProjects.handleProjectCreate(event)">
+          <button class="btn btn-primary mp-create-btn" onclick="MyProjects.createProject()">시작하기</button>
+        </div>
+      </div>
+      <div class="mp-braindump-hint">아직 할 일로 정리되지 않은 생각은 <a href="braindump.html?v=20260824t">브레인 덤프</a>에 프로젝트 태그와 함께 모아두세요.</div>
       <div id="mp-dashboard"></div>
       ${projects.length > 1 ? `<div class="mp-filter-bar" style="margin-top:20px">${filterBtns}</div>` : ''}
       <div id="mp-list" style="margin-top:24px"></div>
@@ -340,6 +398,7 @@ const MyProjects = (() => {
   return {
     render, toggleDone, deleteTask, toggleShowDone, setFilter, handleAdd,
     toggleExpand, setPriority, setDueDate, saveMemo,
+    createProject, handleProjectCreate,
   };
 })();
 

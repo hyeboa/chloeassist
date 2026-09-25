@@ -3,44 +3,55 @@
  */
 
 const Sitemap = (() => {
-  const STATUSES  = ['미정', '기획', '디자인중', '개발중', '완료'];
+  const STATUSES  = ['미정', '기획', '디자인중', '개발중', '운영'];
   const STATUS_CLS = {
     '미정':    'st-none',
     '기획':    'st-plan',
     '디자인중': 'st-design',
     '개발중':  'st-dev',
-    '완료':    'st-done',
+    '운영':    'st-live',
   };
 
-  const BRANCH_COLORS = [
-    { border: '#a78bfa', bg: '#faf5ff', text: '#5b21b6', line: '#c4b5fd' },
-    { border: '#60a5fa', bg: '#eff6ff', text: '#1d4ed8', line: '#93c5fd' },
-    { border: '#fb923c', bg: '#fff7ed', text: '#c2410c', line: '#fdba74' },
-    { border: '#34d399', bg: '#f0fdf4', text: '#065f46', line: '#6ee7b7' },
-    { border: '#f472b6', bg: '#fdf2f8', text: '#9d174d', line: '#f9a8d4' },
-    { border: '#fbbf24', bg: '#fefce8', text: '#92400e', line: '#fde68a' },
+  const PLATFORM_OPTIONS = [
+    { id: 'mobile', name: '모바일 앱', code: 'APP', desc: 'iOS · Android 사용자 화면', color: '#7c3aed', bg: '#f5f3ff', line: '#c4b5fd' },
+    { id: 'web', name: 'PC 웹', code: 'WEB', desc: '데스크톱 공개 웹 화면', color: '#2563eb', bg: '#eff6ff', line: '#93c5fd' },
+    { id: 'ops', name: '운영 콘솔', code: 'OPS', desc: '서비스 운영자용 화면', color: '#c2410c', bg: '#fff7ed', line: '#fdba74' },
+    { id: 'internal', name: '내부 도구', code: 'TOOL', desc: '디자인 · 개발 관리 화면', color: '#be185d', bg: '#fdf2f8', line: '#f9a8d4' },
+    { id: 'shared', name: '공통', code: 'SHARED', desc: '여러 플랫폼이 함께 쓰는 흐름', color: '#047857', bg: '#ecfdf5', line: '#6ee7b7' },
+    { id: 'other', name: '기타 채널', code: 'ETC', desc: '추가 플랫폼과 실험 화면', color: '#475569', bg: '#f8fafc', line: '#cbd5e1' },
+    { id: 'unassigned', name: '미분류', code: '—', desc: '플랫폼을 아직 지정하지 않은 흐름', color: '#64748b', bg: '#f8fafc', line: '#cbd5e1' },
   ];
 
-  const MAX_DEPTH = 4;
+  const MAX_DEPTH = 2;
+  const WORKSPACE_PARAM = 'workspace';
   let viewMode = 'diagram';
   let pageTab  = 'screens';
   let linkPickerScreenId = null;
+  let ignoreNextHashChange = false;
   const FOCUS_SCREEN_KEY = 'chloeassist:sitemap:focusScreen';
 
   /* ─ drag state ─ */
   let dragSectionId = null;
   let dragScreenId  = null;
 
-  let featuresCache = [];
-  let sectionsCache = [];
-  let screensCache = [];
-  let componentsCache = [];
-  function getFeatures() { return featuresCache.length ? featuresCache : (Store.get('features') || []); }
-  function loadAll() { return Promise.all([Store.loadFeatures().then(v=>featuresCache=v), Store.loadSitemapSections().then(v=>sectionsCache=v), Store.loadSitemapScreens().then(v=>screensCache=v), Store.loadSitemapComponents().then(v=>componentsCache=v)]); }
+  function getFeatures() { return Store.get('features') || []; }
+  function normalizeWorkspaceUrl() {
+    const url = new URL(location.href);
+    if (!url.searchParams.has(WORKSPACE_PARAM)) return;
+    url.searchParams.delete(WORKSPACE_PARAM);
+    history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }
+  function loadAll() {
+    return Promise.all([
+      Store.loadFeatures(),
+      Store.loadSitemapSections(),
+      Store.loadSitemapScreens(),
+      Store.loadSitemapComponents(),
+    ]);
+  }
 
   function routeToHash(tab, mode = '') {
     if (tab === 'features') return '#features';
-    if (tab === 'userflow') return '#userflow';
     if (tab === 'screens' && mode === 'board') return '#screens-board';
     return '#screens-diagram';
   }
@@ -50,10 +61,6 @@ const Sitemap = (() => {
     if (!hash) return;
     if (hash === 'features') {
       pageTab = 'features';
-      return;
-    }
-    if (hash === 'userflow') {
-      pageTab = 'userflow';
       return;
     }
     if (hash === 'screens-board') {
@@ -69,23 +76,25 @@ const Sitemap = (() => {
 
   function syncHash(tab, mode = '') {
     const next = routeToHash(tab, mode);
-    if (location.hash !== next) location.hash = next;
+    if (location.hash !== next) {
+      ignoreNextHashChange = true;
+      location.hash = next;
+    }
   }
 
-  function sampleGraph() {
-    const now = Date.now();
-    return {
-      features: [
-        { id: crypto.randomUUID(), name: '오늘 정리', category: '기획', status: '완료', desc: '하루 계획과 실행 기록' },
-        { id: crypto.randomUUID(), name: '프로젝트 연결', category: '개발', status: '개발중', desc: '내 프로젝트와 화면 연결' },
-        { id: crypto.randomUUID(), name: '리뷰 보기', category: '운영', status: '기획중', desc: '주간 / 월간 리뷰 확인' },
-      ],
-      sections: [
-        { id: crypto.randomUUID(), name: '매일', order: 1, createdAt: now - 3000 },
-        { id: crypto.randomUUID(), name: '설계', order: 2, createdAt: now - 2000 },
-        { id: crypto.randomUUID(), name: '돌아보기', order: 3, createdAt: now - 1000 },
-      ],
-    };
+  function renderToolbar() {
+    const isFeatures = pageTab === 'features';
+    const isBoard = pageTab === 'screens' && viewMode === 'board';
+    const isDiagram = pageTab === 'screens' && viewMode === 'diagram';
+    return `
+      <nav class="sitemap-toolbar" aria-label="제품 설계 보기">
+        <a href="${routeToHash('features')}" class="sitemap-page-tab ${isFeatures ? 'active' : ''}"
+          onclick="event.preventDefault();Sitemap.openFeatures()">기능 목록</a>
+        <a href="${routeToHash('screens', 'board')}" class="sitemap-page-tab ${isBoard ? 'active' : ''}"
+          onclick="event.preventDefault();Sitemap.openBoard()">화면 보드</a>
+        <a href="${routeToHash('screens', 'diagram')}" class="sitemap-page-tab ${isDiagram ? 'active' : ''}"
+          onclick="event.preventDefault();Sitemap.openDiagram()">화면 구조도</a>
+      </nav>`;
   }
 
   function getSections() {
@@ -95,51 +104,56 @@ const Sitemap = (() => {
       sections.forEach((s, i) => { s.order = i + 1; });
       Store.set('sitemapSections', sections);
     }
-    return sections.sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.createdAt - b.createdAt);
+    return [...sections].sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.createdAt - b.createdAt);
   }
 
   function getScreens() {
-    return (Store.get('sitemapScreens') || [])
+    const screens = Store.get('sitemapScreens') || [];
+    return [...screens]
       .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
   }
 
   function getComponents() {
-    return (Store.get('sitemapComponents') || []).sort((a, b) => a.createdAt - b.createdAt);
+    const components = Store.get('sitemapComponents') || [];
+    return [...components].sort((a, b) => a.createdAt - b.createdAt);
+  }
+
+  function getPlatform(id) {
+    return PLATFORM_OPTIONS.find(platform => platform.id === id)
+      || PLATFORM_OPTIONS.find(platform => platform.id === 'other');
+  }
+
+  function getSectionPlatformId(section) {
+    if (PLATFORM_OPTIONS.some(platform => platform.id === section.platform)) return section.platform;
+    const name = String(section.name || '').trim();
+    if (/^모바일|모바일\s*앱/.test(name)) return 'mobile';
+    if (/^PC|PC\s*웹|웹/.test(name)) return 'web';
+    if (/운영\s*콘솔|운영/.test(name)) return 'ops';
+    if (/디자인\s*콘솔|내부\s*도구/.test(name)) return 'internal';
+    return 'unassigned';
+  }
+
+  function groupSectionsByPlatform(sections) {
+    const grouped = new Map(PLATFORM_OPTIONS.map(platform => [platform.id, []]));
+    sections.forEach(section => {
+      const platformId = getSectionPlatformId(section);
+      (grouped.get(platformId) || grouped.get('other')).push(section);
+    });
+    return PLATFORM_OPTIONS
+      .map(platform => ({ ...platform, sections: grouped.get(platform.id) || [] }))
+      .filter(group => group.sections.length > 0);
+  }
+
+  function renderPlatformOptions(selectedId) {
+    return PLATFORM_OPTIONS
+      .filter(platform => platform.id !== 'unassigned')
+      .map(platform => `<option value="${platform.id}" ${platform.id === selectedId ? 'selected' : ''}>${platform.name}</option>`)
+      .join('');
   }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-
-  /* ─ 화면 깊이 계산 ─ */
-  function getDepth(screenId, allScreens) {
-    let depth = 2, s = allScreens.find(x => x.id === screenId);
-    while (s && s.parentId) { depth++; s = allScreens.find(x => x.id === s.parentId); }
-    return depth;
-  }
-
-  /* ─ 통합 탭 (기능 목록 / 사용자 흐름 / 화면 보드 / 화면 구조도) ─ */
-  function renderToolbar() {
-    const isFeatures = pageTab === 'features';
-    const isFlow     = pageTab === 'userflow';
-    const isScreens  = pageTab === 'screens';
-    const isBoard    = isScreens && viewMode === 'board';
-    const isDiagram  = isScreens && viewMode === 'diagram';
-    return `
-      <div class="sitemap-toolbar">
-        <a href="${routeToHash('features')}" class="sitemap-page-tab ${isFeatures ? 'active' : ''}"
-          onclick="event.preventDefault();Sitemap.openFeatures()">&#10022; 기능 목록</a>
-        <a href="${routeToHash('userflow')}" class="sitemap-page-tab ${isFlow ? 'active' : ''}"
-          onclick="event.preventDefault();Sitemap.openUserFlow()">&#8627; 사용자 흐름</a>
-        <a href="${routeToHash('screens', 'board')}" class="sitemap-page-tab ${isBoard ? 'active' : ''}"
-          onclick="event.preventDefault();Sitemap.openBoard()">&#9776; 화면 보드</a>
-        <a href="${routeToHash('screens', 'diagram')}" class="sitemap-page-tab ${isDiagram ? 'active' : ''}"
-          onclick="event.preventDefault();Sitemap.openDiagram()">&#9671; 화면 구조도</a>
-      </div>`;
-  }
-
-  function renderPageTabs() { return renderToolbar(); }
-  function renderViewTabs()  { return ''; }
 
   /* ════════════════════════════════
      보드 뷰
@@ -167,7 +181,7 @@ const Sitemap = (() => {
         ${linked.length ? `<div class="screen-links-row">
           ${linked.map(f => `
             <span class="screen-link-chip cat-${f.category || ''}"
-              onclick="event.stopPropagation();Sitemap.openFeatures()" title="기능 목록으로 이동" style="cursor:pointer">
+              onclick="event.stopPropagation();Projects.goToFeature('${f.id}')" title="이 보드에서 이 기능 열기" style="cursor:pointer">
               <span class="screen-link-chip-name">${escapeHtml(f.name)}</span>
               <button class="screen-link-chip-x"
                 onclick="event.preventDefault();event.stopPropagation();Sitemap.unlinkFeature('${screen.id}','${f.id}')"
@@ -184,7 +198,7 @@ const Sitemap = (() => {
         ${isPickerOpen ? `
           <div class="screen-link-picker" onclick="event.stopPropagation()">
             ${allFeatures.length === 0
-              ? '<div class="screen-link-empty">기능 목록에서 먼저 기능을 추가해보세요 <button style="margin-left:6px;font-size:0.78rem;color:var(--color-primary);background:none;border:none;cursor:pointer" onclick="event.stopPropagation();Sitemap.openFeatures()">기능 목록 열기 →</button></div>'
+              ? '<div class="screen-link-empty">기능을 먼저 추가해보세요 <button style="margin-left:6px;font-size:0.78rem;color:var(--color-primary);background:none;border:none;cursor:pointer" onclick="event.stopPropagation();Sitemap.openFeatures()">추가 위치로 이동 →</button></div>'
               : allFeatures.map(f => {
                   const on = (screen.featureIds || []).includes(f.id);
                   return `
@@ -218,6 +232,7 @@ const Sitemap = (() => {
         <div class="screen-name-area">
           <span class="screen-name" data-id="${screen.id}"
             ondblclick="Sitemap.focusName('${screen.id}')">${escapeHtml(screen.name)}</span>
+          ${screen.route ? `<span class="screen-route">${escapeHtml(screen.route)}</span>` : ''}
         </div>
         ${renderWireframe()}
         <div class="screen-components">
@@ -257,38 +272,38 @@ const Sitemap = (() => {
   function renderSection(section, allScreens, allComponents) {
     const sectionScreens = allScreens.filter(s => s.sectionId === section.id);
     const total = sectionScreens.length;
-    const done  = sectionScreens.filter(s => s.status === '완료').length;
+    const statusLabel = '운영';
+    const done  = sectionScreens.filter(s => s.status === statusLabel).length;
     const collapsed = !!section.collapsed;
     const order = section.order ?? '';
 
-    const rows = collapsed ? [] : collectRows(null, sectionScreens, 2);
+    const rows = collapsed ? [] : collectRows(null, sectionScreens, 1);
 
     const rowsHTML = rows.map(({ screens, parentId, depth }) => {
       const parentScreen = parentId ? sectionScreens.find(s => s.id === parentId) : null;
-      const indent = (depth - 2) * 36;
+      const indent = (depth - 1) * 36;
       return `
         <div class="sitemap-tree-row depth-${depth}">
-          ${depth > 2 ? `
-            <div class="tree-row-label" style="padding-left:${indent + 20}px">
-              <span class="tree-row-arrow">&#8627;</span>
-              <span class="tree-row-parent">${parentScreen ? escapeHtml(parentScreen.name) : ''}</span>
-              <span class="tree-row-sub">하위 화면</span>
-            </div>` : ''}
-          <div class="sitemap-screens" style="${depth > 2 ? `padding-left:${indent + 20}px` : ''}">
+          <div class="tree-row-label" style="padding-left:${indent + 20}px">
+            ${depth > 1 ? '<span class="tree-row-arrow">&#8627;</span>' : ''}
+            <span class="tree-depth-badge">${depth}단계</span>
+            ${parentScreen ? `<span class="tree-row-parent">${escapeHtml(parentScreen.name)}</span>` : ''}
+          </div>
+          <div class="sitemap-screens" style="${depth > 1 ? `padding-left:${indent + 20}px` : ''}">
             ${screens.map((s, i) => `
               ${i > 0 ? '<div class="screen-arrow"><div class="arrow-line"></div><div class="arrow-head">&#9658;</div></div>' : ''}
               ${renderCard(s, i, allComponents, depth < MAX_DEPTH)}`).join('')}
             ${depth < MAX_DEPTH ? `
               <button class="screen-add-card" onclick="Sitemap.addScreen('${section.id}',${parentId ? `'${parentId}'` : 'null'})">
                 <span class="screen-add-plus">+</span>
-                <span class="screen-add-label">${depth === 2 ? '화면 추가' : '하위 추가'}</span>
+                <span class="screen-add-label">하위 화면 추가</span>
               </button>` : ''}
           </div>
         </div>`;
     }).join('');
 
     return `
-      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''}" data-section-id="${section.id}">
+      <div class="sitemap-section ${collapsed ? 'is-collapsed' : ''} ${section.isPlatformRoot ? 'is-platform-root' : ''}" data-section-id="${section.id}">
         <div class="sitemap-section-hd">
           <div class="section-name-wrap">
             <input type="number" class="section-order" min="1" value="${order}"
@@ -307,7 +322,12 @@ const Sitemap = (() => {
               >${escapeHtml(section.name)}</span>
           </div>
           <div class="section-meta">
-            ${total ? `<span class="section-count">${done}/${total} 완료${collapsed ? ' · 접힘' : ''}</span>` : ''}
+            <select class="section-platform-select" aria-label="${escapeHtml(section.name)} 플랫폼"
+              onchange="Sitemap.setSectionPlatform('${section.id}', this.value)">
+              ${getSectionPlatformId(section) === 'unassigned' ? '<option value="unassigned" selected disabled>미분류</option>' : ''}
+              ${renderPlatformOptions(getSectionPlatformId(section))}
+            </select>
+            ${total ? `<span class="section-count">${done}/${total} ${statusLabel}${collapsed ? ' · 접힘' : ''}</span>` : ''}
             <button class="section-del" onclick="Sitemap.deleteSection('${section.id}')">&#10005;</button>
           </div>
         </div>
@@ -315,136 +335,44 @@ const Sitemap = (() => {
       </div>`;
   }
 
-  function renderUserFlowSteps(section, rows) {
-    return rows.map(({ screens, parentId, depth }) => {
-      const parentLabel = parentId ? section ? (getScreens().find(s => s.id === parentId)?.name || '') : '' : '';
-      const indent = (depth - 2) * 28;
+  function renderPlatformBoard(sections, screens, components) {
+    return groupSectionsByPlatform(sections).map(group => {
+      const sectionIds = new Set(group.sections.map(section => section.id));
+      const platformScreens = screens.filter(screen => sectionIds.has(screen.sectionId));
+      const primarySection = group.sections.find(section => section.isPlatformRoot) || group.sections[0];
       return `
-        <div class="userflow-row" style="padding-left:${indent}px">
-          <div class="userflow-track">
-            ${depth > 2 ? `
-              <div class="userflow-branch-label">
-                <span class="userflow-branch-arrow">&#8627;</span>
-                <span class="userflow-branch-parent">${escapeHtml(parentLabel)}</span>
-                <span class="userflow-branch-sub">하위 흐름</span>
-              </div>` : ''}
-            <div class="userflow-flowline">
-              ${screens.map((screen, i) => {
-                const linkedCount = Array.isArray(screen.featureIds) ? screen.featureIds.length : 0;
-                const status = screen.status || '미정';
-                const ordinal = String(i + 1).padStart(2, '0');
-              return `
-                  ${i > 0 ? '<div class="userflow-flow-connector"><span></span><i></i><span></span></div>' : ''}
-                  <button class="userflow-node st-${(STATUS_CLS[status] || STATUS_CLS['미정']).replace('st-', '') || 'none'}"
-                    onclick="Sitemap.goToScreen('${screen.id}')">
-                    <span class="userflow-node-pin"></span>
-                    <span class="userflow-node-head">
-                      <span class="userflow-node-step">${ordinal}</span>
-                      <span class="userflow-node-status">${status}</span>
-                    </span>
-                    <span class="userflow-node-name">${escapeHtml(screen.name)}</span>
-                    <span class="userflow-node-meta">${linkedCount ? `기능 ${linkedCount}개 연결` : '기능 연결 없음'}</span>
-                  </button>`;
-              }).join('')}
+        <section class="sitemap-platform-group" data-platform="${group.id}"
+          style="--platform-color:${group.color};--platform-bg:${group.bg};--platform-line:${group.line}">
+          <header class="sitemap-platform-header">
+            <div class="sitemap-platform-title">
+              <span class="sitemap-platform-code">${group.code}</span>
+              <span class="sitemap-platform-name">${group.name}</span>
+              <span class="sitemap-platform-desc">${group.desc}</span>
             </div>
+            <div class="sitemap-platform-actions">
+              <span class="sitemap-platform-count">${platformScreens.length}개 화면</span>
+              ${!primarySection ? '' : `
+                <button class="sitemap-platform-add" onclick="Sitemap.addScreen('${primarySection.id}', null)">+ 루트 화면</button>`}
+            </div>
+          </header>
+          <div class="sitemap-platform-sections">
+            ${group.sections.map(section => renderSection(section, screens, components)).join('')}
           </div>
-        </div>`;
+        </section>`;
     }).join('');
   }
 
-  function renderUserFlowView(sections, screens) {
-    if (sections.length === 0 || screens.length === 0) {
-      return `
-        <div class="sitemap-empty">
-          <div class="sitemap-empty-icon">&#8627;</div>
-          <div class="sitemap-empty-text">
-            화면을 추가하면 사용자 흐름이 이곳에 표시돼요.<br>
-            <span style="font-size:0.75rem;opacity:0.6">화면 보드에서 화면을 만들고 순서를 잡아보세요.</span>
-          </div>
-        </div>`;
-    }
-
-    const blocks = sections.map((section) => {
-      const sectionScreens = screens.filter(s => s.sectionId === section.id);
-      if (!sectionScreens.length) return '';
-      const rows = collectRows(null, sectionScreens, 2);
-      const total = sectionScreens.length;
-      const done = sectionScreens.filter(s => s.status === '완료').length;
-
-      return `
-        <section class="userflow-section">
-          <div class="userflow-section-hd">
-            <div class="userflow-section-title">
-              <span class="userflow-section-name">${escapeHtml(section.name)}</span>
-              <span class="userflow-section-count">${done}/${total} 완료</span>
-            </div>
-            <div class="userflow-section-desc">진입부터 하위 흐름까지 순서대로 확인</div>
-          </div>
-          ${renderUserFlowSteps(section, rows)}
-        </section>`;
-    }).filter(Boolean).join('');
-
+  function renderAddSectionControls() {
     return `
-      <div class="userflow-wrap">
-        <div class="userflow-hero">
-          <div class="userflow-hero-badge">제품 설계 · 사용자 흐름</div>
-          <h2 class="userflow-hero-title">사용자 이동 순서를 따라가는 흐름도입니다.</h2>
-          <p class="userflow-hero-desc">보드처럼 카드 목록으로 보지 않고, 시작점과 다음 단계가 한 줄 흐름으로 읽히도록 구성했습니다.</p>
-        </div>
-        <div class="userflow-points">
-          <div class="userflow-point"><span>1</span><strong>진입</strong><em>어디서 시작하는지 봅니다.</em></div>
-          <div class="userflow-point"><span>2</span><strong>이동</strong><em>다음에 어디로 가는지 연결합니다.</em></div>
-          <div class="userflow-point"><span>3</span><strong>분기</strong><em>하위 흐름이 갈라지는 지점을 봅니다.</em></div>
-          <div class="userflow-point"><span>4</span><strong>완료</strong><em>끝까지 자연스럽게 닿는지 확인합니다.</em></div>
-        </div>
-        <div class="userflow-list">
-          ${blocks}
-        </div>
+      <div class="sitemap-add-flow">
+        <label class="sitemap-add-flow-label" for="new-section-platform">새 플랫폼</label>
+        <select id="new-section-platform" class="sitemap-add-flow-select">
+          ${renderPlatformOptions('mobile')}
+        </select>
+        <button class="sitemap-add-section" onclick="Sitemap.addSection(document.getElementById('new-section-platform').value)">
+          + 플랫폼 추가
+        </button>
       </div>`;
-  }
-
-  async function addSampleData(skipRender = false) {
-    const sections = getSections();
-    const screens = getScreens();
-    const features = getFeatures();
-    if ((sections.length || screens.length || features.length) && !confirm('이미 데이터가 있습니다. 샘플 데이터를 추가할까요?')) {
-      return;
-    }
-
-    const sample = sampleGraph();
-    for (const feature of sample.features) {
-      await Store.pushFeature(feature).catch(() => {});
-    }
-    for (const section of sample.sections) {
-      await Store.pushSitemapSection(section).catch(() => {});
-    }
-
-    const createdFeatures = sample.features;
-    const sectionIds = sample.sections.map((section) => section.id);
-    const screensToCreate = [
-      { id: crypto.randomUUID(), sectionId: sectionIds[0], parentId: null, name: '시작 화면', status: '완료', note: '', featureIds: [createdFeatures[0].id] },
-      { id: crypto.randomUUID(), sectionId: sectionIds[0], parentId: null, name: '로그인', status: '개발중', note: '', featureIds: [createdFeatures[0].id, createdFeatures[1].id] },
-      { id: crypto.randomUUID(), sectionId: sectionIds[1], parentId: null, name: '대시보드', status: '개발중', note: '', featureIds: [createdFeatures[1].id] },
-      { id: crypto.randomUUID(), sectionId: sectionIds[1], parentId: null, name: '상세 화면', status: '기획중', note: '', featureIds: [createdFeatures[1].id] },
-      { id: crypto.randomUUID(), sectionId: sectionIds[1], parentId: null, name: '등록 화면', status: '기획중', note: '', featureIds: [createdFeatures[1].id] },
-      { id: crypto.randomUUID(), sectionId: sectionIds[2], parentId: null, name: '주간 리뷰', status: '아이디어', note: '', featureIds: [createdFeatures[2].id] },
-      { id: crypto.randomUUID(), sectionId: sectionIds[2], parentId: null, name: '월간 리뷰', status: '아이디어', note: '', featureIds: [createdFeatures[2].id] },
-    ];
-
-    for (const screen of screensToCreate) {
-      await Store.pushSitemapScreen(screen).catch(() => {});
-    }
-
-    if (!skipRender) render();
-  }
-
-  async function ensureSampleGraph() {
-    const sections = getSections();
-    const screens = getScreens();
-    const features = getFeatures();
-    if (sections.length || screens.length || features.length) return false;
-    await addSampleData(true);
-    return true;
   }
 
   /* ════════════════════════════════
@@ -459,8 +387,9 @@ const Sitemap = (() => {
     return children.reduce((sum, c) => sum + countLeaves(c.id, allScreens), 0);
   }
 
-  function renderHTNode(screen, allScreens, col) {
+  function renderHTNode(screen, allScreens, col, depth = 1) {
     const cls      = STATUS_CLS[screen.status || '미정'];
+    const featureCount = Array.isArray(screen.featureIds) ? screen.featureIds.length : 0;
     const children = allScreens
       .filter(s => s.parentId === screen.id)
       .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
@@ -469,14 +398,18 @@ const Sitemap = (() => {
     return `
       <div class="ht-cw" style="height:${h}px">
         <div class="ht-inner">
-          <div class="diag-scr-node ${cls}">
-            <span class="diag-scr-name">${escapeHtml(screen.name)}</span>
-            <span class="diag-scr-status">${screen.status || '미정'}</span>
-          </div>
+          <button type="button" class="diag-scr-node ${cls}" data-screen-id="${screen.id}"
+            onclick="Sitemap.goToScreen('${screen.id}')" title="이 보드에서 ${escapeHtml(screen.name)} 열기">
+            <span class="diag-scr-main">
+              <span class="diag-scr-name">${escapeHtml(screen.name)}</span>
+              ${screen.route ? `<span class="diag-scr-route">${escapeHtml(screen.route)}</span>` : ''}
+            </span>
+            <span class="diag-scr-status">${screen.status || '미정'} · 기능 ${featureCount}</span>
+          </button>
           ${children.length ? `
             <div class="ht-hline" style="background:${col.line}"></div>
             <div class="ht-kids" style="--vline:${col.line}">
-              ${children.map(c => renderHTNode(c, allScreens, col)).join('')}
+              ${children.map(child => renderHTNode(child, allScreens, col, depth + 1)).join('')}
             </div>` : ''}
         </div>
       </div>`;
@@ -486,34 +419,35 @@ const Sitemap = (() => {
     if (sections.length === 0) return `
       <div class="sitemap-empty">
         <div class="sitemap-empty-icon">&#128241;</div>
-        <div class="sitemap-empty-text">보드 뷰에서 화면을 추가하면 여기에 구조도가 표시돼요.</div>
+        <div class="sitemap-empty-text">이 보드에서 플랫폼과 화면 흐름을 추가하면 여기에 구조도가 표시돼요.</div>
       </div>`;
 
-    const sectionsHTML = sections.map((section, si) => {
-      const level2   = screens
-        .filter(s => s.sectionId === section.id && !s.parentId)
+    const platformGroups = groupSectionsByPlatform(sections);
+    const platformsHTML = platformGroups.map(group => {
+      const sectionIds = new Set(group.sections.map(section => section.id));
+      const platformScreens = screens.filter(screen => sectionIds.has(screen.sectionId));
+      const rootScreens = platformScreens
+        .filter(screen => !screen.parentId)
         .sort((a, b) => (a.screenOrder ?? 9999) - (b.screenOrder ?? 9999) || a.createdAt - b.createdAt);
-      const col       = BRANCH_COLORS[si % BRANCH_COLORS.length];
-      const collapsed = !!section.collapsed;
-      const secLeaves = collapsed ? 1 : (level2.reduce((sum, s) => sum + countLeaves(s.id, screens), 0) || 1);
-      const secH      = secLeaves * HT_LEAF_H;
+      const leaves = rootScreens.reduce((sum, screen) => sum + countLeaves(screen.id, platformScreens), 0) || 1;
+      const height = leaves * HT_LEAF_H;
+      const col = { border: group.color, bg: group.bg, text: group.color, line: group.line };
 
       return `
-        <div class="ht-sec-cw" style="height:${secH}px">
+        <div class="ht-platform-cw" style="height:${height}px">
           <div class="ht-inner">
-            <div class="ht-sec-node ${collapsed ? 'is-collapsed' : ''}"
-              style="border-color:${col.border};background:${col.bg};color:${col.text}"
-              onclick="Sitemap.toggleCollapse('${section.id}')"
-              title="${escapeHtml(section.name)}">
-              ${collapsed ? '<span class="ht-sec-toggle">&#9656;</span>' : ''}
-              <span class="ht-sec-name">${escapeHtml(section.name)}</span>
-              <span class="ht-sec-count">${level2.length}</span>
+            <div class="ht-platform-node"
+              style="--platform-color:${group.color};border-color:${group.color};background:${group.bg};color:${group.color}">
+                <span class="ht-platform-code">${group.code}</span>
+                <span class="ht-platform-copy">
+                  <span class="ht-platform-name">${group.name}</span>
+                  <span class="ht-platform-desc">루트 ${rootScreens.length}개 · 전체 ${platformScreens.length}개 화면</span>
+                </span>
+              </div>
+            <div class="ht-hline" style="background:${group.line}"></div>
+            <div class="ht-kids ht-platform-kids" style="--vline:${group.line}">
+              ${rootScreens.map(screen => renderHTNode(screen, platformScreens, col, 1)).join('')}
             </div>
-            ${(level2.length && !collapsed) ? `
-              <div class="ht-hline" style="background:${col.line}"></div>
-              <div class="ht-kids" style="--vline:${col.line}">
-                ${level2.map(s => renderHTNode(s, screens, col)).join('')}
-              </div>` : ''}
           </div>
         </div>`;
     }).join('');
@@ -523,11 +457,11 @@ const Sitemap = (() => {
         <div class="ht-header">
           <div class="ht-header-node">
             전체 화면 구조
-            <span class="ht-header-count">${screens.length}개 화면</span>
+            <span class="ht-header-count">${platformGroups.length}개 플랫폼 · ${screens.length}개 화면</span>
           </div>
         </div>
         <div class="ht-tree">
-          ${sectionsHTML}
+          ${platformsHTML}
         </div>
       </div>`;
   }
@@ -545,55 +479,49 @@ const Sitemap = (() => {
   }
 
   async function render() {
+    normalizeWorkspaceUrl();
     applyRouteFromHash();
     await loadAll();
-    await ensureSampleGraph();
     const sections   = getSections();
     const screens    = getScreens();
     const components = getComponents();
     if (pageTab === 'features') {
-      document.getElementById('app').innerHTML = renderPageTabs() + Projects.buildHTML();
+      document.getElementById('app').innerHTML = `
+        ${renderToolbar()}
+        ${Projects.buildHTML({
+          statuses: ['아이디어', '기획중', '디자인중', '개발중', '운영'],
+        })}`;
       Projects.bindFeatInput();
       return;
     }
 
     if (viewMode === 'board') {
       document.getElementById('app').innerHTML = `
-        ${renderPageTabs()}
-        ${renderViewTabs()}
+        ${renderToolbar()}
         ${renderLegend()}
         <div class="sitemap-board">
           ${sections.length === 0
             ? `<div class="sitemap-empty">
                  <div class="sitemap-empty-icon">&#128241;</div>
-                 <div class="sitemap-empty-text">섹션을 추가해서 화면 구조를 만들어보세요<br>
-                 <span style="font-size:0.75rem;opacity:0.6">예: 진입, 핵심 사용, 리뷰 흐름...</span></div>
+                 <div class="sitemap-empty-text">구조를 불러오는 중이에요.</div>
                </div>`
-            : sections.map(s => renderSection(s, screens, components)).join('')}
+            : renderPlatformBoard(sections, screens, components)}
         </div>
-        ${sections.length === 0 && screens.length === 0
-          ? `<button class="sitemap-add-section" onclick="Sitemap.addSampleData()">샘플 데이터 넣기</button>
-             <button class="sitemap-add-section" style="margin-top:10px" onclick="Sitemap.addSection()">+ 섹션 추가</button>`
-          : `<button class="sitemap-add-section" onclick="Sitemap.addSection()">+ 섹션 추가</button>`}`;
+        ${renderAddSectionControls()}`;
       bindSectionNameBlur();
       setTimeout(focusQueuedScreen, 50);
-    } else if (pageTab === 'userflow') {
-      document.getElementById('app').innerHTML = `
-        ${renderPageTabs()}
-        ${renderUserFlowView(sections, screens)}
-      `;
-    } else {
-      document.getElementById('app').innerHTML = `
-        ${renderPageTabs()}
-        ${renderViewTabs()}
-        <div class="diag-status-legend">
-          ${STATUSES.map(s => `<span class="legend-item"><span class="legend-dot ${STATUS_CLS[s]}"></span>${s}</span>`).join('')}
-        </div>
-        <div class="diag-scroll-wrap">
-          ${renderDiagramView(sections, screens)}
-        </div>`;
-      sessionStorage.removeItem(FOCUS_SCREEN_KEY);
+      return;
     }
+
+    document.getElementById('app').innerHTML = `
+      ${renderToolbar()}
+      <div class="diag-status-legend">
+        ${STATUSES.map(s => `<span class="legend-item"><span class="legend-dot ${STATUS_CLS[s]}"></span>${s}</span>`).join('')}
+      </div>
+      <div class="diag-scroll-wrap">
+        ${renderDiagramView(sections, screens)}
+      </div>`;
+    sessionStorage.removeItem(FOCUS_SCREEN_KEY);
   }
 
   function bindSectionNameBlur() {
@@ -655,67 +583,99 @@ const Sitemap = (() => {
   }
 
   /* ─ 공개 메서드 ─ */
+  function resetPageScroll() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
+
+  function renderFromStart() {
+    resetPageScroll();
+    render();
+    setTimeout(resetPageScroll, 80);
+  }
+
   function openFeatures() {
     pageTab = 'features';
     syncHash('features');
-    render();
-  }
-
-  function openUserFlow() {
-    pageTab = 'userflow';
-    syncHash('userflow');
-    render();
+    renderFromStart();
   }
 
   function openBoard() {
     pageTab = 'screens';
     viewMode = 'board';
     syncHash('screens', 'board');
-    render();
+    renderFromStart();
   }
 
   function openDiagram() {
     pageTab = 'screens';
     viewMode = 'diagram';
     syncHash('screens', 'diagram');
-    render();
+    renderFromStart();
   }
 
   function setView(mode) {
-    viewMode = mode;
-    syncHash('screens', mode);
-    render();
+    pageTab = 'screens';
+    viewMode = mode === 'board' ? 'board' : 'diagram';
+    syncHash('screens', viewMode);
+    renderFromStart();
   }
 
   function setPageTab(tab) {
-    pageTab = tab;
-    if (tab === 'userflow') viewMode = 'diagram';
-    syncHash(tab, viewMode);
-    render();
+    pageTab = tab === 'features' ? 'features' : 'screens';
+    syncHash(pageTab, viewMode);
+    renderFromStart();
   }
   function rerender()       { render(); }
+  function handleHashChange() {
+    if (ignoreNextHashChange) {
+      ignoreNextHashChange = false;
+      return;
+    }
+    applyRouteFromHash();
+    renderFromStart();
+  }
 
   function goToScreen(screenId) {
     sessionStorage.setItem(FOCUS_SCREEN_KEY, screenId);
     pageTab = 'screens';
     viewMode = 'board';
     syncHash('screens', 'board');
-    render();
+    renderFromStart();
   }
 
-  function addSection() {
+  function addSection(platform = 'mobile') {
     const sections = getSections();
     const maxOrder = sections.reduce((m, s) => Math.max(m, s.order ?? 0), 0);
-    const item = { id: crypto.randomUUID(), name: '새 플로우', order: maxOrder + 1, createdAt: Date.now() };
+    const platformId = PLATFORM_OPTIONS.some(option => option.id === platform && option.id !== 'unassigned')
+      ? platform
+      : 'other';
+    const platformInfo = getPlatform(platformId);
+    const existingPlatform = sections.find(section => section.isPlatformRoot && getSectionPlatformId(section) === platformId);
+    if (existingPlatform) {
+      Toast.show(`${platformInfo.name} 플랫폼이 이미 있습니다. 해당 플랫폼에 화면을 추가해 주세요.`, 'info');
+      return;
+    }
+    const item = {
+      id: crypto.randomUUID(),
+      platform: platformId,
+      name: platformInfo.name,
+      isPlatformRoot: true,
+      order: maxOrder + 1,
+      createdAt: Date.now(),
+    };
     Store.pushSitemapSection(item).catch(() => {});
     render();
-    const els = document.querySelectorAll('.section-name');
-    const last = els[els.length - 1];
-    if (last) {
-      last.focus();
-      const r = document.createRange(); r.selectNodeContents(last);
-      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-    }
+    Toast.show(`${platformInfo.name} 플랫폼을 추가했습니다.`, 'success');
+  }
+
+  function setSectionPlatform(id, platform) {
+    if (!PLATFORM_OPTIONS.some(option => option.id === platform && option.id !== 'unassigned')) return;
+    const section = getSections().find(item => item.id === id);
+    Store.update('sitemapSections', id, {
+      platform,
+      ...(section?.isPlatformRoot ? { name: getPlatform(platform).name } : {}),
+    });
+    render();
   }
 
   function setOrder(id, value) {
@@ -769,7 +729,10 @@ const Sitemap = (() => {
     if (last) setTimeout(() => focusComponent(last.dataset.compId), 50);
   }
 
-  function deleteComponent(id) { Store.remove('sitemapComponents', id); render(); }
+  function deleteComponent(id) {
+    Store.remove('sitemapComponents', id);
+    render();
+  }
 
   function cycleStatus(id) {
     const screen = getScreens().find(s => s.id === id);
@@ -832,7 +795,7 @@ const Sitemap = (() => {
 
     card.classList.add('is-target');
     card.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
-    setTimeout(() => card.classList.remove('is-target'), 1800);
+    setTimeout(() => card.classList.remove('is-target'), 3200);
   }
 
   /* ══════════════════════════════
@@ -955,17 +918,20 @@ const Sitemap = (() => {
   }
 
   return {
-    render, setView, setPageTab, rerender,
-    openFeatures, openUserFlow, openBoard, openDiagram,
+    render, setView, setPageTab, rerender, handleHashChange, resetPageScroll,
+    openFeatures, openBoard, openDiagram,
     goToScreen,
-    addSampleData,
     addSection, addScreen, addComponent, deleteComponent,
     cycleStatus, deleteScreen, deleteSection, focusName, focusComponent,
-    setOrder, toggleCollapse,
+    setOrder, setSectionPlatform, toggleCollapse,
     toggleLinkPicker, toggleLinkFeature, unlinkFeature,
     sectionDragStart, sectionDragOver, sectionDragLeave, sectionDrop, sectionDragEnd,
     screenDragStart,  screenDragOver,  screenDragLeave,  screenDrop,  screenDragEnd,
   };
 })();
 
-document.addEventListener('DOMContentLoaded', () => Sitemap.render());
+document.addEventListener('DOMContentLoaded', () => {
+  Sitemap.resetPageScroll();
+  Sitemap.render();
+});
+window.addEventListener('hashchange', () => Sitemap.handleHashChange());

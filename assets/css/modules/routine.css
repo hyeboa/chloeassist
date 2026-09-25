@@ -259,7 +259,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  max-height: 600px;
 }
 
 /* ─ 탭 바 ─ */
@@ -284,7 +283,7 @@
 
 .routine-tab-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   padding: 16px 18px 18px;
@@ -293,8 +292,7 @@
 /* ─ 주간 매트릭스 ─ */
 .rmatrix-wrap {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .rmatrix-table {

@@ -192,10 +192,10 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 14px 18px;
+  padding: 14px 16px;
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 12px;
   transition: box-shadow var(--transition);
   position: relative;
   overflow: hidden;
@@ -251,14 +251,21 @@
   color: #fff;
 }
 
-.milestone-body { flex: 1; }
+.milestone-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+}
 
 .milestone-title {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 600;
   color: var(--color-text);
-  flex: 1;
-  letter-spacing: -0.1px;
+  letter-spacing: 0;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .milestone-item.done .milestone-title {
@@ -271,9 +278,9 @@
 }
 
 .milestone-dday {
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  padding: 6px 14px;
+  padding: 5px 10px;
   border-radius: var(--radius-full);
   white-space: nowrap;
   flex-shrink: 0;
@@ -298,14 +305,24 @@
 
 .milestone-item:hover .milestone-actions { opacity: 1; }
 
+.milestone-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .ms-del-btn {
-  padding: 6px 10px;
+  flex-shrink: 0;
+  opacity: 0;
+  padding: 5px 8px;
   border-radius: 6px;
-  font-size: 0.88rem;
+  font-size: 0.76rem;
   color: var(--color-text-3);
   transition: background var(--transition), color var(--transition);
 }
 
+.milestone-item:hover .ms-del-btn { opacity: 1; }
 .ms-del-btn:hover { background: #fee2e2; color: var(--color-danger); }
 
 /* ─ 마일스톤 섹션 헤더 ─ */
@@ -931,7 +948,8 @@
   border-radius: var(--radius-sm);
   padding: 4px 8px;
   cursor: pointer;
-  max-width: 160px;
+  min-width: 0;
+  max-width: 210px;
   outline: none;
   transition: border-color var(--transition);
 }
@@ -1014,13 +1032,63 @@
 /* ── 단계별 목표 페이지 2컬럼 ── */
 .goals-page-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
 }
 
-.goals-page-left  { min-width: 0; }
-.goals-page-right { min-width: 0; }
+.goals-page-left,
+.goals-page-right {
+  min-width: 0;
+}
+
+.goals-page-layout .goals-section,
+.goals-page-layout .goals-milestone-section {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.goals-milestone-section {
+  display: block;
+}
+
+.goals-page-layout .quick-add-wrap {
+  margin-bottom: 14px;
+}
+
+.goals-page-layout .quick-add-inner {
+  min-height: 96px;
+}
+
+.goals-page-layout .quick-add-input {
+  font-size: 0.95rem;
+}
+
+.quick-add-date {
+  flex: 0 0 auto;
+  min-width: 142px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  font: inherit;
+}
+
+@media (max-width: 560px) {
+  .quick-add-top:has(.quick-add-date) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quick-add-date {
+    width: 100%;
+  }
+}
+
+.goals-milestone-section .ms-col-list {
+  gap: 0;
+}
 
 @media (max-width: 1100px) {
   .goals-page-layout {

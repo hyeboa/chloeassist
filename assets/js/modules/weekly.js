@@ -23,12 +23,12 @@ const Weekly = (() => {
   }
 
   function weekKey(weekStart) {
-    return weekStart.toISOString().slice(0, 10);
+    return LocalDate.toKey(weekStart);
   }
 
   function inWeek(dateStr, start, end) {
     if (!dateStr) return false;
-    const d = new Date(dateStr);
+    const d = LocalDate.fromKey(dateStr);
     return d >= start && d <= end;
   }
 
@@ -40,12 +40,12 @@ const Weekly = (() => {
   }
 
   function shortDate(str) {
-    const d = new Date(str);
+    const d = LocalDate.fromKey(str);
     return `${d.getMonth() + 1}/${d.getDate()}`;
   }
 
   function ddayLabel(dateStr) {
-    const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
+    const diff = LocalDate.diffDays(dateStr);
     if (diff < 0)  return `D+${Math.abs(diff)}`;
     if (diff === 0) return 'D-Day';
     return `D-${diff}`;
@@ -65,7 +65,7 @@ const Weekly = (() => {
       const done     = ts.filter(t => t.done).length;
       const weekDone = ts.filter(t =>
         t.done && t.doneAt &&
-        inWeek(new Date(t.doneAt).toISOString().slice(0, 10), start, end)
+        inWeek(LocalDate.toKey(new Date(t.doneAt)), start, end)
       ).length;
       return { name, total, done, weekDone, pct: total ? Math.round(done / total * 100) : 0 };
     }).sort((a, b) => b.weekDone - a.weekDone || b.pct - a.pct);
@@ -115,7 +115,7 @@ const Weekly = (() => {
        - 미완료    → dueDate가 이번 주인 것 */
     const doneTasks = tasks.filter(t => {
       if (!t.done) return false;
-      if (t.doneAt) return inWeek(new Date(t.doneAt).toISOString().slice(0,10), currentWeekStart, weekEnd);
+      if (t.doneAt) return inWeek(LocalDate.toKey(new Date(t.doneAt)), currentWeekStart, weekEnd);
       return (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, weekEnd);
     });
     const missTasks = tasks.filter(t =>
@@ -139,8 +139,8 @@ const Weekly = (() => {
 
     /* 다음 마일스톤 */
     const nextMs = milestones
-      .filter(m => !m.done && new Date(m.date) >= today)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
+      .filter(m => !m.done && m.date >= LocalDate.today())
+      .sort((a, b) => a.date.localeCompare(b.date))[0] || null;
 
     /* 통계 */
     const totalWeek   = weekTasks.length;
@@ -279,7 +279,7 @@ const Weekly = (() => {
   /* ─ AI 주간 요약 생성 ─ */
   async function generateSummary() {
     if (!AI.hasApiKey()) {
-      Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
+      Toast.show('로컬 AI 모드가 준비되지 않았어요. 다시 시도해 주세요.', 'warning');
       return;
     }
 
@@ -302,7 +302,7 @@ const Weekly = (() => {
     const wEnd2   = getWeekEnd(currentWeekStart);
     const doneSummary = tasks.filter(t => {
       if (!t.done) return false;
-      if (t.doneAt) return inWeek(new Date(t.doneAt).toISOString().slice(0,10), currentWeekStart, wEnd2);
+      if (t.doneAt) return inWeek(LocalDate.toKey(new Date(t.doneAt)), currentWeekStart, wEnd2);
       return (isCurrent && t.isToday) || inWeek(t.dueDate, currentWeekStart, wEnd2);
     });
     const missSummary = tasks.filter(t =>
@@ -311,8 +311,8 @@ const Weekly = (() => {
     const done = doneSummary.map(t => t.title);
     const miss = missSummary.map(t => t.title);
     const featDone = features.filter(f => f.status === '완료').length;
-    const upcomingMs = milestones.filter(m => !m.done && new Date(m.date) >= today)
-      .sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 2);
+    const upcomingMs = milestones.filter(m => !m.done && m.date >= LocalDate.today())
+      .sort((a, b) => a.date.localeCompare(b.date)).slice(0, 2);
     const projSummary = projectProgress(currentWeekStart, wEnd2);
 
     const prompt = `나는 헬로아지(반려견 플랫폼 모바일 앱)를 1인으로 기획·디자인·운영하고 있어.

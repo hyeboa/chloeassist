@@ -17,13 +17,17 @@ const Monthly = (() => {
 
   function inMonth(val, month) {
     if (!val) return false;
-    const d = typeof val === 'number' ? new Date(val) : new Date(val);
+    const d = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)
+      ? LocalDate.fromKey(val)
+      : new Date(val);
     return d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth();
   }
 
   function inRange(val, start, end) {
     if (!val) return false;
-    const d = typeof val === 'number' ? new Date(val) : new Date(val);
+    const d = typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)
+      ? LocalDate.fromKey(val)
+      : new Date(val);
     return d >= start && d <= end;
   }
 
@@ -32,8 +36,16 @@ const Monthly = (() => {
   }
 
   function shortDate(str) {
-    const d = new Date(str);
+    const d = LocalDate.fromKey(str);
     return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  function weekRangeLabel(start, end) {
+    const startLabel = `${start.getMonth() + 1}월 ${start.getDate()}일`;
+    const endLabel = start.getMonth() === end.getMonth()
+      ? `${end.getDate()}일`
+      : `${end.getMonth() + 1}월 ${end.getDate()}일`;
+    return `${startLabel} ~ ${endLabel}`;
   }
 
   function escapeHtml(str) {
@@ -181,7 +193,7 @@ const Monthly = (() => {
                 </div>
                 <div class="mo-week-label ${isCur ? 'current' : ''}">
                   ${i + 1}주차
-                  <span class="mo-week-date">${w.start.getMonth() + 1}월 ${w.start.getDate()}일 ~ ${w.end.getDate()}일</span>
+                  <span class="mo-week-date">${weekRangeLabel(w.start, w.end)}</span>
                 </div>
                 <div class="mo-week-sub">${st.total > 0 ? `${st.done}/${st.total}` : '-'}</div>
               </div>`;
@@ -270,7 +282,7 @@ const Monthly = (() => {
   /* ─ AI 월간 요약 ─ */
   async function generateSummary() {
     if (!AI.hasApiKey()) {
-      Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
+      Toast.show('로컬 AI 모드가 준비되지 않았어요. 다시 시도해 주세요.', 'warning');
       return;
     }
 

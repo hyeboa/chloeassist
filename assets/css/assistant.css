@@ -225,3 +225,25 @@
   border-radius: 50%;
   background: var(--color-success);
 }
+
+@media (max-width: 768px) {
+  .main-wrapper.ai-open { margin-right: 0; }
+
+  .ai-sidebar {
+    width: min(100vw, 360px);
+    z-index: 120;
+  }
+
+  .ai-toggle-btn {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .ai-toggle-dot {
+    width: 8px;
+    height: 8px;
+  }
+}

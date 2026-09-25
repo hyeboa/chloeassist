@@ -32,10 +32,8 @@ const Braindump = (() => {
   let activeProject = '전체';
   let hideDone      = false;
   let lastProject   = '';
-  let notesCache    = [];
-
-  function getNotes() { return notesCache.length ? notesCache : (Store.get('notes') || []); }
-  async function loadNotes() { notesCache = await Store.loadNotes(); return notesCache; }
+  function getNotes() { return Store.get('notes') || []; }
+  async function loadNotes() { return Store.loadNotes(); }
 
   function projectColor(name) {
     if (!name) return null;
@@ -48,6 +46,14 @@ const Braindump = (() => {
     return String(str)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function escapeJs(str) {
+    return String(str)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/\r/g, '\\r')
+      .replace(/\n/g, '\\n');
   }
 
   /* ─ 저장 ─ */
@@ -67,7 +73,6 @@ const Braindump = (() => {
   }
 
   function deleteNote(id) {
-    Store.remove('notes', id);
     Store.removeNote(id).catch(() => {});
     render();
   }
@@ -76,7 +81,6 @@ const Braindump = (() => {
   function toggleDone(id) {
     const n = getNotes().find(x => x.id === id);
     if (!n) return;
-    Store.update('notes', id, { done: !n.done, doneAt: !n.done ? Date.now() : null });
     Store.updateNote(id, { done: !n.done, doneAt: !n.done ? Date.now() : null }).catch(() => {});
     renderList();
   }
@@ -124,26 +128,23 @@ const Braindump = (() => {
     });
   }
 
+  function selectedDueDate() {
+    if (convertDate === 'today') return LocalDate.today();
+    if (convertDate === 'tomorrow') return LocalDate.addDays(LocalDate.today(), 1);
+    if (convertDate === 'week') {
+      const today = LocalDate.fromKey(LocalDate.today());
+      const toSun = today.getDay() === 0 ? 0 : 7 - today.getDay();
+      return LocalDate.addDays(today, toSun);
+    }
+    return null;
+  }
+
   function confirmConvert() {
     const note = getNotes().find(n => n.id === convertingId);
     if (!note) { convertingId = null; render(); return; }
 
-    const today = new Date();
-    let dueDate = null, isToday = false;
-
-    if (convertDate === 'today') {
-      dueDate = today.toISOString().slice(0, 10);
-      isToday = true;
-    } else if (convertDate === 'tomorrow') {
-      const d = new Date(today);
-      d.setDate(d.getDate() + 1);
-      dueDate = d.toISOString().slice(0, 10);
-    } else if (convertDate === 'week') {
-      const d = new Date(today);
-      const toSun = today.getDay() === 0 ? 0 : 7 - today.getDay();
-      d.setDate(d.getDate() + toSun);
-      dueDate = d.toISOString().slice(0, 10);
-    }
+    const dueDate = selectedDueDate();
+    const isToday = convertDate === 'today';
 
     if (note.project) {
       const item = {
@@ -151,6 +152,8 @@ const Braindump = (() => {
         project: note.project,
         title: note.text,
         done: false,
+        dueDate,
+        priority: 'normal',
         createdAt: Date.now(),
       };
       Store.pushProjectTask(item).catch(() => {});
@@ -187,6 +190,13 @@ const Braindump = (() => {
                 ${escapeHtml(n.project)}
               </span>
               <span style="font-size:0.82rem;color:var(--color-text-3)">프로젝트 할 일로 추가돼요</span>
+              <div class="convert-sep">·</div>
+              <div class="convert-group">
+                ${DATE_OPTS.map(d => `
+                  <button class="convert-date-chip${convertDate === d.val ? ' selected' : ''}"
+                    data-val="${d.val}" onclick="Braindump.selectConvertDate('${d.val}')">${d.label}</button>
+                `).join('')}
+              </div>
               <button class="convert-confirm-btn" onclick="Braindump.confirmConvert()">추가 →</button>
             </div>
             <div class="convert-hint">Enter 확인 · Esc 취소</div>
@@ -282,7 +292,7 @@ const Braindump = (() => {
 
     const filterBtns = ['전체', ...projects, ...(hasUntagged ? ['태그없음'] : '')]
       .map(p => `<button class="dump-filter-btn${activeProject === p ? ' active' : ''}"
-          data-proj="${p}" onclick="Braindump.setProjectFilter('${p}')">${p}</button>`)
+          data-proj="${escapeHtml(p)}" onclick="Braindump.setProjectFilter('${escapeJs(p)}')">${escapeHtml(p)}</button>`)
       .join('');
 
     document.getElementById('app').innerHTML = `
@@ -301,7 +311,7 @@ const Braindump = (() => {
           </div>
         </div>
       </div>
-      <div class="dump-tag-hint">프로젝트 태그를 입력하면 새 프로젝트가 만들어져요. <a href="myprojects.html">내 프로젝트</a>에서 확인할 수 있어요.</div>
+      <div class="dump-tag-hint">프로젝트 태그를 달아두면 나중에 해당 프로젝트 할 일로 바로 보낼 수 있어요.</div>
 
       <div class="dump-list-header">
         <div class="dump-filter-bar">${filterBtns}</div>
@@ -363,7 +373,7 @@ const Braindump = (() => {
 
   async function aiOrganize() {
     if (!AI.hasApiKey()) {
-      Toast.show('설정(⚙)에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
+      Toast.show('로컬 AI 모드가 준비되지 않았어요. 다시 시도해 주세요.', 'warning');
       return;
     }
 
@@ -376,7 +386,7 @@ const Braindump = (() => {
     const btn = document.getElementById('dump-ai-btn');
     if (btn) { btn.disabled = true; btn.textContent = '✦ 분석 중...'; }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = LocalDate.today();
     const noteList = notes.map((n, i) => `${i + 1}. ${n.text}`).join('\n');
 
     const prompt = `오늘 날짜: ${today}.

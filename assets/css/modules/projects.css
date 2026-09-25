@@ -57,6 +57,7 @@
 .kanban-col[data-status="디자인중"] .kanban-col-header { background: var(--cat-디자인-bg); }
 .kanban-col[data-status="개발중"]   .kanban-col-header { background: var(--cat-개발-bg); }
 .kanban-col[data-status="완료"]     .kanban-col-header { background: var(--st-done-bg); }
+.kanban-col[data-status="운영"]     .kanban-col-header { background: var(--st-done-bg); }
 
 .kanban-col-title {
   font-size: 0.85rem;
@@ -70,6 +71,7 @@
 .kanban-col[data-status="디자인중"] .kanban-col-title { color: var(--cat-디자인-text); }
 .kanban-col[data-status="개발중"]   .kanban-col-title { color: var(--cat-개발-text); }
 .kanban-col[data-status="완료"]     .kanban-col-title { color: var(--st-done-text); }
+.kanban-col[data-status="운영"]     .kanban-col-title { color: var(--st-done-text); }
 
 .kanban-count {
   font-size: 0.75rem;
@@ -87,6 +89,7 @@
 .kanban-col[data-status="디자인중"] .kanban-count { color: var(--cat-디자인-text); }
 .kanban-col[data-status="개발중"]   .kanban-count { color: var(--cat-개발-text); }
 .kanban-col[data-status="완료"]     .kanban-count { color: var(--st-done-text); }
+.kanban-col[data-status="운영"]     .kanban-count { color: var(--st-done-text); }
 
 /* ===== 기능 카드 ===== */
 .feature-card {
@@ -111,9 +114,13 @@
 .feature-card[data-status="디자인중"] { border-left-color: #f472b6; }
 .feature-card[data-status="개발중"]   { border-left-color: #60a5fa; }
 .feature-card[data-status="완료"]     { border-left-color: #34d399; }
+.feature-card[data-status="운영"]     { border-left-color: #10b981; }
 
 .feature-card.expanded {
   box-shadow: var(--shadow-md);
+}
+.feature-card.is-target {
+  box-shadow: 0 0 0 2px rgba(108,99,255,0.24), var(--shadow-md);
 }
 
 .feature-card[draggable="true"] {
@@ -229,6 +236,7 @@
 .feature-card[data-status="디자인중"] .feature-progress-fill { background: #f472b6; }
 .feature-card[data-status="개발중"]   .feature-progress-fill { background: #60a5fa; }
 .feature-card[data-status="완료"]     .feature-progress-fill { background: #34d399; }
+.feature-card[data-status="운영"]     .feature-progress-fill { background: #10b981; }
 
 .feature-progress-text {
   font-size: 0.82rem;

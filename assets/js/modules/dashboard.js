@@ -29,11 +29,11 @@ const Dashboard = (() => {
     return TAG_COLORS[hash % TAG_COLORS.length];
   }
 
-  function todayStr() { return new Date().toDateString(); }
+  function todayStr() { return LocalDate.today(); }
 
   function getTodayTasks() {
     const all = Store.get('tasks') || [];
-    return all.filter(t => t.isToday || (t.dueDate && new Date(t.dueDate).toDateString() === todayStr()));
+    return all.filter(t => t.isToday || t.dueDate === todayStr());
   }
 
   function formatDate() {
@@ -44,14 +44,14 @@ const Dashboard = (() => {
 
   /* ─ 프로젝트 현황 계산 ─ */
   function nextMilestone() {
-    const today = new Date().setHours(0, 0, 0, 0);
+    const today = LocalDate.today();
     return (Store.get('milestones') || [])
-      .filter(m => !m.done && new Date(m.date) >= today)
-      .sort((a, b) => new Date(a.date) - new Date(b.date))[0] || null;
+      .filter(m => !m.done && m.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date))[0] || null;
   }
 
   function ddayInfo(dateStr) {
-    const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
+    const diff = LocalDate.diffDays(dateStr);
     const label = diff === 0 ? 'D-Day' : diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`;
     const cls   = diff <= 7 ? 'soon' : diff <= 21 ? 'near' : 'far';
     return { label, cls };
@@ -70,7 +70,7 @@ const Dashboard = (() => {
     const all   = Store.get('tasks') || [];
     const week  = all.filter(t =>
       (t.isToday && today >= mon && today <= sun) ||
-      (t.dueDate && new Date(t.dueDate) >= mon && new Date(t.dueDate) <= sun)
+      (t.dueDate && LocalDate.fromKey(t.dueDate) >= mon && LocalDate.fromKey(t.dueDate) <= sun)
     );
     const done  = week.filter(t => t.done).length;
     const total = week.length;
@@ -90,7 +90,7 @@ const Dashboard = (() => {
       ? (() => {
           const dd = ddayInfo(ms.date);
           return `
-            <a class="today-banner-ms" href="roadmap.html" title="마일스톤 페이지로 이동">
+            <a class="today-banner-ms" href="roadmap.html?v=20260824t" title="마일스톤 페이지로 이동">
               <span class="today-ms-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4.5h11l-1.6 3.2L16 11H5"/></svg>
               </span>
@@ -148,12 +148,10 @@ const Dashboard = (() => {
     const undone = getTodayTasks().filter(t => !t.done);
     if (undone.length === 0) return;
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const iso = tomorrow.toISOString().slice(0, 10);
+    const tomorrow = LocalDate.addDays(LocalDate.today(), 1);
 
     undone.forEach(t => {
-      Store.update('tasks', t.id, { isToday: false, dueDate: iso });
+      Store.update('tasks', t.id, { isToday: false, dueDate: tomorrow });
     });
     Toast.show(`${undone.length}개를 내일로 옮겼어요. 오늘도 수고했어요!`, 'success');
     render();
@@ -210,9 +208,9 @@ const Dashboard = (() => {
       .filter(t => !t.done)
       .sort((a, b) => {
         if (!!b.starred !== !!a.starred) return b.starred ? 1 : -1;
-        const aD = a.dueDate ? new Date(a.dueDate) : null;
-        const bD = b.dueDate ? new Date(b.dueDate) : null;
-        if (aD && bD) return aD - bD;
+        const aD = a.dueDate || null;
+        const bD = b.dueDate || null;
+        if (aD && bD) return aD.localeCompare(bD);
         if (aD) return -1;
         if (bD) return 1;
         return a.createdAt - b.createdAt;
@@ -220,7 +218,7 @@ const Dashboard = (() => {
   }
 
   function shortDate(str) {
-    const d = new Date(str);
+    const d = LocalDate.fromKey(str);
     return `${d.getMonth() + 1}/${d.getDate()}`;
   }
 
@@ -272,10 +270,9 @@ const Dashboard = (() => {
 
   /* ─ 프로젝트 마감 임박 ─ */
   function getProjectDeadlineTasks() {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const limit = new Date(today); limit.setDate(today.getDate() + 3);
+    const limit = LocalDate.addDays(LocalDate.today(), 3);
     return (Store.get('projectTasks') || [])
-      .filter(t => !t.done && t.dueDate && new Date(t.dueDate + 'T00:00:00') <= limit)
+      .filter(t => !t.done && t.dueDate && t.dueDate <= limit)
       .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   }
 
@@ -291,8 +288,6 @@ const Dashboard = (() => {
     const tasks = getProjectDeadlineTasks();
     if (tasks.length === 0) return '';
 
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-
     return `
       <div class="proj-deadline-section">
         <div class="proj-deadline-header">
@@ -301,8 +296,8 @@ const Dashboard = (() => {
         </div>
         ${tasks.map(t => {
           const color = projectColor(t.project);
-          const due   = new Date(t.dueDate + 'T00:00:00');
-          const diff  = Math.round((due - today) / 86400000);
+          const due   = LocalDate.fromKey(t.dueDate);
+          const diff  = LocalDate.diffDays(t.dueDate);
           let dcls = 'proj-due', dlabel;
           if (diff < 0)       { dcls += ' overdue'; dlabel = `${-diff}일 지남`; }
           else if (diff === 0){ dcls += ' today';   dlabel = '오늘'; }
@@ -339,28 +334,6 @@ const Dashboard = (() => {
       </button>`;
   }
 
-  async function copyCurrentUrl() {
-    const url = location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      Toast.show('현재 주소를 복사했습니다.', 'success');
-    } catch {
-      Toast.show('주소 복사에 실패했습니다.', 'error');
-    }
-  }
-
-  function renderAccessCard() {
-    return `
-      <div class="site-access-card">
-        <div class="site-access-label">접속 주소</div>
-        <div class="site-access-url" title="${location.href}">${location.href}</div>
-        <div class="site-access-actions">
-          <button class="btn btn-ghost site-access-btn" onclick="Dashboard.copyCurrentUrl()">현재 주소 복사</button>
-          <a class="btn btn-primary site-access-btn" href="${location.href}" target="_blank" rel="noreferrer">새 탭 열기</a>
-        </div>
-      </div>`;
-  }
-
   async function render() {
     await Promise.all([Store.loadTasks?.(), Store.loadMilestones?.(), Store.loadProjectTasks?.(), Store.loadFeatures?.(), Store.loadUiSettings?.()]);
     focusMode = !!Store.getUiSetting('focusMode', false);
@@ -387,7 +360,6 @@ const Dashboard = (() => {
 
     document.getElementById('app').innerHTML = `
       ${renderBanner(done, total, pct)}
-      ${renderAccessCard()}
 
       <div class="quick-add-wrap">
         <div class="quick-add-inner">

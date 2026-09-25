@@ -24,9 +24,8 @@ const Issues = (() => {
   let filter = 'all'; // 'all' | 'open' | 'progress' | 'resolved'
 
   /* ─ 데이터 ─ */
-  let issuesCache = [];
-  function getIssues() { return issuesCache.length ? issuesCache : (Store.get('issues') || []); }
-  async function loadIssues() { issuesCache = await Store.loadIssues(); return issuesCache; }
+  function getIssues() { return Store.get('issues') || []; }
+  async function loadIssues() { return Store.loadIssues(); }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -209,7 +208,6 @@ const Issues = (() => {
   function cycleStatus(id) {
     const it = getIssues().find(i => i.id === id);
     if (!it) return;
-    Store.update('issues', id, { status: nextStatus(it.status) });
     Store.updateIssue(id, { status: nextStatus(it.status) }).catch(()=>{});
     render();
   }
@@ -217,7 +215,6 @@ const Issues = (() => {
   function cyclePriority(id) {
     const it = getIssues().find(i => i.id === id);
     if (!it) return;
-    Store.update('issues', id, { priority: nextPriority(it.priority || 'normal') });
     Store.updateIssue(id, { priority: nextPriority(it.priority || 'normal') }).catch(()=>{});
     render();
   }
@@ -225,13 +222,11 @@ const Issues = (() => {
   function editTitle(id, text) {
     const t = text.trim();
     if (!t) { render(); return; }
-    Store.update('issues', id, { title: t });
     Store.updateIssue(id, { title: t }).catch(()=>{});
   }
 
   function deleteIssue(id) {
     if (!confirm('이 이슈를 삭제할까요?')) return;
-    Store.remove('issues', id);
     Store.removeIssue(id).catch(()=>{});
     render();
   }

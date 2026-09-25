@@ -1,17 +1,27 @@
 /**
  * projects.js — 헬로아지 기능 보드 (칸반)
- * 상태: 아이디어 → 기획중 → 디자인중 → 개발중 → 완료
+ * 상태: 아이디어 → 기획중 → 디자인중 → 개발중 → 운영
  */
 
 const Projects = (() => {
-  const STATUSES = ['아이디어', '기획중', '디자인중', '개발중', '완료'];
+  const STATUSES = ['아이디어', '기획중', '디자인중', '개발중', '운영'];
 
   let expandedId = null;
   let draggedFeatureId = null;
+  let renderContext = null;
 
-  function getFeatures() { return Store.get('features') || []; }
-  function getTasks()    { return Store.get('tasks')    || []; }
-  function getScreens()  { return Store.get('sitemapScreens') || []; }
+  function getFeatures() { return renderContext?.features || Store.get('features') || []; }
+  function getTasks()    { return renderContext?.tasks    || Store.get('tasks')    || []; }
+  function getScreens()  { return renderContext?.screens  || Store.get('sitemapScreens') || []; }
+  function isReadOnly() {
+    return !!renderContext?.readOnly;
+  }
+
+  function blockReadOnlyAction() {
+    if (!isReadOnly()) return false;
+    Toast.show('이 보드는 편집할 수 없습니다.', 'info');
+    return true;
+  }
 
   function linkedScreens(featureId) {
     return getScreens().filter(s => Array.isArray(s.featureIds) && s.featureIds.includes(featureId));
@@ -31,7 +41,7 @@ const Projects = (() => {
     '기획중':   { bg: '#ede9fe', text: '#6d28d9', border: '#c4b5fd' },
     '디자인중': { bg: '#fce7f3', text: '#be185d', border: '#f9a8d4' },
     '개발중':   { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' },
-    '완료':     { bg: '#dcfce7', text: '#15803d', border: '#6ee7b7' },
+    '운영':     { bg: '#dcfce7', text: '#15803d', border: '#6ee7b7' },
     '미정':     { bg: '#f1f5f9', text: '#94a3b8', border: '#e2e8f0' },
   };
   function sc(status) { return STATUS_COLOR[status] || STATUS_COLOR['미정']; }
@@ -74,6 +84,7 @@ const Projects = (() => {
 
   /* ─ 기능 카드 ─ */
   function renderCard(f) {
+    const readOnly   = isReadOnly();
     const isOpen     = expandedId === f.id;
     const tasks      = linkedTasks(f.id);
     const done       = tasks.filter(t => t.done).length;
@@ -91,10 +102,10 @@ const Projects = (() => {
       </div>` : '';
 
     return `
-      <div class="feature-card ${isOpen ? 'expanded' : ''}" data-status="${f.status}" data-id="${f.id}"
-        draggable="true"
+      <div class="feature-card ${isOpen ? 'expanded' : ''} ${readOnly ? 'is-readonly' : ''}" data-status="${f.status}" data-id="${f.id}"
+        ${readOnly ? 'draggable="false"' : `draggable="true"
         ondragstart="Projects.cardDragStart(event,'${f.id}')"
-        ondragend="Projects.cardDragEnd(event)"
+        ondragend="Projects.cardDragEnd(event)"`}
         onclick="Projects.toggleExpand('${f.id}')">
         <div class="feature-card-name">${escapeHtml(f.name)}</div>
         ${f.desc ? `<div class="feature-card-desc">${escapeHtml(f.desc)}</div>` : ''}
@@ -110,7 +121,7 @@ const Projects = (() => {
         ${taskPreview}
 
         ${isOpen ? `
-          ${renderTaskPanel(f)}
+          ${readOnly ? '' : renderTaskPanel(f)}
           ${(() => {
             const screens = linkedScreens(f.id);
             if (!screens.length) return '';
@@ -131,46 +142,55 @@ const Projects = (() => {
                 </div>
               </div>`;
           })()}
-          <button class="feature-action-btn del" style="margin-top:12px" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">삭제</button>` : ''}
+          ${readOnly ? '' : `<button class="feature-action-btn del" style="margin-top:12px" onclick="event.stopPropagation();Projects.deleteFeature('${f.id}')">삭제</button>`}` : ''}
       </div>
     `;
   }
 
   /* ─ HTML 빌더 ─ */
-  function buildHTML() {
-    const features = getFeatures();
-    return `
-      <div class="quick-add-wrap">
-        <div class="quick-add-inner">
-          <div class="quick-add-top">
-            <input id="feat-input" class="quick-add-input" type="text"
-              placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
-            <span class="ai-badge">✦ AI</span>
-          </div>
-          <div class="quick-add-footer">
-            <span class="quick-add-hint">Enter로 추가</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="kanban-board">
-        ${STATUSES.map(status => {
-          const cols = features.filter(f => f.status === status);
-          return `
-            <div class="kanban-col" data-status="${status}"
-              ondragover="Projects.colDragOver(event)"
-              ondragleave="Projects.colDragLeave(event)"
-              ondrop="Projects.colDrop(event,'${status}')">
-              <div class="kanban-col-header">
-                <span class="kanban-col-title">${status}</span>
-                <span class="kanban-count">${cols.length}</span>
-              </div>
-              ${cols.map(f => renderCard(f)).join('')}
+  function buildHTML(context = null) {
+    const previousContext = renderContext;
+    renderContext = context;
+    try {
+      const features = getFeatures();
+      const readOnly = isReadOnly();
+      const statuses = context?.statuses || STATUSES;
+      return `
+        ${readOnly ? '' : `
+        <div class="quick-add-wrap">
+          <div class="quick-add-inner">
+            <div class="quick-add-top">
+              <input id="feat-input" class="quick-add-input" type="text"
+                placeholder="산책 기록 기능 디자인 GPS 경로 저장 및 공유...">
+              <span class="ai-badge">✦ AI</span>
             </div>
-          `;
-        }).join('')}
-      </div>
-    `;
+            <div class="quick-add-footer">
+              <span class="quick-add-hint">Enter로 추가</span>
+            </div>
+          </div>
+        </div>`}
+
+        <div class="kanban-board ${readOnly ? 'is-readonly' : ''}">
+          ${statuses.map(status => {
+            const cols = features.filter(f => f.status === status);
+            return `
+              <div class="kanban-col" data-status="${status}"
+                ${readOnly ? '' : `ondragover="Projects.colDragOver(event)"
+                ondragleave="Projects.colDragLeave(event)"
+                ondrop="Projects.colDrop(event,'${status}')"`}>
+                <div class="kanban-col-header">
+                  <span class="kanban-col-title">${status}</span>
+                  <span class="kanban-count">${cols.length}</span>
+                </div>
+                ${cols.map(f => renderCard(f)).join('')}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } finally {
+      renderContext = previousContext;
+    }
   }
 
   /* ─ 렌더 ─ */
@@ -185,6 +205,7 @@ const Projects = (() => {
 
   /* ─ 기능 입력 바인딩 ─ */
   function bindFeatInput() {
+    if (blockReadOnlyAction()) return;
     const input = document.getElementById('feat-input');
     if (!input) return;
 
@@ -226,6 +247,22 @@ const Projects = (() => {
   }
 
   /* ─ 화면 탭으로 이동 ─ */
+  function goToFeature(featureId) {
+    expandedId = featureId;
+    if (typeof Sitemap !== 'undefined') {
+      Sitemap.openFeatures();
+    } else {
+      render();
+    }
+    setTimeout(() => {
+      const card = document.querySelector(`.feature-card[data-id="${featureId}"]`);
+      if (!card) return;
+      card.classList.add('is-target');
+      card.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+      setTimeout(() => card.classList.remove('is-target'), 3200);
+    }, 140);
+  }
+
   function goToScreens(screenId = null) {
     if (typeof Sitemap !== 'undefined') {
       if (screenId && typeof Sitemap.goToScreen === 'function') {
@@ -236,7 +273,7 @@ const Projects = (() => {
       }
     } else {
       if (screenId) sessionStorage.setItem('chloeassist:sitemap:focusScreen', screenId);
-      location.href = 'sitemap.html';
+      location.href = 'sitemap.html?v=20260824t';
     }
   }
 
@@ -247,6 +284,7 @@ const Projects = (() => {
   }
 
   function handleTaskAdd(e, featureId) {
+    if (blockReadOnlyAction()) return;
     if (e.key !== 'Enter' || e.isComposing) return;
     const input = e.currentTarget;
     const text  = input.value.trim();
@@ -261,11 +299,13 @@ const Projects = (() => {
   }
 
   function deleteTask(taskId) {
+    if (blockReadOnlyAction()) return;
     Store.removeTask(taskId).catch(() => {});
     render();
   }
 
   function toggleTaskDone(taskId) {
+    if (blockReadOnlyAction()) return;
     const t = getTasks().find(x => x.id === taskId);
     if (!t) return;
     Store.updateTask(taskId, { done: !t.done }).catch(() => {});
@@ -273,6 +313,7 @@ const Projects = (() => {
   }
 
   function deleteFeature(id) {
+    if (blockReadOnlyAction()) return;
     getTasks().filter(t => t.featureId === id)
       .forEach(t => Store.updateTask(t.id, { featureId: null }).catch(() => {}));
     Store.removeFeature(id).catch(() => {});
@@ -281,15 +322,17 @@ const Projects = (() => {
   }
 
   function moveStatus(id, newStatus) {
+    if (blockReadOnlyAction()) return;
     Store.updateFeature(id, {
       status: newStatus,
-      doneAt: newStatus === '완료' ? Date.now() : null,
+      doneAt: newStatus === '운영' ? Date.now() : null,
     }).catch(() => {});
     render();
   }
 
   /* ─ 드래그&드롭 ─ */
   function cardDragStart(e, featureId) {
+    if (blockReadOnlyAction()) { e.preventDefault(); return; }
     draggedFeatureId = featureId;
     e.dataTransfer.effectAllowed = 'move';
     e.currentTarget.style.opacity = '0.5';
@@ -301,16 +344,19 @@ const Projects = (() => {
   }
 
   function colDragOver(e) {
+    if (isReadOnly()) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     e.currentTarget.style.background = 'var(--color-surface-2)';
   }
 
   function colDragLeave(e) {
+    if (isReadOnly()) return;
     e.currentTarget.style.background = '';
   }
 
   function colDrop(e, status) {
+    if (blockReadOnlyAction()) return;
     e.preventDefault();
     e.currentTarget.style.background = '';
     if (draggedFeatureId) {
@@ -319,7 +365,7 @@ const Projects = (() => {
   }
 
   return {
-    render, buildHTML, bindFeatInput, goToScreens,
+    render, buildHTML, bindFeatInput, goToFeature, goToScreens,
     deleteFeature, moveStatus, toggleExpand, handleTaskAdd, deleteTask, toggleTaskDone,
     cardDragStart, cardDragEnd, colDragOver, colDragLeave, colDrop,
   };

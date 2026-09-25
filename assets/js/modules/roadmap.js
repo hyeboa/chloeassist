@@ -10,18 +10,15 @@ const Roadmap = (() => {
   let expandedGoals = new Set();
 
   /* ─ 데이터 ─ */
-  let milestonesCache = [];
-  let goalsCache = [];
-
-  function getMilestones() { return milestonesCache.length ? milestonesCache : (Store.get('milestones') || []); }
-  function getGoals()      { return goalsCache.length ? goalsCache : (Store.get('goals')      || []); }
-  async function loadMilestones() { milestonesCache = await Store.loadMilestones(); return milestonesCache; }
-  async function loadGoals() { goalsCache = await Store.loadGoals(); return goalsCache; }
+  function getMilestones() { return Store.get('milestones') || []; }
+  function getGoals()      { return Store.get('goals') || []; }
+  async function loadMilestones() { return Store.loadMilestones(); }
+  async function loadGoals() { return Store.loadGoals(); }
 
   /* ─ D-day ─ */
   function dday(dateStr, done) {
     if (done) return { label: '완료', cls: 'dday-done' };
-    const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
+    const diff = LocalDate.diffDays(dateStr);
     if (diff === 0)  return { label: 'D-Day', cls: 'dday-today' };
     if (diff < 0)    return { label: `D+${Math.abs(diff)}`, cls: 'dday-overdue' };
     if (diff <= 14)  return { label: `D-${diff}`, cls: 'dday-soon' };
@@ -30,7 +27,7 @@ const Roadmap = (() => {
 
   function milestoneClass(m) {
     if (m.done) return 'done';
-    const diff = Math.ceil((new Date(m.date) - new Date().setHours(0,0,0,0)) / 86400000);
+    const diff = LocalDate.diffDays(m.date);
     if (diff < 0) return 'overdue';
     return 'upcoming';
   }
@@ -41,16 +38,19 @@ const Roadmap = (() => {
 
   /* ─ 마일스톤 추가 입력 ─ */
   function renderAddInput() {
+    const aiEnabled = AI.hasApiKey();
     return `
       <div class="quick-add-wrap">
         <div class="quick-add-inner">
           <div class="quick-add-top">
             <input id="ms-input" class="quick-add-input" type="text"
-              placeholder="베타 출시 6월 30일 유저 100명 테스트 시작...">
-            <span class="ai-badge">✦ AI</span>
+              placeholder="${aiEnabled ? '베타 출시 6월 30일 유저 100명 테스트 시작...' : '마일스톤 이름'}">
+            ${aiEnabled
+              ? '<span class="ai-badge">✦ AI</span>'
+              : '<input id="ms-date-input" class="quick-add-date" type="date" aria-label="마일스톤 날짜">'}
           </div>
           <div class="quick-add-footer">
-            <span class="quick-add-hint">Enter로 추가</span>
+            <span class="quick-add-hint">${aiEnabled ? '자연어로 입력 · Enter로 추가' : '이름과 날짜를 입력 · Enter로 추가'}</span>
           </div>
           <div class="quick-add-status" id="ms-status"></div>
         </div>
@@ -74,19 +74,21 @@ const Roadmap = (() => {
                 <div class="milestone-item ${milestoneClass(m)}">
                   <div class="milestone-check ${m.done ? 'checked' : ''}"
                     onclick="Roadmap.toggleDone('${m.id}')">${m.done ? '✓' : ''}</div>
-                  <div class="milestone-title">${escapeHtml(m.title)}</div>
-                  <span class="milestone-dday ${dd.cls}">${dd.label}</span>
-                  <div class="milestone-actions">
-                    <select class="ms-goal-select"
-                      onchange="Roadmap.assignMilestoneGoal('${m.id}', this.value || null)"
-                      title="목표에 연결">
-                      <option value="">목표 연결 안함</option>
-                      ${goals.map((g, i) => `
-                        <option value="${g.id}" ${m.goalId === g.id ? 'selected' : ''}>${i + 1}차 · ${escapeHtml(g.title)}</option>
-                      `).join('')}
-                    </select>
-                    <button class="ms-del-btn" onclick="Roadmap.deleteMilestone('${m.id}')">삭제</button>
+                  <div class="milestone-body">
+                    <div class="milestone-title">${escapeHtml(m.title)}</div>
+                    <div class="milestone-meta-row">
+                      <span class="milestone-dday ${dd.cls}">${dd.label}</span>
+                      <select class="ms-goal-select"
+                        onchange="Roadmap.assignMilestoneGoal('${m.id}', this.value || null)"
+                        title="목표에 연결">
+                        <option value="">목표 연결 안함</option>
+                        ${goals.map((g, i) => `
+                          <option value="${g.id}" ${m.goalId === g.id ? 'selected' : ''}>${i + 1}차 · ${escapeHtml(g.title)}</option>
+                        `).join('')}
+                      </select>
+                    </div>
                   </div>
+                  <button class="ms-del-btn" onclick="Roadmap.deleteMilestone('${m.id}')" title="마일스톤 삭제">삭제</button>
                 </div>
               `;
             }).join('')
@@ -191,7 +193,7 @@ const Roadmap = (() => {
           `).join('')}
 
           ${days.map(({ date, thisMonth }) => {
-            const key     = date.toISOString().slice(0, 10);
+            const key     = LocalDate.toKey(date);
             const msList  = msMap[key] || [];
             const isToday = date.toDateString() === todayStr;
             const isSun   = date.getDay() === 0;
@@ -256,7 +258,7 @@ const Roadmap = (() => {
       </div>`).join('');
 
     const labelSegs = segs.map(({ g, i, pct, isDone, isActive, dd, state, flexVal }) => `
-      <a href="goals.html" class="pipeline-label ${state}" style="flex:${flexVal}">
+      <a href="goals.html?v=20260824t" class="pipeline-label ${state}" style="flex:${flexVal}">
         <span class="pl-badge">${i + 1}차</span>
         <span class="pl-title">${escapeHtml(g.title)}</span>
         ${isDone
@@ -283,10 +285,10 @@ const Roadmap = (() => {
           <div class="section-title" style="margin:0">단계별 목표</div>
           <span class="ms-section-meta">전체 ${goals.length}개</span>
         </div>
+        ${renderAddGoalInput()}
         ${goals.length === 0
           ? '<div class="goal-empty">아직 목표가 없어요. 1차 목표부터 추가해보세요.</div>'
           : goals.map((g, i) => renderGoalCard(g, i)).join('')}
-        ${renderAddGoalInput()}
       </div>`;
   }
 
@@ -337,7 +339,7 @@ const Roadmap = (() => {
   function renderChecklist(goal) {
     const items  = goal.items || [];
     const linked = getMilestones().filter(m => m.goalId === goal.id)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     if (items.length === 0 && linked.length === 0) {
       return '<div class="goal-checklist-empty">항목을 추가하거나 마일스톤을 연결하세요</div>';
@@ -376,16 +378,17 @@ const Roadmap = (() => {
   }
 
   function renderAddGoalInput() {
+    const aiEnabled = AI.hasApiKey();
     return `
       <div class="quick-add-wrap">
         <div class="quick-add-inner">
           <div class="quick-add-top">
             <input id="goal-add-input" class="quick-add-input" type="text"
-              placeholder="분기별 마케팅 전략 수립 3월 말까지...">
-            <span class="ai-badge">✦ AI</span>
+              placeholder="${aiEnabled ? '분기별 마케팅 전략 수립 3월 말까지...' : '목표 이름'}">
+            <span class="ai-badge">${aiEnabled ? '✦ AI' : '직접 추가'}</span>
           </div>
           <div class="quick-add-footer">
-            <span class="quick-add-hint">Enter로 추가</span>
+            <span class="quick-add-hint">${aiEnabled ? '자연어로 입력 · Enter로 추가' : 'Enter로 추가 · 날짜는 펼쳐서 설정'}</span>
           </div>
           <div class="quick-add-status" id="goal-status"></div>
         </div>
@@ -406,7 +409,7 @@ const Roadmap = (() => {
     await loadMilestones();
     const app = document.getElementById('app');
     if (!app) return;
-    const milestones = [...getMilestones()].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const milestones = [...getMilestones()].sort((a, b) => a.date.localeCompare(b.date));
 
     if (pageMode === 'goals') {
       app.innerHTML = `
@@ -415,7 +418,7 @@ const Roadmap = (() => {
             ${renderGoalsSection()}
           </div>
           <div class="goals-page-right">
-            <div class="milestone-section">
+            <div class="milestone-section goals-milestone-section">
               <div class="ms-section-hd">
                 <div class="section-title" style="margin:0">마일스톤</div>
                 <span class="ms-section-meta">전체 ${milestones.length}개</span>
@@ -475,7 +478,8 @@ const Roadmap = (() => {
       if (!text) return;
 
       if (!AI.hasApiKey()) {
-        Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
+        addGoal(text, null);
+        Toast.show('목표를 추가했어요. 펼친 카드에서 날짜를 설정할 수 있어요.', 'success');
         return;
       }
 
@@ -509,16 +513,26 @@ const Roadmap = (() => {
 
   function bindMsInput() {
     const input  = document.getElementById('ms-input');
+    const dateInput = document.getElementById('ms-date-input');
     const status = document.getElementById('ms-status');
     if (!input) return;
 
-    input.addEventListener('keydown', async (e) => {
-      if (e.key !== 'Enter' || e.isComposing) return;
+    async function submit() {
       const text = input.value.trim();
       if (!text) return;
 
       if (!AI.hasApiKey()) {
-        Toast.show('설정(⚙)에서 Claude API 키를 저장해 주세요.', 'warning');
+        const date = dateInput?.value || '';
+        if (!date) {
+          status.textContent = '날짜를 선택해 주세요.';
+          status.className = 'quick-add-status error';
+          dateInput?.focus();
+          return;
+        }
+        const item = { id: crypto.randomUUID(), title: text, date, desc: '', done: false, createdAt: Date.now() };
+        Store.pushMilestone(item).catch(() => {});
+        input.value = '';
+        render();
         return;
       }
 
@@ -539,19 +553,24 @@ const Roadmap = (() => {
         input.disabled = false;
         input.focus();
       }
+    }
+
+    [input, dateInput].filter(Boolean).forEach(element => {
+      element.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || e.isComposing) return;
+        submit();
+      });
     });
   }
 
   function toggleDone(id) {
     const ms = getMilestones().find(m => m.id === id);
     if (!ms) return;
-    Store.update('milestones', id, { done: !ms.done, doneAt: !ms.done ? Date.now() : null });
     Store.updateMilestone(id, { done: !ms.done, doneAt: !ms.done ? Date.now() : null }).catch(() => {});
     render();
   }
 
   function deleteMilestone(id) {
-    Store.remove('milestones', id);
     Store.removeMilestone(id).catch(() => {});
     render();
   }
@@ -559,6 +578,7 @@ const Roadmap = (() => {
   /* ─ 목표 동작 ─ */
   function addGoal(title, targetDate = null) {
     const item = { id: crypto.randomUUID(), title: title.trim(), items: [], targetDate: targetDate || null, createdAt: Date.now(), sortIndex: getGoals().length };
+    expandedGoals.add(item.id);
     Store.pushGoal(item).catch(() => {});
     render();
   }
@@ -566,7 +586,6 @@ const Roadmap = (() => {
   function editGoalTitle(id, text) {
     const t = text.trim();
     if (!t) { render(); return; }
-    Store.update('goals', id, { title: t });
     Store.updateGoal(id, { title: t }).catch(() => {});
   }
 
@@ -574,8 +593,7 @@ const Roadmap = (() => {
     if (!confirm('이 목표를 삭제할까요? 연결된 마일스톤은 삭제되지 않고 연결만 해제됩니다.')) return;
     getMilestones()
       .filter(m => m.goalId === id)
-      .forEach(m => Store.update('milestones', m.id, { goalId: null }));
-    Store.remove('goals', id);
+      .forEach(m => Store.updateMilestone(m.id, { goalId: null }).catch(() => {}));
     Store.removeGoal(id).catch(() => {});
     render();
   }
@@ -604,7 +622,6 @@ const Roadmap = (() => {
     const goal = getGoals().find(g => g.id === goalId);
     if (!goal) return;
     const items = [...(goal.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
-    Store.update('goals', goalId, { items });
     Store.updateGoal(goalId, { items }).catch(() => {});
     render();
   }
@@ -613,7 +630,6 @@ const Roadmap = (() => {
     const goal = getGoals().find(g => g.id === goalId);
     if (!goal) return;
     const items = (goal.items || []).map(it => it.id === itemId ? { ...it, done: !it.done } : it);
-    Store.update('goals', goalId, { items });
     Store.updateGoal(goalId, { items }).catch(() => {});
     render();
   }
@@ -622,7 +638,6 @@ const Roadmap = (() => {
     const goal = getGoals().find(g => g.id === goalId);
     if (!goal) return;
     const items = (goal.items || []).filter(it => it.id !== itemId);
-    Store.update('goals', goalId, { items });
     Store.updateGoal(goalId, { items }).catch(() => {});
     render();
   }
@@ -634,13 +649,11 @@ const Roadmap = (() => {
   }
 
   function setGoalDate(id, date) {
-    Store.update('goals', id, { targetDate: date || null });
     Store.updateGoal(id, { targetDate: date || null }).catch(() => {});
     render();
   }
 
   function assignMilestoneGoal(milestoneId, goalId) {
-    Store.update('milestones', milestoneId, { goalId: goalId || null });
     Store.updateMilestone(milestoneId, { goalId: goalId || null }).catch(() => {});
     render();
   }

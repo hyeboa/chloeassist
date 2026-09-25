@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await Store.ready;
   await AI.init?.();
   Nav.render();
   Banner.render();

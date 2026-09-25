@@ -7,11 +7,11 @@ const Banner = (() => {
   const WARN_DAYS = 7;
 
   function today() {
-    return new Date().toISOString().slice(0, 10);
+    return LocalDate.today();
   }
 
   function diffDays(dateStr) {
-    return Math.ceil((new Date(dateStr) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+    return LocalDate.diffDays(dateStr);
   }
 
   function isDismissed(key) {

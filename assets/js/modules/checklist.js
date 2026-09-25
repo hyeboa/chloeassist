@@ -29,11 +29,11 @@ const Checklist = (() => {
         '앱 스토어/플레이스토어 개발자 계정 설정',
         '스토어 등록 정보 작성(설명, 스크린샷, 아이콘)',
         '온보딩/튜토리얼 UI 최종 점검',
-        'FAQ 문서 작성',
+        '서비스 안내 문서 점검',
         'crash 리포팅 도구(Firebase 등) 연동',
         '버전 관리 전략 수립',
         '출시 공지 초안 작성',
-        '고객 지원 채널 준비(이메일, 채팅 등)',
+        '운영 문의 수신 경로 확인',
       ],
     },
     marketing: {
@@ -68,7 +68,7 @@ const Checklist = (() => {
         '데이터 백업 자동화 설정',
         '장애 대응(롤백) 계획 수립 및 테스트',
         '핵심 지표(KPI) 정의',
-        'CS 응대 템플릿 및 FAQ 준비',
+        '신고·운영 대응 문구 점검',
         '고객 온보딩 프로세스 정의',
       ],
     },
@@ -100,9 +100,8 @@ const Checklist = (() => {
   };
 
   /* ─ 데이터 ─ */
-  let listsCache = [];
-  function getLists() { return listsCache.length ? listsCache : (Store.get('launchChecklists') || []); }
-  async function loadLists() { listsCache = await Store.loadLaunchChecklists(); return listsCache; }
+  function getLists() { return Store.get('launchChecklists') || []; }
+  async function loadLists() { return Store.loadLaunchChecklists(); }
 
   function escapeHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -118,6 +117,7 @@ const Checklist = (() => {
 
   /* ─ 상단 바: 통계 + AI 입력 ─ */
   function renderTopBar(lists) {
+    const aiEnabled  = AI.hasApiKey();
     const totalLists = lists.length;
     const allItems   = lists.reduce((n, l) => n + (l.items || []).length, 0);
     const doneItems  = lists.reduce((n, l) => n + (l.items || []).filter(i => i.done).length, 0);
@@ -149,8 +149,8 @@ const Checklist = (() => {
           <div class="cl-ai-inner">
             <div class="cl-ai-add-row">
               <input id="cl-ai-input" class="cl-ai-input" type="text"
-                placeholder="추가할 항목을 자유롭게 입력하면 AI가 분류해서 넣어줘요  (예: 앱스토어 스크린샷 5장 준비)">
-              <span class="ai-badge">✦ AI</span>
+                placeholder="${aiEnabled ? '추가할 항목을 입력하면 AI가 분류해요 (예: 앱스토어 스크린샷 5장 준비)' : '추가할 항목을 입력하세요 (기타에 저장돼요)'}">
+              <span class="ai-badge">${aiEnabled ? '✦ AI' : '직접 추가'}</span>
             </div>
             <div class="cl-ai-footer">
               <span class="quick-add-hint">Enter로 추가</span>
@@ -208,8 +208,11 @@ const Checklist = (() => {
 
   /* ─ 관리 가이드 ─ */
   function renderGuide() {
+    const aiEnabled = AI.hasApiKey();
     const rows = [
-      ['✦', 'AI로 항목 추가', '상단 입력창에 떠오르는 일을 자유롭게 적고 Enter를 누르면, AI가 제품·마케팅·운영·기술 중 알맞은 곳에 알아서 분류해 넣어줘요.'],
+      aiEnabled
+        ? ['✦', 'AI로 항목 추가', '상단 입력창에 떠오르는 일을 적고 Enter를 누르면, AI가 제품·마케팅·운영·기술 중 알맞은 곳에 분류해 넣어요.']
+        : ['+', '직접 항목 추가', '상단 입력창에 적고 Enter를 누르면 기타에 저장돼요. 필요하면 설정에서 AI 분류를 켤 수 있어요.'],
       ['✓', '항목 체크하기', '항목 왼쪽의 체크박스를 클릭하면 완료/해제가 토글돼요. 상단 진행률이 실시간으로 갱신됩니다.'],
       ['✕', '항목 삭제', '항목에 마우스를 올리면 오른쪽에 나타나는 ✕ 버튼으로 삭제할 수 있어요.'],
       ['📊', '한눈에 보기', '제품·마케팅·운영·기술 카테고리별로 모든 항목이 펼쳐져 있어, 출시 준비 상태를 바로 확인할 수 있어요.'],
@@ -252,6 +255,10 @@ const Checklist = (() => {
     }
 
     const hasItems = lists.some(l => (l.items || []).length > 0);
+    const visibleCategories = ['product', 'marketing', 'operations', 'technical'];
+    if (lists.some(list => list.category === 'etc' && (list.items || []).length > 0)) {
+      visibleCategories.push('etc');
+    }
 
     app.innerHTML = `
       ${renderTopBar(lists)}
@@ -265,7 +272,7 @@ const Checklist = (() => {
                <div class="cl-empty-title">아직 항목이 없어요</div>
                <div class="cl-empty-sub">상단 AI 입력으로 추가해보세요</div>
              </div>`
-          : ['product', 'marketing', 'operations', 'technical'].map(cat => renderCategorySection(lists, cat)).join('')}
+          : visibleCategories.map(cat => renderCategorySection(lists, cat)).join('')}
       </div>
       ${renderGuide()}`;
 
@@ -283,10 +290,15 @@ const Checklist = (() => {
       const text = input.value.trim();
       if (!text) return;
 
-      // API 키 없으면 그냥 기타 카테고리에 원문 추가
+      // 로컬 AI 모드가 아니면 그냥 기타 카테고리에 원문 추가
       if (!AI.hasApiKey()) {
-        addItemToCategory('etc', text);
-        input.value = '';
+        await addItemToCategory('etc', text);
+        const newStatus = document.getElementById('cl-ai-status');
+        if (newStatus) {
+          newStatus.textContent = '“기타”에 추가했어요';
+          newStatus.className = 'cl-ai-status success';
+        }
+        document.getElementById('cl-ai-input')?.focus();
         return;
       }
 
@@ -298,7 +310,7 @@ const Checklist = (() => {
         const result = await NLInput.parse('checklistItem', text);
         const cat   = ['product', 'marketing', 'operations', 'technical'].includes(result.category)
           ? result.category : 'product';
-        const added = addItemToCategory(cat, result.text || text); // 내부에서 render() 호출
+        const added = await addItemToCategory(cat, result.text || text); // 내부에서 render() 호출
 
         // render() 로 입력 요소가 새로 생성되므로 새 요소에 결과 표시
         const newStatus = document.getElementById('cl-ai-status');
@@ -318,7 +330,7 @@ const Checklist = (() => {
   }
 
   // 카테고리에 맞는 리스트를 찾아 항목 추가 (없으면 자동 생성)
-  function addItemToCategory(category, text) {
+  async function addItemToCategory(category, text) {
     let lists = getLists();
     let target = lists.find(l => l.category === category);
 
@@ -326,14 +338,13 @@ const Checklist = (() => {
       const tplKey = ['product', 'marketing', 'operations', 'technical'].includes(category) ? category : null;
       const label  = tplKey ? TEMPLATES[tplKey].label : '기타';
       const item = { id: crypto.randomUUID(), title: label, category, dueDate: '', items: [], createdAt: Date.now() };
-      Store.pushLaunchChecklist(item).catch(()=>{});
+      await Store.pushLaunchChecklist(item);
       target = { ...item };
     }
 
     const items = [...(target.items || []), { id: crypto.randomUUID(), text: text.trim(), done: false }];
-    Store.update('launchChecklists', target.id, { items });
-    Store.updateLaunchChecklist(target.id, { items }).catch(()=>{});
-    render();
+    await Store.updateLaunchChecklist(target.id, { items });
+    await render();
     return { listTitle: target.title };
   }
 
@@ -342,7 +353,6 @@ const Checklist = (() => {
     const list = getLists().find(l => l.id === listId);
     if (!list) return;
     const items = (list.items || []).map(it => it.id === itemId ? { ...it, done: !it.done } : it);
-    Store.update('launchChecklists', listId, { items });
     Store.updateLaunchChecklist(listId, { items }).catch(()=>{});
     render();
   }
@@ -351,7 +361,6 @@ const Checklist = (() => {
     const list = getLists().find(l => l.id === listId);
     if (!list) return;
     const items = (list.items || []).filter(it => it.id !== itemId);
-    Store.update('launchChecklists', listId, { items });
     Store.updateLaunchChecklist(listId, { items }).catch(()=>{});
     render();
   }

@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ChloeAssist 초기화</title>
+  <title>Chloe Assist 초기화</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root {
       color-scheme: light;
@@ -47,7 +48,6 @@
     }
     .danger { color: var(--danger); font-weight: 700; }
     .done {
-      margin-top: 20px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -57,62 +57,71 @@
       color: #fff;
       text-decoration: none;
       font-weight: 700;
+      border: 0;
+      cursor: pointer;
     }
-    .done[hidden] { display: none; }
+    .actions { display: flex; gap: 10px; margin-top: 20px; }
+    .cancel { background: #fff; color: var(--text); border: 1px solid var(--line); }
+    .reset { background: var(--danger); }
+    .done[hidden], .actions[hidden] { display: none; }
   </style>
 </head>
 <body>
   <main class="card">
     <h1>데이터 초기화</h1>
-    <p>이 페이지를 열면 ChloeAssist의 브라우저 저장 데이터를 모두 지웁니다.</p>
+    <p>초기화를 누르면 프로젝트, 할 일, 리뷰, 제품 설계, 이슈와 루틴 데이터를 모두 지웁니다.</p>
+    <p>데이터 파일은 <code>/Users/leehyunhye/Documents/chloeassist/data/chloeassist-data.json</code> 입니다.</p>
+    <p>저장된 로컬 AI 설정은 유지합니다.</p>
     <p class="danger">되돌릴 수 없습니다.</p>
-    <div id="status" class="status">초기화 준비 중...</div>
-    <a id="back" class="done" href="/" hidden>홈으로 돌아가기</a>
+    <div id="status" class="status">설정에서 데이터를 먼저 내보낸 뒤 초기화하는 것을 권장합니다.</div>
+    <div id="actions" class="actions">
+      <a class="done cancel" href="index.html?v=20260824t">취소</a>
+      <button id="reset" class="done reset" type="button">모든 데이터 초기화</button>
+    </div>
+    <a id="back" class="done" href="index.html?v=20260824t" hidden>홈으로 돌아가기</a>
   </main>
 
   <script>
     const statusEl = document.getElementById('status');
     const backEl = document.getElementById('back');
+    const actionsEl = document.getElementById('actions');
+    const resetEl = document.getElementById('reset');
 
     function setStatus(message) {
       statusEl.textContent = message;
     }
 
+    function clearAppStorage(storage) {
+      const keys = [];
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = storage.key(index);
+        if (key && key.startsWith('chloeassist:') && key !== 'chloeassist:config') keys.push(key);
+      }
+      keys.forEach((key) => storage.removeItem(key));
+    }
+
     async function clearBrowserStorage() {
-      try { localStorage.clear(); } catch {}
-      try { sessionStorage.clear(); } catch {}
-      try {
-        if (window.indexedDB && typeof indexedDB.databases === 'function') {
-          const dbs = await indexedDB.databases();
-          for (const db of dbs) {
-            if (db && db.name) indexedDB.deleteDatabase(db.name);
-          }
-        }
-      } catch {}
-      try {
-        if ('caches' in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map((key) => caches.delete(key)));
-        }
-      } catch {}
-      try {
-        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map((reg) => reg.unregister()));
-        }
-      } catch {}
+      try { clearAppStorage(localStorage); } catch {}
+      try { clearAppStorage(sessionStorage); } catch {}
     }
 
     async function run() {
-      setStatus('브라우저 저장소를 지우는 중...');
+      setStatus('Chloe Assist 저장 데이터를 지우는 중...');
+      actionsEl.hidden = true;
       await clearBrowserStorage();
-      setStatus('초기화가 완료됐습니다.\n브라우저 저장소를 모두 비웠습니다.');
+      try {
+        await fetch('/api/store', { method: 'DELETE' });
+      } catch {}
+      setStatus('초기화가 완료됐습니다.\n작업공간 데이터만 비웠고 로컬 AI 설정은 유지했습니다.');
       backEl.hidden = false;
     }
 
-    run().catch((err) => {
-      setStatus(`초기화 중 오류가 발생했습니다.\n${err?.message || err}`);
-      backEl.hidden = false;
+    resetEl.addEventListener('click', () => {
+      if (!confirm('정말 모든 Chloe Assist 데이터를 지울까요?')) return;
+      run().catch((err) => {
+        setStatus(`초기화 중 오류가 발생했습니다.\n${err?.message || err}`);
+        backEl.hidden = false;
+      });
     });
   </script>
 </body>

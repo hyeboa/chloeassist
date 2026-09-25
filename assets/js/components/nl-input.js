@@ -87,15 +87,13 @@ const NLInput = (() => {
   };
 
   async function parse(type, text) {
-    const today = new Date().toISOString().slice(0, 10);
+    if (typeof AI.parse === 'function') {
+      return AI.parse(type, text);
+    }
+
+    const today = LocalDate.today();
     const prompt = PROMPTS[type](text, today);
-
-    const raw = await AI.chat(
-      [{ role: 'user', content: prompt }],
-      '',
-      'claude-haiku-4-5-20251001'
-    );
-
+    const raw = await AI.chat([{ role: 'user', content: prompt }], '', 'local');
     const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/```\s*$/, '');
     const json = JSON.parse(cleaned);
     if (json.error) throw new Error(json.error);
@@ -135,7 +133,7 @@ const NLInput = (() => {
       if (!text) return;
 
       if (!AI.hasApiKey()) {
-        Toast.show('설정(⚙)에서 Claude API 키를 먼저 입력해 주세요.', 'warning');
+        Toast.show('로컬 AI 모드가 준비되지 않았어요. 다시 시도해 주세요.', 'warning');
         return;
       }
 

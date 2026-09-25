@@ -9,46 +9,45 @@ const Routine = (() => {
 
   /* ─ 날짜 유틸 ─ */
   function todayStr() {
-    return new Date().toISOString().slice(0, 10);
+    return LocalDate.today();
   }
 
   function isFuture(date) { return date > todayStr(); }
   function isToday(date)  { return date === todayStr(); }
 
   function getWeekDays(forDate) {
-    const d = new Date(forDate + 'T00:00:00');
+    const d = LocalDate.fromKey(forDate);
     const sunday = new Date(d);
     sunday.setDate(d.getDate() - d.getDay());
     return Array.from({ length: 7 }, (_, i) => {
       const dd = new Date(sunday);
       dd.setDate(sunday.getDate() + i);
-      return dd.toISOString().slice(0, 10);
+      return LocalDate.toKey(dd);
     });
   }
 
   function dateLabel(date) {
-    const d = new Date(date + 'T00:00:00');
+    const d = LocalDate.fromKey(date);
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
   }
 
   function dayName(date) {
     const days = ['일', '월', '화', '수', '목', '금', '토'];
-    return days[new Date(date + 'T00:00:00').getDay()];
+    return days[LocalDate.fromKey(date).getDay()];
   }
 
-  function dayNum(date) { return new Date(date + 'T00:00:00').getDate(); }
+  function dayNum(date) { return LocalDate.fromKey(date).getDate(); }
 
   /* ─ 스토어 ─ */
-  let routinesCache = [];
   let routineLogsCache = {};
-  function getRoutines() { return routinesCache.length ? routinesCache : (Store.get('routines') || []); }
-  async function loadRoutines() { routinesCache = await Store.loadRoutines(); return routinesCache; }
+  function getRoutines() { return Store.get('routines') || []; }
+  async function loadRoutines() { return Store.loadRoutines(); }
   async function loadRoutineLogs() { routineLogsCache = await Store.loadRoutineLogs(); return routineLogsCache; }
 
   /* 루틴 시작일 (추가된 날짜) — 이 날짜부터 표시 */
   function routineStart(r) {
-    return new Date(r.createdAt || Date.now()).toISOString().slice(0, 10);
+    return LocalDate.toKey(new Date(r.createdAt || Date.now()));
   }
 
   function isActive(r, date) { return routineStart(r) <= date; }
@@ -84,10 +83,10 @@ const Routine = (() => {
     const todayLog = getLog(t);
     if (!todayLog[routineId]) return 0;
     let streak = 1;
-    const d = new Date(t + 'T00:00:00');
+    const d = LocalDate.fromKey(t);
     for (let i = 0; i < 365; i++) {
       d.setDate(d.getDate() - 1);
-      const ds = d.toISOString().slice(0, 10);
+      const ds = LocalDate.toKey(d);
       if (start && ds < start) break;
       if (getLog(ds)[routineId]) { streak++; } else { break; }
     }
@@ -100,16 +99,16 @@ const Routine = (() => {
   }
 
   function prevWeek() {
-    const d = new Date(weekStartDate + 'T00:00:00');
+    const d = LocalDate.fromKey(weekStartDate);
     d.setDate(d.getDate() - 7);
-    weekStartDate = d.toISOString().slice(0, 10);
+    weekStartDate = LocalDate.toKey(d);
     render();
   }
 
   function nextWeek() {
-    const d = new Date(weekStartDate + 'T00:00:00');
+    const d = LocalDate.fromKey(weekStartDate);
     d.setDate(d.getDate() + 7);
-    weekStartDate = d.toISOString().slice(0, 10);
+    weekStartDate = LocalDate.toKey(d);
     render();
   }
 
@@ -125,7 +124,7 @@ const Routine = (() => {
     setTimeout(() => { const el = document.getElementById('routine-input'); if (el) el.focus(); }, 0);
   }
 
-  async function deleteRoutine(id) { Store.remove('routines', id); Store.removeRoutine(id).catch(()=>{}); render(); }
+  async function deleteRoutine(id) { Store.removeRoutine(id).catch(()=>{}); render(); }
 
   function toggleCheck(id) {
     if (isFuture(selectedDate)) return;
@@ -149,7 +148,7 @@ const Routine = (() => {
         : 'empty';
       return `
         <button class="rdn-day-pill${date === selectedDate ? ' selected' : ''}${isToday(date) ? ' is-today' : ''}${isFuture(date) ? ' future' : ''}"
-          onclick="Routine.selectDate('${date}')">
+          onclick="Routine.selectDate('${date}')" aria-label="${dateLabel(date)}">
           <span class="rdn-dayname">${dayName(date)}</span>
           <span class="rdn-daynum">${dayNum(date)}</span>
           <span class="rdn-dot ${dotClass}"></span>
@@ -161,9 +160,9 @@ const Routine = (() => {
 
     return `
       <div class="routine-date-nav">
-        <button class="rdn-arrow" onclick="Routine.prevWeek()">&#8249;</button>
+        <button class="rdn-arrow" onclick="Routine.prevWeek()" aria-label="이전 주">&#8249;</button>
         <div class="rdn-week">${pills}</div>
-        <button class="rdn-arrow" onclick="Routine.nextWeek()">&#8250;</button>
+        <button class="rdn-arrow" onclick="Routine.nextWeek()" aria-label="다음 주">&#8250;</button>
         ${todayBtn}
       </div>`;
   }
@@ -209,9 +208,9 @@ const Routine = (() => {
   function renderChart() {
     const days = [];
     for (let i = -29; i <= 0; i++) {
-      const d = new Date(todayStr() + 'T00:00:00');
+      const d = LocalDate.fromKey(todayStr());
       d.setDate(d.getDate() + i);
-      const date   = d.toISOString().slice(0, 10);
+      const date   = LocalDate.toKey(d);
       const log    = getLog(date);
       const active = activeRoutines(date);
       const done   = active.filter(r => log[r.id]).length;
@@ -344,13 +343,15 @@ const Routine = (() => {
               return `
                 <div class="routine-item ${done ? 'done' : ''}">
                   <button class="routine-check ${done ? 'checked' : ''} ${future ? 'disabled' : ''}"
-                    onclick="Routine.toggleCheck('${r.id}')" ${future ? 'disabled' : ''}>
+                    onclick="Routine.toggleCheck('${r.id}')" ${future ? 'disabled' : ''}
+                    aria-label="${escapeHtml(r.name)} ${done ? '완료 해제' : '완료'}">
                     ${done ? '✓' : ''}
                   </button>
                   <span class="routine-number">${index + 1}.</span>
                   <span class="routine-name">${escapeHtml(r.name)}</span>
                   ${streakBadge}
-                  <button class="routine-delete" onclick="Routine.deleteRoutine('${r.id}')" title="삭제">✕</button>
+                  <button class="routine-delete" onclick="Routine.deleteRoutine('${r.id}')"
+                    title="삭제" aria-label="${escapeHtml(r.name)} 삭제">✕</button>
                 </div>`;
             }).join('')}
           </div>
